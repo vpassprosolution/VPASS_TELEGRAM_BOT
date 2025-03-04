@@ -39,7 +39,7 @@ async def show_instruments(update: Update, context: CallbackContext):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     # Send a NEW menu message
-    await query.message.reply_text("Select Your Preferred Instrument", reply_markup=reply_markup)
+    await query.message.reply_text("Select from our exclusive range of instruments", reply_markup=reply_markup)
 
 async def handle_instrument_selection(update: Update, context: CallbackContext):
     """Handles when a user selects an instrument."""

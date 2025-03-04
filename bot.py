@@ -79,7 +79,7 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if step == "name":
             user_steps[user_id]["name"] = user_input
             user_steps[user_id]["step"] = "username"
-            sent_message = await update.message.reply_text("Enter your Telegram username (without @):")
+            sent_message = await update.message.reply_text("Enter your Telegram username")
         
         elif step == "username":
             user_steps[user_id]["username"] = user_input
@@ -149,14 +149,14 @@ async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
     [InlineKeyboardButton("VPASS SMART SIGNAL", callback_data="vpass_smart_signal")],
     [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="ai_sentiment")],
         [
-            InlineKeyboardButton("Forex Factory", url="https://www.forexfactory.com"),
+            InlineKeyboardButton("F.Factory", url="https://www.forexfactory.com"),
             InlineKeyboardButton("Discord", url="https://discord.com"),
             InlineKeyboardButton("ChatGPT", url="https://chat.openai.com"),
             InlineKeyboardButton("DeepSeek", url="https://www.deepseek.com")
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.message.reply_text("Welcome, Select Your Preference", reply_markup=reply_markup)
+    await query.message.reply_text("💎Welcome to World of A.I💎", reply_markup=reply_markup)
 
 def main():
     """Main function to run the bot"""
