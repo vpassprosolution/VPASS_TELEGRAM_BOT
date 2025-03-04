@@ -3,25 +3,25 @@ from telegram.ext import CallbackContext
 import requests
 
 # VPASS AI SENTIMENT API URL
-VPASS_AI_SENTIMENT_URL = "https://vpassaisentiment-production.up.railway.app"
+VPASS_AI_SENTIMENT_URL = "https://vpassaisentiment-production.up.railway.app/storyline/?instrument="
 
-# Define the available instruments
-INSTRUMENTS = {
+# Correct Instrument Mapping (API requires '/' replaced with '-')
+INSTRUMENTS = { 
     "gold": "gold",
     "bitcoin": "bitcoin",
     "ethereum": "ethereum",
-    "dow jones": "dow jones",
+    "dow jones": "dow-jones",
     "nasdaq": "nasdaq",
-    "eur/usd": "eur/usd",
-    "gbp/usd": "gbp/usd"
+    "eur/usd": "eur-usd",
+    "gbp/usd": "gbp-usd"
 }
 
 async def show_instruments(update: Update, context: CallbackContext):
-    """Displays the list of 7 instruments when 'VPASS AI SENTIMENT' is clicked."""
+    """Displays the list of instruments when 'VPASS AI SENTIMENT' is clicked."""
     query = update.callback_query
 
-    # Create buttons for the 7 instruments
-    keyboard = [[InlineKeyboardButton(inst, callback_data=f"sentiment_{inst.lower()}")] for inst in INSTRUMENTS.keys()]
+    # Create buttons for the instruments
+    keyboard = [[InlineKeyboardButton(inst.upper(), callback_data=f"sentiment_{inst}")] for inst in INSTRUMENTS.keys()]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     # Edit the message to show the instrument options
@@ -30,15 +30,21 @@ async def show_instruments(update: Update, context: CallbackContext):
 async def handle_instrument_selection(update: Update, context: CallbackContext):
     """Handles when a user selects an instrument."""
     query = update.callback_query
-    selected_instrument = query.data.replace("sentiment_", "").upper()  # Extract the instrument name
+    selected_instrument = query.data.replace("sentiment_", "")  # Extract the instrument name
 
     if selected_instrument in INSTRUMENTS:
-        if selected_instrument == "GOLD":
-            # Redirect to VPASS_AI_SENTIMENT API
-            response_text = f"You selected {selected_instrument}. Redirecting to VPASS AI SENTIMENT..."
-            ai_sentiment_url = f"{VPASS_AI_SENTIMENT_URL}/{INSTRUMENTS[selected_instrument]}"
-            requests.get(ai_sentiment_url)  # This makes a request to the external project
-        else:
-            response_text = f"You selected {selected_instrument}. Processing data..."
+        formatted_instrument = INSTRUMENTS[selected_instrument]  # Get API-compatible format
+        api_url = f"{VPASS_AI_SENTIMENT_URL}{formatted_instrument}"
+
+        # Send request to API
+        try:
+            response = requests.get(api_url)
+            if response.status_code == 200:
+                storyline = response.json().get("storyline", "No sufficient data available.")
+                response_text = f"📊 **{selected_instrument.upper()} Storyline:**\n\n{storyline}"
+            else:
+                response_text = f"⚠️ No sufficient data available for {selected_instrument.upper()}."
+        except Exception as e:
+            response_text = f"❌ Error fetching data: {str(e)}"
 
         await query.message.edit_text(response_text)
