@@ -30,7 +30,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
     # Send welcome image first
-    welcome_image = r"C:\Users\Admin\Desktop\VPASS_TELEGRAM_BOT\images\welcome.png"
+    welcome_image = "welcome.png"
+
     with open(welcome_image, "rb") as photo:
         await update.message.reply_photo(photo=photo)
 
