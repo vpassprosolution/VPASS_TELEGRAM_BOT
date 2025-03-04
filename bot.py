@@ -167,12 +167,14 @@ def main():
     app.add_handler(CallbackQueryHandler(register_user, pattern="register"))
     app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))
     app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="main_menu"))
+    app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))
+    app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))
-app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))
-app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))
 
-    print("Bot is running...")
+    print("Bot is running...")  # ✅ Ensure this is properly indented under `main()`
+
     app.run_polling()
 
 if __name__ == "__main__":
     main()
+
