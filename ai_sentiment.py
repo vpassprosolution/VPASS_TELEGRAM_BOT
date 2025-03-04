@@ -83,7 +83,7 @@ async def return_to_instruments(update: Update, context: CallbackContext):
     """Shows instrument menu again while keeping sentiment text visible."""
     query = update.callback_query
 
-    # Delete the previous menu buttons but keep sentiment text
+    # Delete only the menu button, keeping sentiment text
     try:
         await context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
     except Exception:
