@@ -40,10 +40,15 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         try:
             response = requests.get(api_url)
             if response.status_code == 200:
-                storyline = response.json().get("storyline", "No sufficient data available.")
-            else:
-                storyline = f"⚠️ No sufficient data available for {selected_instrument.upper()}."
-        except Exception as e:
-            storyline = f"❌ Error fetching data: {str(e)}"
+                # Extract the nested storyline text from the API response
+                storyline_data = response.json().get("storyline", {})  
+                storyline_text = storyline_data.get("storyline", "No sufficient data available.")  
 
-        await query.message.edit_text(storyline)  # ✅ Displays API response exactly as received
+                # Ensure response is formatted properly in Telegram
+                response_text = f"📌 **{selected_instrument.upper()} Sentiment Analysis**\n\n{storyline_text}"
+            else:
+                response_text = f"⚠️ No sufficient data available for {selected_instrument.upper()}."
+        except Exception as e:
+            response_text = f"❌ Error fetching data: {str(e)}"
+
+        await query.message.edit_text(response_text, parse_mode="Markdown")
