@@ -171,10 +171,11 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))
 
-    print("Bot is running...")  # ✅ Ensure this is properly indented under `main()`
+    print("Bot is running...")  # ✅ Ensure this is inside `main()` with the correct indentation
 
     app.run_polling()
 
 if __name__ == "__main__":
     main()
+
 
