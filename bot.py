@@ -170,6 +170,8 @@ def main():
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))
     app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))
+    dispatcher.add_handler(CallbackQueryHandler(show_instruments, pattern="^show_instruments$"))
+    dispatcher.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="^sentiment_"))
 
     print("Bot is running...")  # ✅ Ensure this is inside `main()` with the correct indentation
 

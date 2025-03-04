@@ -1,5 +1,5 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CallbackContext, CallbackQueryHandler
+from telegram.ext import CallbackContext
 from telegram.helpers import escape_markdown
 import requests
 
@@ -61,9 +61,3 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await query.message.edit_text(response_text, parse_mode="MarkdownV2", reply_markup=reply_markup)
-
-# Handlers for Callback Queries
-handlers = [
-    CallbackQueryHandler(show_instruments, pattern="^show_instruments$"),
-    CallbackQueryHandler(handle_instrument_selection, pattern="^sentiment_")
-]
