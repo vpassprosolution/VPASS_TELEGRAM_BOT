@@ -2,7 +2,6 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 from telegram.helpers import escape_markdown
 import requests
-import asyncio  # For smooth disappearing effect
 
 # VPASS AI SENTIMENT API URL
 VPASS_AI_SENTIMENT_URL = "https://vpassaisentiment-production.up.railway.app/storyline/?instrument="
@@ -18,18 +17,11 @@ INSTRUMENTS = {
     "gbp/usd": "gbp-usd"
 }
 
-async def delete_previous_message(update: Update):
-    """Deletes the previous message with a smooth magic disappearing effect."""
-    try:
-        await asyncio.sleep(0.3)  # Small delay to enhance transition effect
-        await update.callback_query.message.delete()
-    except Exception:
-        pass  # Ignore if message deletion fails
-
 async def show_instruments(update: Update, context: CallbackContext):
     """Displays the 7-instrument menu after 'VPASS AI SENTIMENT' is clicked."""
-    await delete_previous_message(update)  # Ensure previous menu disappears smoothly
+    query = update.callback_query
 
+    # Edit message instead of deleting to apply instant replace effect
     keyboard = [
         [InlineKeyboardButton("GOLD", callback_data="sentiment_gold")],
         [InlineKeyboardButton("BITCOIN", callback_data="sentiment_bitcoin"), InlineKeyboardButton("ETHEREUM", callback_data="sentiment_ethereum")],
@@ -39,13 +31,12 @@ async def show_instruments(update: Update, context: CallbackContext):
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.callback_query.message.reply_text("Select Your Preferred Instrument", reply_markup=reply_markup)
+    await query.message.edit_text("Select Your Preferred Instrument", reply_markup=reply_markup)
 
 async def handle_instrument_selection(update: Update, context: CallbackContext):
     """Handles when a user selects an instrument and fetches sentiment analysis text."""
-    await delete_previous_message(update)  # Ensure previous menu disappears smoothly
-
     query = update.callback_query
+
     selected_instrument = query.data.replace("sentiment_", "")
 
     if selected_instrument in INSTRUMENTS:
@@ -64,24 +55,26 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         except Exception as e:
             response_text = f"❌ Error fetching data: {escape_markdown(str(e), version=2)}"
 
-        # Show sentiment text with "Back" button below it (resets 7-instrument menu as a new message)
-        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="reset_instruments")]]  # Correctly returns to fresh 7-instrument menu
+        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="reset_main_menu")]]  # Correctly resets to main menu while keeping text
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await update.callback_query.message.reply_text(response_text, parse_mode="MarkdownV2", reply_markup=reply_markup)
+        await query.message.reply_text(response_text, parse_mode="MarkdownV2", reply_markup=reply_markup)
 
-async def reset_instruments(update: Update, context: CallbackContext):
-    """Resets the 7-instrument menu while keeping sentiment text visible."""
+async def reset_main_menu(update: Update, context: CallbackContext):
+    """Resets the bot to the main menu as a fresh new message while keeping sentiment text."""
     query = update.callback_query
 
     keyboard = [
-        [InlineKeyboardButton("GOLD", callback_data="sentiment_gold")],
-        [InlineKeyboardButton("BITCOIN", callback_data="sentiment_bitcoin"), InlineKeyboardButton("ETHEREUM", callback_data="sentiment_ethereum")],
-        [InlineKeyboardButton("DOW JONES", callback_data="sentiment_dow jones"), InlineKeyboardButton("NASDAQ", callback_data="sentiment_nasdaq")],
-        [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur/usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp/usd")],
-        [InlineKeyboardButton("⬅️ Back", callback_data="main_menu")]  # Back to VPASS AI SENTIMENT menu
+        [InlineKeyboardButton("VPASS SMART SIGNAL", callback_data="smart_signal")],
+        [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="ai_sentiment")],
+        [
+            InlineKeyboardButton("Forex Factory", url="https://www.forexfactory.com/"),
+            InlineKeyboardButton("Discord", url="https://discord.com/"),
+            InlineKeyboardButton("ChatGPT", url="https://chat.openai.com/"),
+            InlineKeyboardButton("DeepSeek", url="https://www.deepseek.com/")
+        ]
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    await query.message.reply_text("Select Your Preferred Instrument", reply_markup=reply_markup)
+    await query.message.reply_text("Welcome, Select Your Preference", reply_markup=reply_markup)
