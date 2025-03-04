@@ -18,7 +18,7 @@ INSTRUMENTS = {
 }
 
 async def show_instruments(update: Update, context: CallbackContext):
-    """Displays the list of instruments when 'VPASS AI SENTIMENT' is clicked."""
+    """Displays the list of instruments when 'VPASS AI SENTIMENT' is clicked or when returning from sentiment analysis."""
     query = update.callback_query
 
     # Arrange instruments in the requested layout
@@ -32,8 +32,8 @@ async def show_instruments(update: Update, context: CallbackContext):
     
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # Edit the message to show the instrument options
-    await query.message.edit_text("Select Your Preferred Instrument", reply_markup=reply_markup)
+    # Send a NEW menu message while keeping previous sentiment text visible
+    await query.message.reply_text("Select Your Preferred Instrument", reply_markup=reply_markup)
 
 async def handle_instrument_selection(update: Update, context: CallbackContext):
     """Handles when a user selects an instrument."""
@@ -61,8 +61,9 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         except Exception as e:
             response_text = f"❌ Error fetching data: {escape_markdown(str(e), version=2)}"
 
-        # Add "Menu" button below sentiment analysis text
+        # Add "Menu" button BELOW the sentiment text (so sentiment text stays)
         keyboard = [[InlineKeyboardButton("🔙 Menu", callback_data="ai_sentiment")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await query.message.edit_text(response_text, parse_mode="MarkdownV2", reply_markup=reply_markup)
+        await query.message.edit_text(response_text, parse_mode="MarkdownV2")
+        await query.message.reply_text("Return to the menu:", reply_markup=reply_markup)  # ✅ Sends NEW menu button
