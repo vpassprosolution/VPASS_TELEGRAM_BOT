@@ -17,46 +17,39 @@ INSTRUMENTS = {
     "gbp/usd": "gbp-usd"
 }
 
-async def show_instruments(update: Update, context: CallbackContext):
-    """Displays the list of instruments when 'VPASS AI SENTIMENT' is clicked or when returning from sentiment analysis."""
-    query = update.callback_query
-
-    # Delete the previous menu message
+async def delete_previous_message(update: Update):
+    """Deletes the previous message instantly for a magic disappearing effect."""
     try:
-        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
+        await update.callback_query.message.delete()
     except Exception:
-        pass  # Ignore if deletion fails
+        pass  # Ignore if message deletion fails
 
-    # Arrange instruments in the requested layout
+async def show_instruments(update: Update, context: CallbackContext):
+    """Displays the 7-instrument menu after 'VPASS AI SENTIMENT' is clicked."""
+    await delete_previous_message(update)  # Ensure previous menu disappears instantly
+
     keyboard = [
         [InlineKeyboardButton("GOLD", callback_data="sentiment_gold")],
         [InlineKeyboardButton("BITCOIN", callback_data="sentiment_bitcoin"), InlineKeyboardButton("ETHEREUM", callback_data="sentiment_ethereum")],
         [InlineKeyboardButton("DOW JONES", callback_data="sentiment_dow jones"), InlineKeyboardButton("NASDAQ", callback_data="sentiment_nasdaq")],
         [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur/usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp/usd")],
-        [InlineKeyboardButton("⬅️ Back", callback_data="main_menu")]  # Back to main menu
+        [InlineKeyboardButton("⬅️ Back", callback_data="main_menu")]  # Back to VPASS AI SENTIMENT menu
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-
-    # Send the instrument selection menu
-    await query.message.reply_text("Select Your Preferred Instrument", reply_markup=reply_markup)
+    await update.callback_query.message.reply_text("Select Your Preferred Instrument", reply_markup=reply_markup)
 
 async def handle_instrument_selection(update: Update, context: CallbackContext):
     """Handles when a user selects an instrument and fetches sentiment analysis text."""
+    await delete_previous_message(update)  # Ensure previous menu disappears instantly
+
     query = update.callback_query
     selected_instrument = query.data.replace("sentiment_", "")
-
-    # Delete the previous 7-instrument menu
-    try:
-        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
-    except Exception:
-        pass  # Ignore if deletion fails
 
     if selected_instrument in INSTRUMENTS:
         formatted_instrument = INSTRUMENTS[selected_instrument]
         api_url = f"{VPASS_AI_SENTIMENT_URL}{formatted_instrument}"
 
-        # Fetch sentiment analysis data
         try:
             response = requests.get(api_url)
             if response.status_code == 200:
@@ -69,8 +62,7 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         except Exception as e:
             response_text = f"❌ Error fetching data: {escape_markdown(str(e), version=2)}"
 
-        # Show sentiment text with "Back" button below it (calls show_instruments())
-        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="show_instruments")]]  # Returns to 7-instrument menu
+        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="show_instruments")]]  # Correctly returns to 7-instrument menu
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await query.message.reply_text(response_text, parse_mode="MarkdownV2", reply_markup=reply_markup)
+        await update.callback_query.message.reply_text(response_text, parse_mode="MarkdownV2", reply_markup=reply_markup)
