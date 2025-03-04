@@ -31,11 +31,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"Welcome back {username}", reply_markup=reply_markup)
             return
 
-    async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Returns to the main menu"""
-    query = update.callback_query
-
-
     # Send welcome image first
     welcome_image = "welcome.png"
 
@@ -49,6 +44,24 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Store message ID so we can delete it later
     context.user_data["button_message"] = sent_message.message_id
+
+async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Returns to the main menu"""
+    query = update.callback_query
+
+    keyboard = [
+        [InlineKeyboardButton("VPASS SMART SIGNAL", callback_data="vpass_smart_signal")],
+        [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="ai_sentiment")],
+        [
+            InlineKeyboardButton("F.Factory", url="https://www.forexfactory.com"),
+            InlineKeyboardButton("Discord", url="https://discord.com"),
+            InlineKeyboardButton("ChatGPT", url="https://chat.openai.com"),
+            InlineKeyboardButton("DeepSeek", url="https://www.deepseek.com")
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await query.message.edit_text("Choose preference and elevate your experience", reply_markup=reply_markup)
 
 async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles user registration when they click the button"""
@@ -135,30 +148,6 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
         sent_message = await update.message.reply_text(next_prompt)
         user_steps[user_id]["last_message_id"] = sent_message.message_id  # Store message ID
 
-async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles the 'START VPASS PRO NOW' button click"""
-    query = update.callback_query
-
-    # Delete the previous message
-    try:
-        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
-    except Exception:
-        pass  # Ignore errors
-
-    # Create the button menu
-    keyboard = [
-        [InlineKeyboardButton("VPASS SMART SIGNAL", callback_data="vpass_smart_signal")],
-        [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="ai_sentiment")],
-        [
-            InlineKeyboardButton("F.Factory", url="https://www.forexfactory.com"),
-            InlineKeyboardButton("Discord", url="https://discord.com"),
-            InlineKeyboardButton("ChatGPT", url="https://chat.openai.com"),
-            InlineKeyboardButton("DeepSeek", url="https://www.deepseek.com")
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.message.reply_text("Choose preference and elevate your experience", reply_markup=reply_markup)
-
 def main():
     """Main function to run the bot"""
     app = Application.builder().token(BOT_TOKEN).build()
@@ -166,6 +155,7 @@ def main():
     # Handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(register_user, pattern="register"))
+    app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
     app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))
     app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))
