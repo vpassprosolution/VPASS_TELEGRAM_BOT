@@ -21,6 +21,12 @@ async def show_instruments(update: Update, context: CallbackContext):
     """Displays the list of instruments when 'VPASS AI SENTIMENT' is clicked or when returning from sentiment analysis."""
     query = update.callback_query
 
+    # Delete the previous message (to remove buttons)
+    try:
+        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
+    except Exception:
+        pass  # Ignore if deletion fails
+
     # Arrange instruments in the requested layout
     keyboard = [
         [InlineKeyboardButton("GOLD", callback_data="sentiment_gold")],  # Gold at the top
@@ -32,13 +38,19 @@ async def show_instruments(update: Update, context: CallbackContext):
     
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # Send a NEW menu message while keeping previous sentiment text visible
+    # Send a NEW menu message
     await query.message.reply_text("Select Your Preferred Instrument", reply_markup=reply_markup)
 
 async def handle_instrument_selection(update: Update, context: CallbackContext):
     """Handles when a user selects an instrument."""
     query = update.callback_query
     selected_instrument = query.data.replace("sentiment_", "")  # Extract the instrument name
+
+    # Delete the previous message (so instrument menu disappears)
+    try:
+        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
+    except Exception:
+        pass  # Ignore if deletion fails
 
     if selected_instrument in INSTRUMENTS:
         formatted_instrument = INSTRUMENTS[selected_instrument]  # Get API-compatible format
@@ -65,5 +77,4 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         keyboard = [[InlineKeyboardButton("🔙 Menu", callback_data="ai_sentiment")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await query.message.edit_text(response_text, parse_mode="MarkdownV2")
-        await query.message.reply_text("Return to the menu:", reply_markup=reply_markup)  # ✅ Sends NEW menu button
+        await query.message.reply_text(response_text, parse_mode="MarkdownV2", reply_markup=reply_markup)
