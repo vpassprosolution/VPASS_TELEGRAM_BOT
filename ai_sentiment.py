@@ -86,4 +86,14 @@ async def return_to_instruments(update: Update, context: CallbackContext):
     query = update.callback_query
 
     # Send new instrument menu without removing sentiment text
-    await show_instruments(update, context)
+    keyboard = [
+        [InlineKeyboardButton("GOLD", callback_data="sentiment_gold")],
+        [InlineKeyboardButton("BITCOIN", callback_data="sentiment_bitcoin"), InlineKeyboardButton("ETHEREUM", callback_data="sentiment_ethereum")],
+        [InlineKeyboardButton("DOW JONES", callback_data="sentiment_dow jones"), InlineKeyboardButton("NASDAQ", callback_data="sentiment_nasdaq")],
+        [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur/usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp/usd")],
+        [InlineKeyboardButton("⬅️ Back", callback_data="main_menu")]  
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await query.message.reply_text("Select Your Preferred Instrument", reply_markup=reply_markup)
