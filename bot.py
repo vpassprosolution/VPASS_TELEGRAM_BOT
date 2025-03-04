@@ -80,12 +80,15 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if step == "name":
             user_steps[user_id]["name"] = user_input
             user_steps[user_id]["step"] = "username"
+            next_prompt = "Enter your Telegram username:"
         elif step == "username":
             user_steps[user_id]["username"] = user_input
             user_steps[user_id]["step"] = "contact"
+            next_prompt = "Enter your contact number:"
         elif step == "contact":
             user_steps[user_id]["contact"] = user_input
             user_steps[user_id]["step"] = "email"
+            next_prompt = "Enter your email address:"
         elif step == "email":
             user_steps[user_id]["email"] = user_input
 
@@ -124,12 +127,7 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         # Ask for the next input
-        next_prompt = {
-            "username": "Enter your Telegram username",
-            "contact": "Enter your contact number:",
-            "email": "Enter your email address:"
-        }
-        sent_message = await update.message.reply_text(next_prompt[user_steps[user_id]["step"]])
+        sent_message = await update.message.reply_text(next_prompt)
         user_steps[user_id]["last_message_id"] = sent_message.message_id  # Store message ID
 
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -164,16 +162,11 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(register_user, pattern="register"))
     app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))
-    app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="main_menu"))
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))
     app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))
-    app.add_handler(CommandHandler("admin", admin_panel))
-    app.add_handler(CallbackQueryHandler(add_user_prompt, pattern="admin_add_user"))
-    app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
-    app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_admin_input))
-    
-    print("Bot is running...")  # ✅ Ensure this is inside main() with the correct indentation
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))
+
+    print("Bot is running...")
 
     app.run_polling()
 
