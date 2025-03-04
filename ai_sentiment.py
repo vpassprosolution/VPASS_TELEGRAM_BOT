@@ -73,13 +73,11 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         except Exception as e:
             response_text = f"❌ Error fetching data: {escape_markdown(str(e), version=2)}"
 
-        # Send sentiment text
-        await query.message.reply_text(response_text, parse_mode="MarkdownV2")
-
-        # Send a NEW "Menu" button BELOW the sentiment text (so sentiment text stays)
+        # Send sentiment text with "Menu" button directly below
         keyboard = [[InlineKeyboardButton("🔙 Menu", callback_data="return_to_instruments")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.message.reply_text(" ", reply_markup=reply_markup)  # Empty text ensures only the button is displayed
+
+        await query.message.reply_text(response_text, parse_mode="MarkdownV2", reply_markup=reply_markup)
 
 async def return_to_instruments(update: Update, context: CallbackContext):
     """Shows instrument menu again while keeping sentiment text visible."""
