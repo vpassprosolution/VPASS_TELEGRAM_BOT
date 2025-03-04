@@ -2,12 +2,13 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 from telegram.helpers import escape_markdown
 import requests
+import asyncio  # For smooth disappearing effect
 
 # VPASS AI SENTIMENT API URL
 VPASS_AI_SENTIMENT_URL = "https://vpassaisentiment-production.up.railway.app/storyline/?instrument="
 
 # Correct Instrument Mapping (API requires '/' replaced with '-')
-INSTRUMENTS = { 
+INSTRUMENTS = {
     "gold": "gold",
     "bitcoin": "bitcoin",
     "ethereum": "ethereum",
@@ -18,15 +19,16 @@ INSTRUMENTS = {
 }
 
 async def delete_previous_message(update: Update):
-    """Deletes the previous message instantly for a magic disappearing effect."""
+    """Deletes the previous message with a smooth magic disappearing effect."""
     try:
+        await asyncio.sleep(0.3)  # Small delay to enhance transition effect
         await update.callback_query.message.delete()
     except Exception:
         pass  # Ignore if message deletion fails
 
 async def show_instruments(update: Update, context: CallbackContext):
     """Displays the 7-instrument menu after 'VPASS AI SENTIMENT' is clicked."""
-    await delete_previous_message(update)  # Ensure previous menu disappears instantly
+    await delete_previous_message(update)  # Ensure previous menu disappears smoothly
 
     keyboard = [
         [InlineKeyboardButton("GOLD", callback_data="sentiment_gold")],
@@ -41,7 +43,7 @@ async def show_instruments(update: Update, context: CallbackContext):
 
 async def handle_instrument_selection(update: Update, context: CallbackContext):
     """Handles when a user selects an instrument and fetches sentiment analysis text."""
-    await delete_previous_message(update)  # Ensure previous menu disappears instantly
+    await delete_previous_message(update)  # Ensure previous menu disappears smoothly
 
     query = update.callback_query
     selected_instrument = query.data.replace("sentiment_", "")
@@ -62,7 +64,7 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         except Exception as e:
             response_text = f"❌ Error fetching data: {escape_markdown(str(e), version=2)}"
 
-        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="show_instruments")]]  # Correctly returns to 7-instrument menu
+        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="show_instruments")]]  # Correctly returns to 7-instrument menu as a new message
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await update.callback_query.message.reply_text(response_text, parse_mode="MarkdownV2", reply_markup=reply_markup)
