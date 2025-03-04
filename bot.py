@@ -156,7 +156,7 @@ async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.message.reply_text("💎Welcome to World of A.I💎", reply_markup=reply_markup)
+    await query.message.reply_text("Choose preference and elevate your experience", reply_markup=reply_markup)
 
 def main():
     """Main function to run the bot"""
