@@ -63,6 +63,13 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await query.message.edit_text("Choose preference and elevate your experience", reply_markup=reply_markup)
 
+async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles the 'START VPASS PRO NOW' button click"""
+    query = update.callback_query
+
+
+
+
 async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles user registration when they click the button"""
     query = update.callback_query
@@ -155,13 +162,17 @@ def main():
     # Handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(register_user, pattern="register"))
-    app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
     app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))
+    app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="main_menu"))
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))
     app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))
-
-    print("Bot is running...")
+    app.add_handler(CommandHandler("admin", admin_panel))
+    app.add_handler(CallbackQueryHandler(add_user_prompt, pattern="admin_add_user"))
+    app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
+    app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_admin_input))
+    
+    print("Bot is running...")  # ✅ Ensure this is inside main() with the correct indentation
 
     app.run_polling()
 
