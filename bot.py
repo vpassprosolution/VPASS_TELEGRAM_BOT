@@ -2,6 +2,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 import psycopg2
 from db import connect_db
+from ai_sentiment import show_instruments, handle_instrument_selection
 
 # Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
@@ -145,8 +146,8 @@ async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Create the button menu
     keyboard = [
-        [InlineKeyboardButton("VPASS SMART SIGNAL", callback_data="vpass_smart_signal")],
-        [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="vpass_ai_sentiment")],
+    [InlineKeyboardButton("VPASS SMART SIGNAL", callback_data="vpass_smart_signal")],
+    [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="ai_sentiment")],
         [
             InlineKeyboardButton("Forex Factory", url="https://www.forexfactory.com"),
             InlineKeyboardButton("Discord", url="https://discord.com"),
@@ -167,6 +168,8 @@ def main():
     app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))
     app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="main_menu"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))
+app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))
+app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))
 
     print("Bot is running...")
     app.run_polling()
