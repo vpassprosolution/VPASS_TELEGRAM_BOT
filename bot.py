@@ -3,6 +3,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Mess
 import psycopg2
 from db import connect_db
 from ai_sentiment import show_instruments, handle_instrument_selection
+from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_prompt, handle_admin_input
 
 # Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
@@ -169,8 +170,12 @@ def main():
     app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="main_menu"))
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))
     app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))
-
+    app.add_handler(CommandHandler("admin", admin_panel))
+    app.add_handler(CallbackQueryHandler(add_user_prompt, pattern="admin_add_user"))
+    app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
+    app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_admin_input))
+    
     print("Bot is running...")  # ✅ Ensure this is inside main() with the correct indentation
 
     app.run_polling()
