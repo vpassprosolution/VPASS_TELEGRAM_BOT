@@ -41,29 +41,9 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
             response = requests.get(api_url)
             if response.status_code == 200:
                 storyline = response.json().get("storyline", "No sufficient data available.")
-
-if isinstance(storyline, list):  # If API returns a list of events
-    formatted_storyline = "\n".join([f"📍 {event}" for event in storyline])
-else:
-    formatted_storyline = storyline
-
-response_text = (
-    f"📌 **{selected_instrument.upper()} Sentiment Analysis**\n\n"
-    f"📢 {formatted_storyline}\n\n"
-    "📊 **Key Insights:**\n"
-    "🏦 **Central Banks Are Buying:** Increased reserves show lack of trust in fiat currencies.\n"
-    "📉 **Stock Market Uncertainty:** Traders seek gold as a safe haven.\n"
-    "🌎 **Geopolitical Tensions:** Global conflicts drive demand for gold.\n\n"
-    "🔎 **What to Watch:**\n"
-    "➡️ If gold breaks above a key resistance level, expect further rallies.\n"
-    "⬇️ A drop below support levels may signal a correction.\n\n"
-    "💡 **Final Verdict:** Stay alert for opportunities!"
-)
-
-                response_text = f"📊 **{selected_instrument.upper()} Storyline:**\n\n{storyline}"
             else:
-                response_text = f"⚠️ No sufficient data available for {selected_instrument.upper()}."
+                storyline = f"⚠️ No sufficient data available for {selected_instrument.upper()}."
         except Exception as e:
-            response_text = f"❌ Error fetching data: {str(e)}"
+            storyline = f"❌ Error fetching data: {str(e)}"
 
-        await query.message.edit_text(response_text)
+        await query.message.edit_text(storyline)  # ✅ Displays API response exactly as received
