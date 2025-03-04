@@ -1,5 +1,6 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
+from telegram.helpers import escape_markdown
 import requests
 
 # VPASS AI SENTIMENT API URL
@@ -44,11 +45,13 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
                 storyline_data = response.json().get("storyline", {})  
                 storyline_text = storyline_data.get("storyline", "No sufficient data available.")  
 
-                # Ensure response is formatted properly in Telegram
-                response_text = f"📌 **{selected_instrument.upper()} Sentiment Analysis**\n\n{storyline_text}"
+                # Escape special characters for Telegram Markdown V2
+                formatted_storyline = escape_markdown(storyline_text, version=2)
+
+                response_text = f"📌 *{selected_instrument.upper()} Sentiment Analysis*\n\n{formatted_storyline}"
             else:
                 response_text = f"⚠️ No sufficient data available for {selected_instrument.upper()}."
         except Exception as e:
-            response_text = f"❌ Error fetching data: {str(e)}"
+            response_text = f"❌ Error fetching data: {escape_markdown(str(e), version=2)}"
 
-        await query.message.edit_text(response_text, parse_mode="Markdown")
+        await query.message.edit_text(response_text, parse_mode="MarkdownV2")
