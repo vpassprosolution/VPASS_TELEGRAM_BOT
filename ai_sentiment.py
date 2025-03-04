@@ -33,9 +33,11 @@ async def show_instruments(update: Update, context: CallbackContext):
         [InlineKeyboardButton("BITCOIN", callback_data="sentiment_bitcoin"), InlineKeyboardButton("ETHEREUM", callback_data="sentiment_ethereum")],  # Side by side
         [InlineKeyboardButton("DOW JONES", callback_data="sentiment_dow jones"), InlineKeyboardButton("NASDAQ", callback_data="sentiment_nasdaq")],
         [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur/usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp/usd")],
-        [InlineKeyboardButton("⬅️ Back", callback_data="main_menu")]  # Back button to main menu
     ]
-    
+
+    # Add Back button to return to the main menu
+    keyboard.append([InlineKeyboardButton("⬅️ Back", callback_data="main_menu")])  
+
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     # Send a NEW menu message while keeping sentiment text visible
@@ -83,19 +85,16 @@ async def return_to_instruments(update: Update, context: CallbackContext):
     """Shows instrument menu again while keeping sentiment text visible."""
     query = update.callback_query
 
-    # Delete only the menu button, keeping sentiment text
-    try:
-        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
-    except Exception:
-        pass  # Ignore if deletion fails
-
+    # Send new instrument menu without removing sentiment text
     keyboard = [
         [InlineKeyboardButton("GOLD", callback_data="sentiment_gold")],
         [InlineKeyboardButton("BITCOIN", callback_data="sentiment_bitcoin"), InlineKeyboardButton("ETHEREUM", callback_data="sentiment_ethereum")],
         [InlineKeyboardButton("DOW JONES", callback_data="sentiment_dow jones"), InlineKeyboardButton("NASDAQ", callback_data="sentiment_nasdaq")],
         [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur/usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp/usd")],
-        [InlineKeyboardButton("⬅️ Back", callback_data="main_menu")]  
     ]
+
+    # Add Back button to return to the main menu
+    keyboard.append([InlineKeyboardButton("⬅️ Back", callback_data="main_menu")])  
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
