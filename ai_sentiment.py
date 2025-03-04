@@ -53,7 +53,11 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         except Exception as e:
             response_text = f"❌ Error fetching data: {escape_markdown(str(e), version=2)}"
 
-        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="show_instruments")]]  # Back to 7-instrument menu
+        # Back button returns to 7-instrument menu, Menu button also refreshes the 7-instrument menu
+        keyboard = [
+            [InlineKeyboardButton("🔙 Back", callback_data="show_instruments"),
+             InlineKeyboardButton("📊 Menu", callback_data="show_instruments")]
+        ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await query.message.edit_text(response_text, parse_mode="MarkdownV2", reply_markup=reply_markup)
