@@ -3,17 +3,22 @@ from telegram.ext import ContextTypes
 import psycopg2
 from db import connect_db
 
-# List of Admin Telegram IDs (You can add multiple admins here)
-ADMIN_IDS = [6756668018, 6596936867, 1829527460]  # Replace with actual admin Telegram IDs
+# List of Admin Telegram IDs
+ADMIN_IDS = [6756668018, 6596936867, 1829527460]  
 
 async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the /admin command and shows admin options"""
     user_id = update.message.from_user.id
 
+    # Delete the /admin command message
+    try:
+        await context.bot.delete_message(chat_id=update.message.chat_id, message_id=update.message.message_id)
+    except Exception:
+        pass  
+
     # Check if the user is an admin
     if user_id not in ADMIN_IDS:
-        await update.message.reply_text("❌ You are not authorized to access admin functions.")
-        return
+        return  
 
     # Create admin menu buttons
     keyboard = [
@@ -23,53 +28,86 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text("🔹 **Admin Panel** 🔹\nChoose an action:", reply_markup=reply_markup)
+    sent_message = await update.message.reply_text("🔹 **Admin Panel** 🔹\nChoose an action:", reply_markup=reply_markup)
+    
+    # Store message ID to delete later
+    context.user_data["admin_panel_message"] = sent_message.message_id
+
+async def delete_admin_message(context, chat_id, message_id):
+    """Helper function to delete messages after a delay"""
+    try:
+        await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+    except Exception:
+        pass  
 
 async def add_user_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Prompts admin to enter user details"""
     query = update.callback_query
-    await query.message.reply_text("📝 Please enter user details in this format:\n`user_id, name, username, contact, email`")
+    chat_id = query.message.chat_id
+
+    try:
+        await context.bot.delete_message(chat_id=chat_id, message_id=query.message.message_id)
+    except Exception:
+        pass  
+
+    sent_message = await query.message.reply_text("📝 Enter user details:\n`user_id, name, username, contact, email`")
     context.user_data["admin_action"] = "add_user"
+    context.user_data["last_admin_message"] = sent_message.message_id  
 
 async def delete_user_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Prompts admin to enter the user ID to delete"""
+    """Prompts admin to enter user ID to delete"""
     query = update.callback_query
-    await query.message.reply_text("🗑️ Enter the **user_id** of the user you want to delete:")
+    chat_id = query.message.chat_id
+
+    try:
+        await context.bot.delete_message(chat_id=chat_id, message_id=query.message.message_id)
+    except Exception:
+        pass  
+
+    sent_message = await query.message.reply_text("🗑️ Enter **user_id** to delete:")
     context.user_data["admin_action"] = "delete_user"
+    context.user_data["last_admin_message"] = sent_message.message_id  
 
 async def check_user_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Prompts admin to enter user ID to check"""
     query = update.callback_query
-    await query.message.reply_text("🔍 Enter the **user_id** to check if the user exists:")
+    chat_id = query.message.chat_id
+
+    try:
+        await context.bot.delete_message(chat_id=chat_id, message_id=query.message.message_id)
+    except Exception:
+        pass  
+
+    sent_message = await query.message.reply_text("🔍 Enter **user_id** to check:")
     context.user_data["admin_action"] = "check_user"
+    context.user_data["last_admin_message"] = sent_message.message_id  
 
 async def handle_admin_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles admin input based on the selected action"""
+    """Handles admin input based on selected action"""
     user_id = update.message.from_user.id
+    chat_id = update.message.chat_id
+
     if user_id not in ADMIN_IDS:
-        await update.message.reply_text("❌ You are not authorized to use admin commands.")
-        return
+        return  
 
     action = context.user_data.get("admin_action")
     if not action:
-        await update.message.reply_text("⚠️ No admin action selected. Use /admin to access the panel.")
-        return
+        return  
 
     input_text = update.message.text.strip()
     
     conn = connect_db()
     if not conn:
-        await update.message.reply_text("⚠️ Database connection error. Try again later.")
-        return
+        return  
 
     cur = conn.cursor()
 
     if action == "add_user":
         try:
-            # Extract user details
             user_data = input_text.split(",")
             if len(user_data) != 5:
-                await update.message.reply_text("⚠️ Incorrect format. Use: `user_id, name, username, contact, email`")
+                sent_message = await update.message.reply_text("⚠️ Incorrect format. Use: `user_id, name, username, contact, email`")
+                context.user_data["last_admin_message"] = sent_message.message_id  
                 return
 
             user_id, name, username, contact, email = map(str.strip, user_data)
@@ -87,36 +125,43 @@ async def handle_admin_input(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 (user_id, name, username, contact, email)
             )
             conn.commit()
-            await update.message.reply_text(f"✅ User `{user_id}` has been added/updated successfully.")
+            sent_message = await update.message.reply_text(f"✅ User `{user_id}` added/updated successfully.")
 
         except Exception as e:
-            await update.message.reply_text(f"❌ Error adding user: {e}")
+            sent_message = await update.message.reply_text(f"❌ Error adding user: {e}")
 
     elif action == "delete_user":
         try:
             cur.execute("DELETE FROM users WHERE user_id = %s", (input_text,))
             conn.commit()
             if cur.rowcount > 0:
-                await update.message.reply_text(f"✅ User `{input_text}` has been deleted successfully.")
+                sent_message = await update.message.reply_text(f"✅ User `{input_text}` deleted successfully.")
             else:
-                await update.message.reply_text(f"⚠️ User `{input_text}` not found.")
+                sent_message = await update.message.reply_text(f"⚠️ User `{input_text}` not found.")
 
         except Exception as e:
-            await update.message.reply_text(f"❌ Error deleting user: {e}")
+            sent_message = await update.message.reply_text(f"❌ Error deleting user: {e}")
 
     elif action == "check_user":
         try:
             cur.execute("SELECT * FROM users WHERE user_id = %s", (input_text,))
             user = cur.fetchone()
             if user:
-                await update.message.reply_text(f"✅ User `{input_text}` exists in the database.")
+                sent_message = await update.message.reply_text(f"✅ User `{input_text}` exists in the database.")
             else:
-                await update.message.reply_text(f"⚠️ User `{input_text}` does not exist.")
+                sent_message = await update.message.reply_text(f"⚠️ User `{input_text}` does not exist.")
 
         except Exception as e:
-            await update.message.reply_text(f"❌ Error checking user: {e}")
+            sent_message = await update.message.reply_text(f"❌ Error checking user: {e}")
 
     cur.close()
     conn.close()
-    context.user_data["admin_action"] = None  # Reset action
+
+    # Delete the messages after 5 seconds
+    await delete_admin_message(context, chat_id, sent_message.message_id)
+
+    if "last_admin_message" in context.user_data:
+        await delete_admin_message(context, chat_id, context.user_data["last_admin_message"])
+
+    context.user_data["admin_action"] = None  
 
