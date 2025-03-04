@@ -21,12 +21,19 @@ async def show_instruments(update: Update, context: CallbackContext):
     """Displays the list of instruments when 'VPASS AI SENTIMENT' is clicked."""
     query = update.callback_query
 
-    # Create buttons for the instruments
-    keyboard = [[InlineKeyboardButton(inst.upper(), callback_data=f"sentiment_{inst}")] for inst in INSTRUMENTS.keys()]
+    # Arrange instruments in the requested layout
+    keyboard = [
+        [InlineKeyboardButton("GOLD", callback_data="sentiment_gold")],  # Gold at the top
+        [InlineKeyboardButton("BITCOIN", callback_data="sentiment_bitcoin"), InlineKeyboardButton("ETHEREUM", callback_data="sentiment_ethereum")],  # Side by side
+        [InlineKeyboardButton("DOW JONES", callback_data="sentiment_dow jones"), InlineKeyboardButton("NASDAQ", callback_data="sentiment_nasdaq")],
+        [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur/usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp/usd")],
+        [InlineKeyboardButton("⬅️ Back", callback_data="main_menu")]  # Back button to main menu
+    ]
+    
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     # Edit the message to show the instrument options
-    await query.message.edit_text("Select an instrument:", reply_markup=reply_markup)
+    await query.message.edit_text("Select Your Preferred Instrument", reply_markup=reply_markup)
 
 async def handle_instrument_selection(update: Update, context: CallbackContext):
     """Handles when a user selects an instrument."""
@@ -54,4 +61,8 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         except Exception as e:
             response_text = f"❌ Error fetching data: {escape_markdown(str(e), version=2)}"
 
-        await query.message.edit_text(response_text, parse_mode="MarkdownV2")
+        # Add "Menu" button below sentiment analysis text
+        keyboard = [[InlineKeyboardButton("🔙 Menu", callback_data="ai_sentiment")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        await query.message.edit_text(response_text, parse_mode="MarkdownV2", reply_markup=reply_markup)
