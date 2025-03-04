@@ -80,18 +80,12 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if step == "name":
             user_steps[user_id]["name"] = user_input
             user_steps[user_id]["step"] = "username"
-            sent_message = await update.message.reply_text("Enter your Telegram username")
-        
         elif step == "username":
             user_steps[user_id]["username"] = user_input
             user_steps[user_id]["step"] = "contact"
-            sent_message = await update.message.reply_text("Enter your contact number:")
-        
         elif step == "contact":
             user_steps[user_id]["contact"] = user_input
             user_steps[user_id]["step"] = "email"
-            sent_message = await update.message.reply_text("Enter your email address:")
-        
         elif step == "email":
             user_steps[user_id]["email"] = user_input
 
@@ -128,36 +122,18 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup = InlineKeyboardMarkup(keyboard)
             await update.message.reply_text("Registration complete, VPASS PRO V2 is now activated for full access.", reply_markup=reply_markup)
             return
-        
-        # Save the last sent message ID for deletion
-        user_steps[user_id]["last_message_id"] = sent_message.message_id
+
+        # Ask for the next input
+        next_prompt = {
+            "username": "Enter your Telegram username",
+            "contact": "Enter your contact number:",
+            "email": "Enter your email address:"
+        }
+        sent_message = await update.message.reply_text(next_prompt[user_steps[user_id]["step"]])
+        user_steps[user_id]["last_message_id"] = sent_message.message_id  # Store message ID
 
     else:
         await update.message.reply_text("Please click **COMPLETE YOUR REGISTRATION** to begin registration.")
-
-async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles the 'START VPASS PRO NOW' button click"""
-    query = update.callback_query
-
-    # Delete the previous message
-    try:
-        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
-    except Exception:
-        pass  # Ignore errors
-
-    # Create the button menu
-    keyboard = [
-    [InlineKeyboardButton("VPASS SMART SIGNAL", callback_data="vpass_smart_signal")],
-    [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="ai_sentiment")],
-        [
-            InlineKeyboardButton("F.Factory", url="https://www.forexfactory.com"),
-            InlineKeyboardButton("Discord", url="https://discord.com"),
-            InlineKeyboardButton("ChatGPT", url="https://chat.openai.com"),
-            InlineKeyboardButton("DeepSeek", url="https://www.deepseek.com")
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.message.reply_text("Choose preference and elevate your experience", reply_markup=reply_markup)
 
 def main():
     """Main function to run the bot"""
@@ -174,7 +150,7 @@ def main():
     app.add_handler(CallbackQueryHandler(add_user_prompt, pattern="admin_add_user"))
     app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
     app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_admin_input))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))
     
     print("Bot is running...")  # ✅ Ensure this is inside main() with the correct indentation
 
