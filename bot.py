@@ -68,8 +68,6 @@ async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
 
 
-
-
 async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles user registration when they click the button"""
     query = update.callback_query
@@ -171,7 +169,8 @@ def main():
     app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
     app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_admin_input))
-    
+    app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
+
     print("Bot is running...")  # ✅ Ensure this is inside main() with the correct indentation
 
     app.run_polling()
