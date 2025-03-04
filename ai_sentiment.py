@@ -21,7 +21,7 @@ async def show_instruments(update: Update, context: CallbackContext):
     """Displays the list of instruments when 'VPASS AI SENTIMENT' is clicked or when returning from sentiment analysis."""
     query = update.callback_query
 
-    # Delete the previous menu to clear buttons
+    # Delete previous message (to remove buttons)
     try:
         await context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
     except Exception:
@@ -38,7 +38,7 @@ async def show_instruments(update: Update, context: CallbackContext):
     
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # Send a NEW menu message while keeping sentiment text visible
+    # Send a NEW menu message
     await query.message.reply_text("Select Your Preferred Instrument", reply_markup=reply_markup)
 
 async def handle_instrument_selection(update: Update, context: CallbackContext):
@@ -73,10 +73,10 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         except Exception as e:
             response_text = f"❌ Error fetching data: {escape_markdown(str(e), version=2)}"
 
-        # Send sentiment text while keeping it visible
+        # Send sentiment text
         await query.message.reply_text(response_text, parse_mode="MarkdownV2")
 
-        # Send a NEW "Menu" button to bring back the instrument selection
+        # Add "Menu" button BELOW the sentiment text (so sentiment text stays)
         keyboard = [[InlineKeyboardButton("🔙 Menu", callback_data="ai_sentiment")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.message.reply_text(" ", reply_markup=reply_markup)  # Empty text ensures only the button is displayed
