@@ -31,6 +31,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"Welcome back {username}", reply_markup=reply_markup)
             return
 
+    async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Returns to the main menu"""
+    query = update.callback_query
+
+
     # Send welcome image first
     welcome_image = "welcome.png"
 
