@@ -64,7 +64,24 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         except Exception as e:
             response_text = f"❌ Error fetching data: {escape_markdown(str(e), version=2)}"
 
-        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="show_instruments")]]  # Correctly returns to 7-instrument menu as a new message
+        # Show sentiment text with "Back" button below it (resets 7-instrument menu as a new message)
+        keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="reset_instruments")]]  # Correctly returns to fresh 7-instrument menu
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await update.callback_query.message.reply_text(response_text, parse_mode="MarkdownV2", reply_markup=reply_markup)
+
+async def reset_instruments(update: Update, context: CallbackContext):
+    """Resets the 7-instrument menu while keeping sentiment text visible."""
+    query = update.callback_query
+
+    keyboard = [
+        [InlineKeyboardButton("GOLD", callback_data="sentiment_gold")],
+        [InlineKeyboardButton("BITCOIN", callback_data="sentiment_bitcoin"), InlineKeyboardButton("ETHEREUM", callback_data="sentiment_ethereum")],
+        [InlineKeyboardButton("DOW JONES", callback_data="sentiment_dow jones"), InlineKeyboardButton("NASDAQ", callback_data="sentiment_nasdaq")],
+        [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur/usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp/usd")],
+        [InlineKeyboardButton("⬅️ Back", callback_data="main_menu")]  # Back to VPASS AI SENTIMENT menu
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await query.message.reply_text("Select Your Preferred Instrument", reply_markup=reply_markup)
