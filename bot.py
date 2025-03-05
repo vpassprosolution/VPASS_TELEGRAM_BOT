@@ -90,15 +90,15 @@ async def show_coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def show_vip_room_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Shows updated VIP message with 'I UNDERSTAND' button"""
+    """Shows VIP message with 'I UNDERSTAND' button"""
     query = update.callback_query
 
     # Create "I UNDERSTAND" button
     keyboard = [[InlineKeyboardButton("I UNDERSTAND", callback_data="delete_vip_message")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # Send VIP message
-    sent_message = await query.message.reply_text(
+    # Send VIP message (so it can be deleted)
+    await query.message.reply_text(
         "✨ *EXCLUSIVE VPASS PRO ACCESS* ✨\n"
         "✨ *VIP MEMBERS ONLY* ✨\n\n"
         "This space is reserved for our esteemed VIP subscribers.\n\n"
@@ -108,20 +108,16 @@ async def show_vip_room_message(update: Update, context: ContextTypes.DEFAULT_TY
         reply_markup=reply_markup
     )
 
-    # Store message ID to delete later
-    context.user_data["vip_message_id"] = sent_message.message_id
-
 async def delete_vip_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Deletes the VIP message when 'I UNDERSTAND' button is clicked"""
     query = update.callback_query
     await query.answer()  # Acknowledge button press
 
-    # Delete the message itself
+    # Delete the button and message itself
     try:
         await context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
     except Exception:
-        pass  # Ignore errors if message was already deleted
-
+        pass  # Ignore errors if already deleted
 
 async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles user registration when they click the button"""
@@ -238,7 +234,8 @@ def main():
     app.add_handler(CallbackQueryHandler(show_coming_soon, pattern="coming_soon_2024"))  # For VPASS AI TECHNICAL ANALYSIS
     app.add_handler(CallbackQueryHandler(show_coming_soon, pattern="coming_soon_2025"))  # For AI AGENT INSTANT SIGNAL
     app.add_handler(CallbackQueryHandler(show_vip_room_message, pattern="news_war_room"))  # For NEWS WAR ROOM
-    
+    app.add_handler(CallbackQueryHandler(delete_vip_message, pattern="delete_vip_message"))  # Handles "I UNDERSTAND"
+
     print("Bot is running...")  
 
     app.run_polling()
