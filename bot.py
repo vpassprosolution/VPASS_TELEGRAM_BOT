@@ -101,19 +101,41 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass  # Ignore errors if message doesn't exist
 
         if step == "name":
-            user_steps[user_id]["name"] = user_input
-            user_steps[user_id]["step"] = "username"
-            next_prompt = "Enter your Telegram username:"
+    user_steps[user_id]["name"] = user_input
+    user_steps[user_id]["step"] = "username"
+
+    # Ensure old message is deleted before asking for new input
+    try:
+        await context.bot.delete_message(chat_id=update.message.chat_id, message_id=user_steps[user_id]["last_message_id"])
+    except Exception:
+        pass  # Ignore if message deletion fails
+
+    sent_message = await update.message.reply_text("Enter your Telegram username:")
+    user_steps[user_id]["last_message_id"] = sent_message.message_id  # Store new message ID
+
         elif step == "username":
-            user_steps[user_id]["username"] = user_input
-            user_steps[user_id]["step"] = "contact"
-            next_prompt = "Enter your contact number:"
-        elif step == "contact":
-            user_steps[user_id]["contact"] = user_input
-            user_steps[user_id]["step"] = "email"
-            next_prompt = "Enter your email address:"
-        elif step == "email":
-            user_steps[user_id]["email"] = user_input
+    user_steps[user_id]["username"] = user_input
+    user_steps[user_id]["step"] = "contact"
+
+    try:
+        await context.bot.delete_message(chat_id=update.message.chat_id, message_id=user_steps[user_id]["last_message_id"])
+    except Exception:
+        pass  
+
+    sent_message = await update.message.reply_text("Enter your contact number:")
+    user_steps[user_id]["last_message_id"] = sent_message.message_id  # Store new message ID
+
+elif step == "contact":
+    user_steps[user_id]["contact"] = user_input
+    user_steps[user_id]["step"] = "email"
+
+    try:
+        await context.bot.delete_message(chat_id=update.message.chat_id, message_id=user_steps[user_id]["last_message_id"])
+    except Exception:
+        pass  
+
+    sent_message = await update.message.reply_text("Enter your email address:")
+    user_steps[user_id]["last_message_id"] = sent_message.message_id  # Store new message ID
 
             # Save user data to the database (including Chat ID)
             conn = connect_db()
