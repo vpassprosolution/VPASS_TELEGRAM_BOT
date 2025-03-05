@@ -33,7 +33,7 @@ async def show_instruments(update: Update, context: CallbackContext):
         [InlineKeyboardButton("BITCOIN", callback_data="sentiment_bitcoin"), InlineKeyboardButton("ETHEREUM", callback_data="sentiment_ethereum")],  # Side by side
         [InlineKeyboardButton("DOW JONES", callback_data="sentiment_dow jones"), InlineKeyboardButton("NASDAQ", callback_data="sentiment_nasdaq")],
         [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur/usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp/usd")],
-        [InlineKeyboardButton("⬅️ Back", callback_data="ai_sentiment")] # Back button to main menu
+        [InlineKeyboardButton("⬅️ Back", callback_data="main_menu")]  # Back button to main menu
     ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -47,11 +47,10 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
     selected_instrument = query.data.replace("sentiment_", "")  # Extract the instrument name
 
     # Instead of deleting the message, edit it to maintain button reference
-try:
-    await query.message.edit_text("Fetching sentiment analysis...", reply_markup=None)
-except Exception:
-    pass  # Ignore if edit fails
-
+    try:
+        await query.message.edit_text("Fetching sentiment analysis...", reply_markup=None)
+    except Exception:
+        pass  # Ignore if edit fails
 
     if selected_instrument in INSTRUMENTS:
         formatted_instrument = INSTRUMENTS[selected_instrument]  # Get API-compatible format
