@@ -30,7 +30,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             username = user[0]
             keyboard = [[InlineKeyboardButton("Go to Main Menu", callback_data="main_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await update.message.reply_text(f"Welcome back to world of AI {username}", reply_markup=reply_markup)
+            await update.message.reply_text(f"🌑 Welcome back to world of AI {username}🌑", reply_markup=reply_markup)
             return
 
     # Send welcome image
@@ -56,7 +56,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="ai_sentiment")],
         [InlineKeyboardButton("VPASS AI TECHNICAL ANALYSIS", callback_data="coming_soon_2024")],  # New button
         [InlineKeyboardButton("AI AGENT INSTANT SIGNAL", callback_data="coming_soon_2025")],  # New button
-        [InlineKeyboardButton("NEWS WAR ROOM", callback_data="news_war_room")],  # Updated button
+        [InlineKeyboardButton("🔥 NEWS WAR ROOM 🔥", callback_data="news_war_room")],  # Updated button
         [
             InlineKeyboardButton("F.Factory", url="https://www.forexfactory.com"),
             InlineKeyboardButton("Discord", url="https://discord.com"),
@@ -67,7 +67,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await query.message.edit_text(
-        "*🎩WELCOME TO VPASS PRO VERSION 2🎩*\n"
+        "*⚫ WELCOME TO VPASS PRO VERSION 2 ⚫*\n"
         "Indulge in your preferences and continue your exclusive journey with vpasspro\\.",
         parse_mode="MarkdownV2",
         reply_markup=reply_markup
