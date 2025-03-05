@@ -2,7 +2,6 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 import psycopg2
 from db import connect_db
-from ai_sentiment import show_instruments, handle_instrument_selection
 from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_prompt, handle_admin_input
 
 # Bot Token
@@ -13,6 +12,8 @@ user_steps = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the /start command"""
+    from ai_sentiment import show_instruments  # Lazy import fix
+
     user_id = update.message.from_user.id
 
     # Check if the user is already registered
@@ -95,9 +96,9 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id in user_steps:
         step = user_steps[user_id]["step"]
 
-        # Delete the previous message
+        # Delete user's message input after submission
         try:
-            await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["last_message_id"])
+            await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)
         except Exception:
             pass  # Ignore errors if message doesn't exist
 
@@ -158,22 +159,24 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     """Main function to run the bot"""
+    from ai_sentiment import show_instruments, handle_instrument_selection  # Lazy import fix
+
     app = Application.builder().token(BOT_TOKEN).build()
 
     # Handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(register_user, pattern="register"))
-    app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))  # ✅ FIXED: Function now exists
+    app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))
     app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
-    app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))
-    app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))
+    app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))  # ✅ FIXED: No circular import
+    app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))  # ✅ FIXED
     app.add_handler(CommandHandler("admin", admin_panel))
     app.add_handler(CallbackQueryHandler(add_user_prompt, pattern="admin_add_user"))
     app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
     app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))  # 🔥 FIXED: Collect user data properly
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))  # ✅ FIXED
 
-    print("Bot is running...")  # ✅ Ensure this is inside main() with the correct indentation
+    print("Bot is running...")  # ✅ Ensure correct indentation
 
     app.run_polling()
 
