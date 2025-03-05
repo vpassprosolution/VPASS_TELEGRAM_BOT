@@ -11,10 +11,10 @@ INSTRUMENTS = {
     "gold": "gold",
     "bitcoin": "bitcoin",
     "ethereum": "ethereum",
-    "dowjones": "dowjones",
+    "dowjones": "dowjones",  
     "nasdaq": "nasdaq",
-    "eur/usd": "eur-usd",
-    "gbp/usd": "gbp-usd"
+    "eur_usd": "eur-usd",  
+    "gbp_usd": "gbp-usd"   
 }
 
 async def show_instruments(update: Update, context: CallbackContext):
@@ -29,11 +29,11 @@ async def show_instruments(update: Update, context: CallbackContext):
 
     # Arrange instruments in the requested layout
     keyboard = [
-        [InlineKeyboardButton("GOLD", callback_data="sentiment_gold")],  # Gold at the top
-        [InlineKeyboardButton("BITCOIN", callback_data="sentiment_bitcoin"), InlineKeyboardButton("ETHEREUM", callback_data="sentiment_ethereum")],  # Side by side
+        [InlineKeyboardButton("GOLD", callback_data="sentiment_gold")],
+        [InlineKeyboardButton("BITCOIN", callback_data="sentiment_bitcoin"), InlineKeyboardButton("ETHEREUM", callback_data="sentiment_ethereum")],
         [InlineKeyboardButton("DOW JONES", callback_data="sentiment_dowjones"), InlineKeyboardButton("NASDAQ", callback_data="sentiment_nasdaq")],
-        [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur-usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp-usd")],  # Fixed callback data
-        [InlineKeyboardButton("⬅️ Back", callback_data="main_menu")]  # Back button to main menu
+        [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur_usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp_usd")],  
+        [InlineKeyboardButton("⬅️ Back", callback_data="main_menu")]
     ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
