@@ -53,6 +53,9 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("VPASS SMART SIGNAL", callback_data="vpass_smart_signal")],
         [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="ai_sentiment")],
+        [InlineKeyboardButton("VPASS AI TECHNICAL ANALYSIS", callback_data="coming_soon_2024")],  # New button
+        [InlineKeyboardButton("AI AGENT INSTANT SIGNAL", callback_data="coming_soon_2025")],  # New button
+        [InlineKeyboardButton("NEWS WAR ROOM", callback_data="news_war_room")],  # Updated button
         [
             InlineKeyboardButton("F.Factory", url="https://www.forexfactory.com"),
             InlineKeyboardButton("Discord", url="https://discord.com"),
@@ -63,6 +66,26 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await query.message.edit_text("Welcome, Select Your Preference", reply_markup=reply_markup)
+
+async def show_coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Shows 'COMING SOON' messages for AI Technical Analysis & AI Agent Instant Signal"""
+    query = update.callback_query
+
+    # Determine the correct message
+    if query.data == "coming_soon_2024":
+        message_text = "📢 COMING SOON ON APRIL 2024"
+    else:
+        message_text = "📢 COMING SOON ON APRIL 2025"
+
+    await query.answer()  # Acknowledge button press
+    await query.message.reply_text(message_text)
+
+async def show_vip_room_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Shows VIP message when clicking 'NEWS WAR ROOM'"""
+    query = update.callback_query
+    await query.answer()  # Acknowledge button press
+    await query.message.reply_text("📢 THIS ROOM IS ONLY FOR VIP SUBSCRIBERS.\n\nPLEASE CONTACT ADMIN FOR MORE DETAILS. THANK YOU!")
+
 
 async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles user registration when they click the button"""
@@ -176,7 +199,10 @@ def main():
     app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
     app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))  
-
+    app.add_handler(CallbackQueryHandler(show_coming_soon, pattern="coming_soon_2024"))  # For VPASS AI TECHNICAL ANALYSIS
+    app.add_handler(CallbackQueryHandler(show_coming_soon, pattern="coming_soon_2025"))  # For AI AGENT INSTANT SIGNAL
+    app.add_handler(CallbackQueryHandler(show_vip_room_message, pattern="news_war_room"))  # For NEWS WAR ROOM
+    
     print("Bot is running...")  
 
     app.run_polling()
