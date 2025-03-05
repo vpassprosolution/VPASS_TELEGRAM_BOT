@@ -3,6 +3,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Mess
 import psycopg2
 from db import connect_db
 from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_prompt, handle_admin_input
+import asyncio
 
 # Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
@@ -73,7 +74,7 @@ async def show_coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Determine the correct message
     if query.data == "coming_soon_2024":
-        message_text = "📢 COMING SOON ON APRIL 2025"
+        message_text = "📢 COMING SOON ON APRIL 2024"  # Fixed incorrect text
     else:
         message_text = "📢 COMING SOON ON APRIL 2025"
 
@@ -83,21 +84,49 @@ async def show_coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Auto-delete the message after 10 seconds
     await asyncio.sleep(10)
     try:
-        await context.bot.delete_message(chat_id=sent_message.chat_id, message_id=sent_message.message_id)
+        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=sent_message.message_id)  # Fixed deletion issue
     except Exception:
         pass  # Ignore errors if message was already deleted
 
 
 async def show_vip_room_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Shows VIP message when clicking 'NEWS WAR ROOM'"""
+    """Shows updated VIP message with 'I UNDERSTAND' button"""
     query = update.callback_query
-    await query.answer()  # Acknowledge button press
-    await query.message.reply_text(
-        "✨ *EXCLUSIVE VPASS PRO ACCESS ✨    ✨ VIP MEMBERS ONLY* ✨\n"
+
+    # Create "I UNDERSTAND" button
+    keyboard = [[InlineKeyboardButton("I UNDERSTAND", callback_data="delete_vip_message")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # Send VIP message
+    sent_message = await query.message.reply_text(
+        "✨ *EXCLUSIVE VPASS PRO ACCESS* ✨\n"
+        "✨ *VIP MEMBERS ONLY* ✨\n\n"
         "This space is reserved for our esteemed VIP subscribers.\n\n"
         "For inquiries or to elevate your experience, kindly contact the administration.\n\n"
         "We appreciate your understanding and look forward to welcoming you.",
-        parse_mode="Markdown"
+        parse_mode="Markdown",
+        reply_markup=reply_markup
+    )
+
+    # Store message ID to delete later
+    context.user_data["vip_message_id"] = sent_message.message_id
+
+async def delete_vip_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Deletes the VIP message when 'I UNDERSTAND' button is clicked"""
+    query = update.callback_query
+    await query.answer()  # Acknowledge button press
+
+    # Try to delete the VIP message
+    try:
+        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=context.user_data["vip_message_id"])
+    except Exception:
+        pass  # Ignore errors if message was already deleted
+
+    # Also delete the button message
+    try:
+        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
+    except Exception:
+        pass  # Ignore errors if already deleted
     )
 
 
