@@ -67,9 +67,11 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await query.message.edit_text(
-        "**🌟 WELCOME BACK! MAKE YOUR SELECTION 🌟**\n"
+        "**🌟 WELCOME BACK! MAKE YOUR SELECTION 🌟**\n\n"
         "Indulge in your preferences and continue your exclusive journey.",
-        parse_mode="Markdown"
+        parse_mode="Markdown",
+        reply_markup=reply_markup
+    )
 
 async def show_coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Shows 'COMING SOON' messages for AI Technical Analysis & AI Agent Instant Signal, then disappears"""
