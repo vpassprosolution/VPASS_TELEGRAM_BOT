@@ -68,20 +68,19 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.edit_text("Welcome, Select Your Preference", reply_markup=reply_markup)
 
 async def show_coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Shows 'COMING SOON' messages for AI Technical Analysis & AI Agent Instant Signal"""
+    """Shows 'COMING SOON' messages for AI Technical Analysis & AI Agent Instant Signal, then disappears"""
     query = update.callback_query
 
     # Determine the correct message
     if query.data == "coming_soon_2024":
-        message_text = "📢 COMING SOON ON APRIL 2024"
+        message_text = "📢 COMING SOON ON APRIL 2025"
     else:
         message_text = "📢 COMING SOON ON APRIL 2025"
 
     await query.answer()  # Acknowledge button press
-    await query.message.reply_text(message_text)
+    sent_message = await query.message.reply_text(message_text)
 
-
-# Auto-delete the message after 10 seconds
+    # Auto-delete the message after 10 seconds
     await asyncio.sleep(10)
     try:
         await context.bot.delete_message(chat_id=sent_message.chat_id, message_id=sent_message.message_id)
@@ -94,7 +93,7 @@ async def show_vip_room_message(update: Update, context: ContextTypes.DEFAULT_TY
     query = update.callback_query
     await query.answer()  # Acknowledge button press
     await query.message.reply_text(
-        "✨ *EXCLUSIVE ACCESS: VIP MEMBERS ONLY* ✨\n"
+        "✨ *EXCLUSIVE VPASS PRO ACCESS ✨    ✨ VIP MEMBERS ONLY* ✨\n"
         "This space is reserved for our esteemed VIP subscribers.\n\n"
         "For inquiries or to elevate your experience, kindly contact the administration.\n\n"
         "We appreciate your understanding and look forward to welcoming you.",
