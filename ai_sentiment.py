@@ -11,7 +11,7 @@ INSTRUMENTS = {
     "gold": "gold",
     "bitcoin": "bitcoin",
     "ethereum": "ethereum",
-    "dowjones": "dow-jones",  # Fixed: Now matches API format
+    "dowjones": "dowjones",  # Fixed: Now matches API format
     "nasdaq": "nasdaq",
     "eur/usd": "eur-usd",  # Fixed: Now matches API format
     "gbp/usd": "gbp-usd"   # Fixed: Now matches API format
