@@ -74,7 +74,7 @@ async def show_coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Determine the correct message
     if query.data == "coming_soon_2024":
-        message_text = "📢 COMING SOON ON APRIL 2024"  # Fixed incorrect text
+        message_text = "📢 COMING SOON ON APRIL 2025"  # Fixed incorrect text
     else:
         message_text = "📢 COMING SOON ON APRIL 2025"
 
@@ -127,7 +127,6 @@ async def delete_vip_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
     except Exception:
         pass  # Ignore errors if already deleted
-    )
 
 
 async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
