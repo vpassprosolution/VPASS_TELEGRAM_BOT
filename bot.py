@@ -91,8 +91,8 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # Delete user's input and previous bot prompt before asking the next question
         try:
-            await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)  # Delete user input
-            await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["prompt_message_id"])  # Delete previous bot question
+            await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)  
+            await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["prompt_message_id"])  
         except Exception:
             pass  
 
@@ -151,6 +151,13 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Store last sent prompt message ID for deletion
         user_steps[user_id]["prompt_message_id"] = sent_message.message_id
 
+async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles the 'START VPASS PRO NOW' button click"""
+    query = update.callback_query
+
+    # Redirect to main menu
+    await main_menu(update, context)
+
 def main():
     """Main function to run the bot"""
     from ai_sentiment import show_instruments, handle_instrument_selection  
@@ -160,7 +167,7 @@ def main():
     # Handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(register_user, pattern="register"))
-    app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))
+    app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))  # ✅ FIXED
     app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))  
     app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))  
