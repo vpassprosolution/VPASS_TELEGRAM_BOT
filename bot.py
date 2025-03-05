@@ -95,47 +95,27 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # Delete the previous message
         try:
-            await context.bot.delete_message(chat_id=update.message.chat_id, message_id=user_steps[user_id]["last_message_id"])
-            await context.bot.delete_message(chat_id=update.message.chat_id, message_id=update.message.message_id)
+            await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["last_message_id"])
         except Exception:
             pass  # Ignore errors if message doesn't exist
 
         if step == "name":
-    user_steps[user_id]["name"] = user_input
-    user_steps[user_id]["step"] = "username"
-
-    # Ensure old message is deleted before asking for new input
-    try:
-        await context.bot.delete_message(chat_id=update.message.chat_id, message_id=user_steps[user_id]["last_message_id"])
-    except Exception:
-        pass  # Ignore if message deletion fails
-
-    sent_message = await update.message.reply_text("Enter your Telegram username:")
-    user_steps[user_id]["last_message_id"] = sent_message.message_id  # Store new message ID
+            user_steps[user_id]["name"] = user_input
+            user_steps[user_id]["step"] = "username"
+            sent_message = await update.message.reply_text("Enter your Telegram username:")
 
         elif step == "username":
-    user_steps[user_id]["username"] = user_input
-    user_steps[user_id]["step"] = "contact"
+            user_steps[user_id]["username"] = user_input
+            user_steps[user_id]["step"] = "contact"
+            sent_message = await update.message.reply_text("Enter your contact number:")
 
-    try:
-        await context.bot.delete_message(chat_id=update.message.chat_id, message_id=user_steps[user_id]["last_message_id"])
-    except Exception:
-        pass  
+        elif step == "contact":
+            user_steps[user_id]["contact"] = user_input
+            user_steps[user_id]["step"] = "email"
+            sent_message = await update.message.reply_text("Enter your email address:")
 
-    sent_message = await update.message.reply_text("Enter your contact number:")
-    user_steps[user_id]["last_message_id"] = sent_message.message_id  # Store new message ID
-
-elif step == "contact":
-    user_steps[user_id]["contact"] = user_input
-    user_steps[user_id]["step"] = "email"
-
-    try:
-        await context.bot.delete_message(chat_id=update.message.chat_id, message_id=user_steps[user_id]["last_message_id"])
-    except Exception:
-        pass  
-
-    sent_message = await update.message.reply_text("Enter your email address:")
-    user_steps[user_id]["last_message_id"] = sent_message.message_id  # Store new message ID
+        elif step == "email":
+            user_steps[user_id]["email"] = user_input
 
             # Save user data to the database (including Chat ID)
             conn = connect_db()
@@ -171,9 +151,10 @@ elif step == "contact":
             await update.message.reply_text("Registration complete, VPASS PRO V2 is now activated for full access.", reply_markup=reply_markup)
             return
 
-        # Ask for the next input
-        sent_message = await update.message.reply_text(next_prompt)
-        user_steps[user_id]["last_message_id"] = sent_message.message_id  # Store message ID
+        # Store the last sent message ID for proper deletion
+        user_steps[user_id]["last_message_id"] = sent_message.message_id
+
+       
 
 def main():
     """Main function to run the bot"""
