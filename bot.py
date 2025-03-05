@@ -78,7 +78,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Function to trigger AI signal menu from ai_signal_handler.py
 async def ai_agent_signal(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await ai_signal_handler.show_instrument_menu(update, context)
+    await ai_signal_handler.show_instruments(update, context)
 
 
 async def show_coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
