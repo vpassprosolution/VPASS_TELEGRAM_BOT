@@ -7,8 +7,18 @@ AI_API_URL = "https://aiagentinstantsignal-production.up.railway.app"
 
 # Function to fetch trade signal from the AI API
 async def fetch_ai_signal(update: Update, context: CallbackContext):
-    selected_instrument = update.callback_query.data.split('_')[1]  # Extract instrument from callback
-    print(f"🔍 Instrument Button Clicked: {selected_instrument}")  # Debugging Log
+    callback_data = update.callback_query.data  # Get raw callback data
+    print(f"🔍 Raw Callback Data: {callback_data}")  # Debugging log
+
+    selected_instrument = callback_data.replace("ai_signal_", "")  # Extract instrument
+    print(f"✅ Extracted Instrument: {selected_instrument}")  # Debugging log
+
+    # Ensure valid instrument selection
+    valid_instruments = ["BTC", "ETH", "EURUSD", "GBPUSD", "DJI", "IXIC", "XAU"]
+    if selected_instrument not in valid_instruments:
+        print(f"⚠️ Invalid instrument selected: {selected_instrument}")
+        await update.callback_query.message.edit_text("⚠️ No valid instrument selected.")
+        return
 
     response = requests.get(f"{AI_API_URL}/get_signal/{selected_instrument}")
 
