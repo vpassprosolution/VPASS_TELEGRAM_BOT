@@ -80,11 +80,26 @@ async def show_coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()  # Acknowledge button press
     await query.message.reply_text(message_text)
 
+
+# Auto-delete the message after 10 seconds
+    await asyncio.sleep(10)
+    try:
+        await context.bot.delete_message(chat_id=sent_message.chat_id, message_id=sent_message.message_id)
+    except Exception:
+        pass  # Ignore errors if message was already deleted
+
+
 async def show_vip_room_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Shows VIP message when clicking 'NEWS WAR ROOM'"""
     query = update.callback_query
     await query.answer()  # Acknowledge button press
-    await query.message.reply_text("📢 THIS ROOM IS ONLY FOR VIP SUBSCRIBERS.\n\nPLEASE CONTACT ADMIN FOR MORE DETAILS. THANK YOU!")
+    await query.message.reply_text(
+        "✨ *EXCLUSIVE ACCESS: VIP MEMBERS ONLY* ✨\n"
+        "This space is reserved for our esteemed VIP subscribers.\n\n"
+        "For inquiries or to elevate your experience, kindly contact the administration.\n\n"
+        "We appreciate your understanding and look forward to welcoming you.",
+        parse_mode="Markdown"
+    )
 
 
 async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
