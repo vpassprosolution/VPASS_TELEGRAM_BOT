@@ -67,7 +67,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await query.message.edit_text(
-        "*⚫ WELCOME TO VPASS PRO VERSION 2 ⚫*\n"
+        "*⚫WELCOME TO VPASS PRO VERSION 2⚫*\n"
         "Indulge in your preferences and continue your exclusive journey with vpasspro\\.",
         parse_mode="MarkdownV2",
         reply_markup=reply_markup
@@ -87,7 +87,7 @@ async def show_coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sent_message = await query.message.reply_text(message_text)
 
     # Auto-delete the message after 10 seconds
-    await asyncio.sleep(10)
+    await asyncio.sleep(2)
     try:
         await context.bot.delete_message(chat_id=query.message.chat_id, message_id=sent_message.message_id)  # Fixed deletion issue
     except Exception:
