@@ -151,7 +151,8 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Registration complete, VPASS PRO V2 is now activated for full access.", reply_markup=reply_markup)
             return
 
-        # Store the last sent message ID for proper deletion
+        
+# Store the last sent message ID for proper deletion
         user_steps[user_id]["last_message_id"] = sent_message.message_id
 
        
