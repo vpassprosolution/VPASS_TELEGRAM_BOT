@@ -116,17 +116,11 @@ async def delete_vip_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
     query = update.callback_query
     await query.answer()  # Acknowledge button press
 
-    # Try to delete the VIP message
-    try:
-        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=context.user_data["vip_message_id"])
-    except Exception:
-        pass  # Ignore errors if message was already deleted
-
-    # Also delete the button message
+    # Delete the message itself
     try:
         await context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
     except Exception:
-        pass  # Ignore errors if already deleted
+        pass  # Ignore errors if message was already deleted
 
 
 async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
