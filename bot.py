@@ -79,6 +79,13 @@ async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sent_message = await query.message.reply_text("Please enter your name:")
     user_steps[user_id]["last_message_id"] = sent_message.message_id
 
+async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles the 'START VPASS PRO NOW' button click"""
+    query = update.callback_query
+
+    # Redirect to main menu
+    await main_menu(update, context)
+
 async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Collects user registration details step by step"""
     user_id = update.message.from_user.id
@@ -156,7 +163,7 @@ def main():
     # Handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(register_user, pattern="register"))
-    app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))
+    app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))  # ✅ FIXED: Function now exists
     app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))
     app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))
