@@ -6,15 +6,15 @@ import requests
 # VPASS AI SENTIMENT API URL
 VPASS_AI_SENTIMENT_URL = "https://vpassaisentiment-production.up.railway.app/storyline/?instrument="
 
-# Correct Instrument Mapping (API requires '/' replaced with '-')
+# Correct Instrument Mapping (Follow API Formatting)
 INSTRUMENTS = { 
     "gold": "gold",
     "bitcoin": "bitcoin",
     "ethereum": "ethereum",
-    "dowjones": "dowjones",  
+    "dowjones": "dow-jones",  # Fixed: Now matches API format
     "nasdaq": "nasdaq",
-    "eur_usd": "eur-usd",  
-    "gbp_usd": "gbp-usd"   
+    "eur/usd": "eur-usd",  # Fixed: Now matches API format
+    "gbp/usd": "gbp-usd"   # Fixed: Now matches API format
 }
 
 async def show_instruments(update: Update, context: CallbackContext):
@@ -32,7 +32,7 @@ async def show_instruments(update: Update, context: CallbackContext):
         [InlineKeyboardButton("GOLD", callback_data="sentiment_gold")],
         [InlineKeyboardButton("BITCOIN", callback_data="sentiment_bitcoin"), InlineKeyboardButton("ETHEREUM", callback_data="sentiment_ethereum")],
         [InlineKeyboardButton("DOW JONES", callback_data="sentiment_dowjones"), InlineKeyboardButton("NASDAQ", callback_data="sentiment_nasdaq")],
-        [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur_usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp_usd")],  
+        [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur/usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp/usd")],  
         [InlineKeyboardButton("⬅️ Back", callback_data="main_menu")]
     ]
     
