@@ -30,7 +30,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             username = user[0]
             keyboard = [[InlineKeyboardButton("Go to Main Menu", callback_data="main_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await update.message.reply_text(f"Welcome back {username}", reply_markup=reply_markup)
+            await update.message.reply_text(f"Welcome back to world of AI {username}", reply_markup=reply_markup)
             return
 
     # Send welcome image
@@ -67,8 +67,8 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await query.message.edit_text(
-        "*WELCOME TO VPASS PRO VERSION 2\\.0*\n"
-        "Indulge in your preferences and continue your exclusive journey with VpassPro\\.",
+        "*🎩WELCOME TO VPASS PRO VERSION 2\\.0🎩*\n"
+        "Indulge in your preferences and continue your exclusive journey with vpasspro\\.",
         parse_mode="MarkdownV2",
         reply_markup=reply_markup
     )
