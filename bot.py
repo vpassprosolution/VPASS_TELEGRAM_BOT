@@ -12,7 +12,7 @@ user_steps = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the /start command"""
-    from ai_sentiment import show_instruments  # Lazy import fix
+    from ai_sentiment import show_instruments  
 
     user_id = update.message.from_user.id
 
@@ -32,7 +32,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"Welcome back {username}", reply_markup=reply_markup)
             return
 
-    # Send welcome image first
+    # Send welcome image
     welcome_image = "welcome.png"
 
     with open(welcome_image, "rb") as photo:
@@ -73,19 +73,12 @@ async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         await context.bot.delete_message(chat_id=query.message.chat_id, message_id=context.user_data["button_message"])
     except Exception:
-        pass  # Ignore errors if message doesn't exist
+        pass  
 
     # Start registration process
     user_steps[user_id] = {"step": "name"}
     sent_message = await query.message.reply_text("Please enter your name:")
-    user_steps[user_id]["last_message_id"] = sent_message.message_id
-
-async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles the 'START VPASS PRO NOW' button click"""
-    query = update.callback_query
-
-    # Redirect to main menu
-    await main_menu(update, context)
+    user_steps[user_id]["prompt_message_id"] = sent_message.message_id  
 
 async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Collects user registration details step by step"""
@@ -96,11 +89,12 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id in user_steps:
         step = user_steps[user_id]["step"]
 
-        # Delete user's message input after submission
+        # Delete user's input and previous bot prompt before asking the next question
         try:
-            await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)
+            await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)  # Delete user input
+            await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["prompt_message_id"])  # Delete previous bot question
         except Exception:
-            pass  # Ignore errors if message doesn't exist
+            pass  
 
         if step == "name":
             user_steps[user_id]["name"] = user_input
@@ -154,12 +148,12 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Registration complete, VPASS PRO V2 is now activated for full access.", reply_markup=reply_markup)
             return
 
-        # Store last sent message ID for deletion
-        user_steps[user_id]["last_message_id"] = sent_message.message_id
+        # Store last sent prompt message ID for deletion
+        user_steps[user_id]["prompt_message_id"] = sent_message.message_id
 
 def main():
     """Main function to run the bot"""
-    from ai_sentiment import show_instruments, handle_instrument_selection  # Lazy import fix
+    from ai_sentiment import show_instruments, handle_instrument_selection  
 
     app = Application.builder().token(BOT_TOKEN).build()
 
@@ -168,15 +162,15 @@ def main():
     app.add_handler(CallbackQueryHandler(register_user, pattern="register"))
     app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))
     app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
-    app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))  # ✅ FIXED: No circular import
-    app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))  # ✅ FIXED
+    app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))  
+    app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))  
     app.add_handler(CommandHandler("admin", admin_panel))
     app.add_handler(CallbackQueryHandler(add_user_prompt, pattern="admin_add_user"))
     app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
     app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))  # ✅ FIXED
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))  
 
-    print("Bot is running...")  # ✅ Ensure correct indentation
+    print("Bot is running...")  
 
     app.run_polling()
 

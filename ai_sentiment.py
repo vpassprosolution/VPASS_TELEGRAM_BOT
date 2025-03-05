@@ -11,10 +11,10 @@ INSTRUMENTS = {
     "gold": "gold",
     "bitcoin": "bitcoin",
     "ethereum": "ethereum",
-    "dow_jones": "dow-jones",
+    "dowjones": "dowjones",
     "nasdaq": "nasdaq",
-    "eur_usd": "eur-usd",
-    "gbp_usd": "gbp-usd"
+    "eur/usd": "eur-usd",
+    "gbp/usd": "gbp-usd"
 }
 
 async def show_instruments(update: Update, context: CallbackContext):
@@ -31,20 +31,27 @@ async def show_instruments(update: Update, context: CallbackContext):
     keyboard = [
         [InlineKeyboardButton("GOLD", callback_data="sentiment_gold")],  # Gold at the top
         [InlineKeyboardButton("BITCOIN", callback_data="sentiment_bitcoin"), InlineKeyboardButton("ETHEREUM", callback_data="sentiment_ethereum")],  # Side by side
-        [InlineKeyboardButton("DOW JONES", callback_data="sentiment_dow_jones"), InlineKeyboardButton("NASDAQ", callback_data="sentiment_nasdaq")],
-        [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur_usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp_usd")],  # Fixed callback data
+        [InlineKeyboardButton("DOW JONES", callback_data="sentiment_dowjones"), InlineKeyboardButton("NASDAQ", callback_data="sentiment_nasdaq")],
+        [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur-usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp-usd")],  # Fixed callback data
         [InlineKeyboardButton("⬅️ Back", callback_data="main_menu")]  # Back button to main menu
     ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # Send a NEW menu message
-    await query.message.reply_text("Select our exclusive range of instruments", reply_markup=reply_markup)
+    # Send a NEW menu message and store its message_id
+    sent_message = await query.message.reply_text("Select our exclusive range of instruments", reply_markup=reply_markup)
+    context.user_data["instrument_menu_message_id"] = sent_message.message_id  # Store message ID
 
 async def handle_instrument_selection(update: Update, context: CallbackContext):
     """Handles when a user selects an instrument."""
     query = update.callback_query
     selected_instrument = query.data.replace("sentiment_", "")  # Extract the instrument name
+
+    # Delete the instrument menu message (so the selection disappears)
+    try:
+        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=context.user_data["instrument_menu_message_id"])
+    except Exception:
+        pass  
 
     # Show fetching message
     fetching_message = await query.message.reply_text("Fetching sentiment analysis...")
