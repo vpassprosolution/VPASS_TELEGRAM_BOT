@@ -4,6 +4,7 @@ import psycopg2
 from db import connect_db
 from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_prompt, handle_admin_input
 import asyncio
+import ai_signal_handler  # Import the AI Signal Handler
 
 # Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
@@ -47,6 +48,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Store message ID so we can delete it later
     context.user_data["button_message"] = sent_message.message_id
 
+
+
 async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Returns to the main menu"""
     query = update.callback_query
@@ -55,7 +58,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("VPASS SMART SIGNAL", callback_data="vpass_smart_signal")],
         [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="ai_sentiment")],
         [InlineKeyboardButton("VPASS AI TECHNICAL ANALYSIS", callback_data="coming_soon_2024")],  # New button
-        [InlineKeyboardButton("AI AGENT INSTANT SIGNAL", callback_data="coming_soon_2025")],  # New button
+        [InlineKeyboardButton("AI AGENT INSTANT SIGNAL", callback_data="ai_agent_signal")],
         [InlineKeyboardButton("🔥 NEWS WAR ROOM 🔥", callback_data="news_war_room")],  # Updated button
         [
             InlineKeyboardButton("F.Factory", url="https://www.forexfactory.com"),
@@ -72,6 +75,11 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="MarkdownV2",
         reply_markup=reply_markup
     )
+
+# Function to trigger AI signal menu from ai_signal_handler.py
+async def ai_agent_signal(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await ai_signal_handler.show_instrument_menu(update, context)
+
 
 async def show_coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Shows 'COMING SOON' messages for AI Technical Analysis & AI Agent Instant Signal, then disappears"""
@@ -237,7 +245,7 @@ def main():
     app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))  
     app.add_handler(CallbackQueryHandler(show_coming_soon, pattern="coming_soon_2024"))  # For VPASS AI TECHNICAL ANALYSIS
-    app.add_handler(CallbackQueryHandler(show_coming_soon, pattern="coming_soon_2025"))  # For AI AGENT INSTANT SIGNAL
+    app.add_handler(CallbackQueryHandler(ai_agent_signal, pattern="ai_agent_signal"))  # ✅ New AI button handler
     app.add_handler(CallbackQueryHandler(show_vip_room_message, pattern="news_war_room"))  # For NEWS WAR ROOM
     app.add_handler(CallbackQueryHandler(delete_vip_message, pattern="delete_vip_message"))  # Handles "I UNDERSTAND"
 
