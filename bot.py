@@ -62,7 +62,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🔥 NEWS WAR ROOM 🔥", callback_data="news_war_room")],  # Updated button
         [
             InlineKeyboardButton("F.Factory", url="https://www.forexfactory.com"),
-            InlineKeyboardButton("Discord", url="https://discord.com"),
+            InlineKeyboardButton("Discord", url="https://discord.gg/jtxA8MdD?event=1347223589618716703"),
             InlineKeyboardButton("ChatGPT", url="https://chat.openai.com"),
             InlineKeyboardButton("DeepSeek", url="https://www.deepseek.com")
         ]
