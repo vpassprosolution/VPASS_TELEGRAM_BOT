@@ -11,24 +11,27 @@ def subscribe(update: Update, context: CallbackContext) -> None:
     chat_id = update.message.chat_id
     payload = {"chat_id": chat_id}
     
-    response = requests.post(API_SUBSCRIBE, json=payload)
-
-    if response.status_code == 200:
-        update.message.reply_text("✅ You are now subscribed to VPASS signals!")
-    elif response.status_code == 400:
-        update.message.reply_text("⚠️ You are already subscribed.")
-    else:
-        update.message.reply_text("❌ Subscription failed. Please try again.")
+    try:
+        response = requests.post(API_SUBSCRIBE, json=payload)
+        if response.status_code == 200:
+            update.message.reply_text("✅ You are now subscribed to VPASS signals!")
+        elif response.status_code == 400:
+            update.message.reply_text("⚠️ You are already subscribed.")
+        else:
+            update.message.reply_text("❌ Subscription failed. Please try again.")
+    except Exception as e:
+        update.message.reply_text(f"❌ Error: {str(e)}")
 
 def unsubscribe(update: Update, context: CallbackContext) -> None:
     """Unsubscribe the user from receiving signals."""
     chat_id = update.message.chat_id
     payload = {"chat_id": chat_id}
 
-    response = requests.post(API_UNSUBSCRIBE, json=payload)
-
-    if response.status_code == 200:
-        update.message.reply_text("🚫 You have unsubscribed from VPASS signals.")
-    else:
-        update.message.reply_text("❌ Unsubscription failed. Please try again.")
-
+    try:
+        response = requests.post(API_UNSUBSCRIBE, json=payload)
+        if response.status_code == 200:
+            update.message.reply_text("🚫 You have unsubscribed from VPASS signals.")
+        else:
+            update.message.reply_text("❌ Unsubscription failed. Please try again.")
+    except Exception as e:
+        update.message.reply_text(f"❌ Error: {str(e)}")
