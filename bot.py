@@ -6,6 +6,8 @@ from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_p
 import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 
+
+
 # Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
 
@@ -249,7 +251,12 @@ def main():
     app.add_handler(CallbackQueryHandler(show_vip_room_message, pattern="news_war_room"))  # For NEWS WAR ROOM
     app.add_handler(CallbackQueryHandler(delete_vip_message, pattern="delete_vip_message"))  # Handles "I UNDERSTAND"
     app.add_handler(CallbackQueryHandler(ai_signal_handler.fetch_ai_signal, pattern="^ai_signal_"))
-
+    
+    # Connect "VPASS SMART SIGNAL" button to subscription system
+    from subscription_handler import subscribe, unsubscribe  
+    app.add_handler(CallbackQueryHandler(subscribe, pattern="vpass_smart_signal"))  
+    app.add_handler(CommandHandler("subscribe", subscribe))  # ✅ Added this line
+    app.add_handler(CommandHandler("unsubscribe", unsubscribe)) 
     print("Bot is running...")  
 
     app.run_polling()
