@@ -253,10 +253,15 @@ def main():
     app.add_handler(CallbackQueryHandler(ai_signal_handler.fetch_ai_signal, pattern="^ai_signal_"))
     
     # Connect "VPASS SMART SIGNAL" button to subscription system
-    from subscription_handler import subscribe, unsubscribe  
-    app.add_handler(CallbackQueryHandler(subscribe, pattern="vpass_smart_signal"))  
-    app.add_handler(CommandHandler("subscribe", subscribe))  # ✅ Added this line
-    app.add_handler(CommandHandler("unsubscribe", unsubscribe)) 
+    from subscription_handler import show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
+
+    app.add_handler(CallbackQueryHandler(show_instruments, pattern="vpass_smart_signal"))
+    app.add_handler(CallbackQueryHandler(show_subscription_menu, pattern="^select_"))
+    app.add_handler(CallbackQueryHandler(subscribe, pattern="^subscribe_"))
+    app.add_handler(CallbackQueryHandler(unsubscribe, pattern="^unsubscribe_"))
+    app.add_handler(CallbackQueryHandler(back_to_main, pattern="back_to_main"))
+    app.add_handler(CallbackQueryHandler(back_to_instruments, pattern="back_to_instruments"))
+
     print("Bot is running...")  
 
     app.run_polling()
