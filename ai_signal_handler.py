@@ -20,8 +20,8 @@ async def fetch_ai_signal(update: Update, context: CallbackContext):
     else:
         trade_signal = "⚠️ Error fetching signal"
 
-    # ✅ Format the message
-    formatted_message = f"Now {selected_instrument} has: {trade_signal}"
+    # ✅ Fix Output Format - Directly Use AI Signal Without Extra Text
+    formatted_message = trade_signal
 
     # ✅ Add a Back button to return to the instrument selection
     keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="ai_agent_signal")]]
