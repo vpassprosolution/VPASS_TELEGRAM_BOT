@@ -20,15 +20,20 @@ async def fetch_ai_signal(update: Update, context: CallbackContext):
     else:
         trade_signal = "⚠️ Error fetching signal"
 
-    # ✅ Fix Output Format - Directly Use AI Signal Without Extra Text
-    formatted_message = trade_signal
+    # ✅ Fix Output Format - Ensure Markdown & Show Instrument Name
+    formatted_message = f"🚨 *WHAT'S UP TRADERS!* 🚨\n🔥 *BREAKING ALERT!* 🔥\n⚡ *{selected_instrument} is experiencing:*\n{trade_signal}"
 
     # ✅ Add a Back button to return to the instrument selection
     keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="ai_agent_signal")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
+    # ✅ Send the formatted message with Markdown enabled
     await update.callback_query.answer()
-    await update.callback_query.message.edit_text(formatted_message, reply_markup=reply_markup)
+    await update.callback_query.message.edit_text(
+        formatted_message, 
+        reply_markup=reply_markup, 
+        parse_mode="Markdown"
+    )
 
 # Function to show instrument selection buttons
 async def show_instruments(update, context):
