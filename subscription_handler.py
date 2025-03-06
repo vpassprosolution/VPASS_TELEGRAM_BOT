@@ -11,8 +11,6 @@ async def subscribe(update: Update, context: CallbackContext) -> None:
     chat_id = update.message.chat_id
     payload = {"chat_id": chat_id}
 
-    await update.message.reply_text("🛠 Debug: Sending subscription request...")
-
     try:
         response = requests.post(API_SUBSCRIBE, json=payload)
         response_json = response.json()
@@ -22,7 +20,7 @@ async def subscribe(update: Update, context: CallbackContext) -> None:
         elif response.status_code == 400:
             await update.message.reply_text("⚠️ You are already subscribed.")
         else:
-            await update.message.reply_text(f"❌ Subscription failed. Debug Response: {response.text}")
+            await update.message.reply_text(f"❌ Subscription failed. Response: {response.text}")
     except Exception as e:
         await update.message.reply_text(f"❌ Error: {str(e)}")
 
@@ -31,8 +29,6 @@ async def unsubscribe(update: Update, context: CallbackContext) -> None:
     chat_id = update.message.chat_id
     payload = {"chat_id": chat_id}
 
-    await update.message.reply_text("🛠 Debug: Sending unsubscription request...")
-
     try:
         response = requests.post(API_UNSUBSCRIBE, json=payload)
         response_json = response.json()
@@ -40,6 +36,6 @@ async def unsubscribe(update: Update, context: CallbackContext) -> None:
         if response.status_code == 200:
             await update.message.reply_text(f"🚫 {response_json.get('message', 'Unsubscription successful!')}")
         else:
-            await update.message.reply_text(f"❌ Unsubscription failed. Debug Response: {response.text}")
+            await update.message.reply_text(f"❌ Unsubscription failed. Response: {response.text}")
     except Exception as e:
         await update.message.reply_text(f"❌ Error: {str(e)}")
