@@ -13,12 +13,14 @@ def subscribe(update: Update, context: CallbackContext) -> None:
     
     try:
         response = requests.post(API_SUBSCRIBE, json=payload)
+        response_json = response.json()
+
         if response.status_code == 200:
-            update.message.reply_text("✅ You are now subscribed to VPASS signals!")
+            update.message.reply_text(f"✅ {response_json.get('message', 'Subscription successful!')}")
         elif response.status_code == 400:
             update.message.reply_text("⚠️ You are already subscribed.")
         else:
-            update.message.reply_text("❌ Subscription failed. Please try again.")
+            update.message.reply_text(f"❌ Subscription failed. Response: {response.text}")
     except Exception as e:
         update.message.reply_text(f"❌ Error: {str(e)}")
 
@@ -29,9 +31,11 @@ def unsubscribe(update: Update, context: CallbackContext) -> None:
 
     try:
         response = requests.post(API_UNSUBSCRIBE, json=payload)
+        response_json = response.json()
+
         if response.status_code == 200:
-            update.message.reply_text("🚫 You have unsubscribed from VPASS signals.")
+            update.message.reply_text(f"🚫 {response_json.get('message', 'Unsubscription successful!')}")
         else:
-            update.message.reply_text("❌ Unsubscription failed. Please try again.")
+            update.message.reply_text(f"❌ Unsubscription failed. Response: {response.text}")
     except Exception as e:
         update.message.reply_text(f"❌ Error: {str(e)}")
