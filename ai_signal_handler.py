@@ -7,7 +7,12 @@ AI_API_URL = "https://aiagentinstantsignal-production.up.railway.app"
 
 # Function to fetch trade signal from the AI API
 async def fetch_ai_signal(update: Update, context: CallbackContext):
-    selected_instrument = update.callback_query.data.replace("ai_signal_", "").upper()
+    selected_instrument = update.callback_query.data.replace("ai_signal_", "")
+
+    # ✅ Fix: Ensure Gold (XAUUSD) is correctly mapped
+    if selected_instrument == "XAU":
+        selected_instrument = "XAUUSD"
+
     response = requests.get(f"{AI_API_URL}/get_signal/{selected_instrument}")
 
     if response.status_code == 200:
@@ -28,7 +33,7 @@ async def fetch_ai_signal(update: Update, context: CallbackContext):
 # Function to show instrument selection buttons
 async def show_instruments(update, context):
     keyboard = [
-        [InlineKeyboardButton("🏆 Gold", callback_data="ai_signal_XAU")],  # Gold alone at the top
+        [InlineKeyboardButton("🏆 Gold", callback_data="ai_signal_XAUUSD")],  # ✅ Fixed: Now correctly calls XAUUSD
         [InlineKeyboardButton("₿ Bitcoin (BTC)", callback_data="ai_signal_BTC"), InlineKeyboardButton("🪙 Ethereum (ETH)", callback_data="ai_signal_ETH")],
         [InlineKeyboardButton("📊 Dow Jones (DJI)", callback_data="ai_signal_DJI"), InlineKeyboardButton("📈 Nasdaq (IXIC)", callback_data="ai_signal_IXIC")],
         [InlineKeyboardButton("💵 EUR/USD", callback_data="ai_signal_EURUSD"), InlineKeyboardButton("💷 GBP/USD", callback_data="ai_signal_GBPUSD")],
