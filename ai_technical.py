@@ -54,12 +54,27 @@ async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.edit_text(f"📊 **Selected: {context.user_data['selected_instrument']}**\n\nNow choose a timeframe:", reply_markup=reply_markup)
 
+import asyncio  # ✅ Ensure asyncio is imported
+
 async def handle_technical_selection(update: Update, context: CallbackContext) -> None:
     """Handle timeframe selection and send chart."""
     query = update.callback_query
 
+    # ✅ Ensure only one error message is visible at a time
+    if "last_error_message_id" in context.user_data:
+        try:
+            await context.bot.delete_message(chat_id=query.message.chat_id, message_id=context.user_data["last_error_message_id"])
+        except:
+            pass  # Ignore if already deleted
+
     if "selected_instrument" not in context.user_data:
-        await query.message.reply_text("❌ No instrument selected. Please go back and choose one.")
+        msg = await query.message.reply_text("❌ No instrument selected. Please go back and choose one.")
+        context.user_data["last_error_message_id"] = msg.message_id  # ✅ Store message ID
+        await asyncio.sleep(1)
+        try:
+            await msg.delete()
+        except:
+            pass  # Ignore errors if already deleted
         return
 
     instrument = context.user_data["selected_instrument"]
@@ -75,9 +90,13 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
     timeframe_key = query.data
     if timeframe_key not in timeframe_map:
         msg = await query.message.reply_text("❌ Failed to retrieve chart. Please try again.")
-        await asyncio.sleep(1)  # ✅ Wait for 1 second
-        await msg.delete()  # ✅ Delete the error message after 1 second
-        return  # ✅ Stop execution here to prevent errors
+        context.user_data["last_error_message_id"] = msg.message_id  # ✅ Store message ID
+        await asyncio.sleep(1)
+        try:
+            await msg.delete()
+        except:
+            pass  # Ignore errors if already deleted
+        return
 
     timeframe = timeframe_map[timeframe_key]
 
@@ -90,9 +109,22 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
         if chart_url:
             await query.message.reply_photo(photo=chart_url, caption=f"📊 {instrument} {timeframe.upper()} Chart")
         else:
-            await query.message.reply_text("❌ Failed to retrieve chart. Please try again.")
+            msg = await query.message.reply_text("❌ Failed to retrieve chart. Please try again.")
+            context.user_data["last_error_message_id"] = msg.message_id  # ✅ Store message ID
+            await asyncio.sleep(1)
+            try:
+                await msg.delete()
+            except:
+                pass  # Ignore errors if already deleted
     else:
-        await query.message.reply_text("❌ Error retrieving chart. Please try again.")
+        msg = await query.message.reply_text("❌ Error retrieving chart. Please try again.")
+        context.user_data["last_error_message_id"] = msg.message_id  # ✅ Store message ID
+        await asyncio.sleep(1)
+        try:
+            await msg.delete()
+        except:
+            pass  # Ignore errors if already deleted
+
 async def back_to_instruments(update: Update, context: CallbackContext) -> None:
     """Back to instrument selection from timeframes."""
     await show_technical_menu(update, context)
