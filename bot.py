@@ -6,7 +6,6 @@ from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_p
 import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
-from ai_technical import show_technical_menu, handle_technical_selection
 
 
 # Bot Token
@@ -235,6 +234,7 @@ def main():
     
     # Connect "VPASS SMART SIGNAL" button to subscription system
     from subscription_handler import show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
+    from ai_technical import show_technical_menu, handle_technical_selection
 
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="vpass_smart_signal"))
     app.add_handler(CallbackQueryHandler(show_subscription_menu, pattern="^select_"))
