@@ -1,6 +1,7 @@
 import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
+import asyncio
 
 # API URL for VPASS AI TECHNICAL
 API_URL = "https://vpassaitechnical-production.up.railway.app/chart/"
@@ -78,7 +79,6 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
         await msg.delete()  # ✅ Delete the error message after 1 second
         return  # ✅ Stop execution here to prevent errors
 
-
     timeframe = timeframe_map[timeframe_key]
 
     # Call the AI Technical API
@@ -93,7 +93,6 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
             await query.message.reply_text("❌ Failed to retrieve chart. Please try again.")
     else:
         await query.message.reply_text("❌ Error retrieving chart. Please try again.")
-
 async def back_to_instruments(update: Update, context: CallbackContext) -> None:
     """Back to instrument selection from timeframes."""
     await show_technical_menu(update, context)
