@@ -8,29 +8,29 @@ API_URL = "https://vpassaitechnical-production.up.railway.app/chart/"
 async def show_technical_menu(update: Update, context: CallbackContext) -> None:
     """Show the instrument selection menu for AI Technical Analysis."""
     keyboard = [
-        [InlineKeyboardButton("📊 Gold", callback_data="instrument_gold")],
-        [InlineKeyboardButton("📊 Bitcoin", callback_data="instrument_bitcoin")],
-        [InlineKeyboardButton("📊 Ethereum", callback_data="instrument_ethereum")],
-        [InlineKeyboardButton("📊 Dow Jones", callback_data="instrument_dowjones")],
-        [InlineKeyboardButton("📊 Nasdaq", callback_data="instrument_nasdaq")],
-        [InlineKeyboardButton("📊 EUR/USD", callback_data="instrument_eurusd")],
-        [InlineKeyboardButton("📊 GBP/USD", callback_data="instrument_gbpusd")],
+        [InlineKeyboardButton("🥇 Gold (XAUUSD)", callback_data="instrument_gold")],
+        [InlineKeyboardButton("₿ Bitcoin (BTC)", callback_data="instrument_bitcoin"),
+         InlineKeyboardButton("Ξ Ethereum (ETH)", callback_data="instrument_ethereum")],
+        [InlineKeyboardButton("📉 Dow Jones (DJI)", callback_data="instrument_dowjones"),
+         InlineKeyboardButton("📈 Nasdaq (IXIC)", callback_data="instrument_nasdaq")],
+        [InlineKeyboardButton("💱 EUR/USD (EURUSD)", callback_data="instrument_eurusd"),
+         InlineKeyboardButton("💷 GBP/USD (GBPUSD)", callback_data="instrument_gbpusd")],
         [InlineKeyboardButton("🔙 Back", callback_data="back_to_main")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.callback_query.message.reply_text("📊 **Select an Instrument for AI Technical Analysis**:", reply_markup=reply_markup)
+    await update.callback_query.message.edit_text("📊 **Select an Instrument for AI Technical Analysis**:", reply_markup=reply_markup)
 
 async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
     """Show the timeframe selection menu after choosing an instrument."""
     query = update.callback_query
     instrument_map = {
-        "instrument_gold": "gold",
-        "instrument_bitcoin": "bitcoin",
-        "instrument_ethereum": "ethereum",
-        "instrument_dowjones": "dow jones",
-        "instrument_nasdaq": "nasdaq",
-        "instrument_eurusd": "eur/usd",
-        "instrument_gbpusd": "gbp/usd"
+        "instrument_gold": "Gold (XAUUSD)",
+        "instrument_bitcoin": "Bitcoin (BTC)",
+        "instrument_ethereum": "Ethereum (ETH)",
+        "instrument_dowjones": "Dow Jones (DJI)",
+        "instrument_nasdaq": "Nasdaq (IXIC)",
+        "instrument_eurusd": "EUR/USD (EURUSD)",
+        "instrument_gbpusd": "GBP/USD (GBPUSD)"
     }
 
     instrument_key = query.data
@@ -42,16 +42,16 @@ async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
     context.user_data["selected_instrument"] = instrument_map[instrument_key]
 
     keyboard = [
-        [InlineKeyboardButton("⏳ 5M", callback_data="timeframe_5m")],
-        [InlineKeyboardButton("⏳ 15M", callback_data="timeframe_15m")],
-        [InlineKeyboardButton("⏳ 30M", callback_data="timeframe_30m")],
-        [InlineKeyboardButton("⏳ 1H", callback_data="timeframe_1h")],
-        [InlineKeyboardButton("⏳ 4H", callback_data="timeframe_4h")],
-        [InlineKeyboardButton("⏳ 1D", callback_data="timeframe_1d")],
-        [InlineKeyboardButton("🔙 Back", callback_data="ai_technical")]
+        [InlineKeyboardButton("⏳ M5", callback_data="timeframe_5m"),
+         InlineKeyboardButton("⏳ M15", callback_data="timeframe_15m"),
+         InlineKeyboardButton("⏳ M30", callback_data="timeframe_30m")],
+        [InlineKeyboardButton("⏳ H1", callback_data="timeframe_1h"),
+         InlineKeyboardButton("⏳ H4", callback_data="timeframe_4h"),
+         InlineKeyboardButton("⏳ Daily", callback_data="timeframe_1d")],
+        [InlineKeyboardButton("🔙 Back", callback_data="back_to_instruments")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.message.reply_text(f"📊 **Selected: {context.user_data['selected_instrument'].upper()}**\n\nNow choose a timeframe:", reply_markup=reply_markup)
+    await query.message.edit_text(f"📊 **Selected: {context.user_data['selected_instrument']}**\n\nNow choose a timeframe:", reply_markup=reply_markup)
 
 async def handle_technical_selection(update: Update, context: CallbackContext) -> None:
     """Handle timeframe selection and send chart."""
@@ -85,8 +85,17 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
         chart_url = response.json().get("chart_url")
 
         if chart_url:
-            await query.message.reply_photo(photo=chart_url, caption=f"📊 {instrument.upper()} {timeframe.upper()} Chart")
+            await query.message.reply_photo(photo=chart_url, caption=f"📊 {instrument} {timeframe.upper()} Chart")
         else:
             await query.message.reply_text("❌ Failed to retrieve chart. Please try again.")
     else:
         await query.message.reply_text("❌ Error retrieving chart. Please try again.")
+
+async def back_to_instruments(update: Update, context: CallbackContext) -> None:
+    """Back to instrument selection from timeframes."""
+    await show_technical_menu(update, context)
+
+async def back_to_main(update: Update, context: CallbackContext) -> None:
+    """Back to main menu from instruments."""
+    from bot import main_menu  # Import main menu function from bot.py
+    await update.callback_query.message.edit_text("Welcome, Select Your Preference:", reply_markup=main_menu())
