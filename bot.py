@@ -73,7 +73,8 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await query.message.edit_text(
         "*WELCOME TO  VPASS PRO  VERSION II* 🆅²\n"
-        "🢃 The Future of Intelligent Starts Here 🢃\\.",
+        "🢃 The Future of Intelligent Starts Here 🢃\n"
+        "🢃 🢃 🢃 🢃 *CHOOSE YOUR STRATEGY* 🢃 🢃 🢃 🢃\",
         parse_mode="MarkdownV2",
         reply_markup=reply_markup
     )
