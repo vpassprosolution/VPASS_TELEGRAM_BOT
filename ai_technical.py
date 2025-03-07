@@ -5,7 +5,7 @@ from telegram.ext import CallbackContext
 # API URL for VPASS AI TECHNICAL
 API_URL = "https://vpassaitechnical-production.up.railway.app/chart/"
 
-def show_technical_menu(update: Update, context: CallbackContext) -> None:
+async def show_technical_menu(update: Update, context: CallbackContext) -> None:
     """Show the instrument selection menu for AI Technical Analysis."""
     keyboard = [
         [InlineKeyboardButton("📊 Gold", callback_data="technical_gold")],
@@ -20,7 +20,7 @@ def show_technical_menu(update: Update, context: CallbackContext) -> None:
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.callback_query.message.reply_text("📊 **Select an Instrument for AI Technical Analysis**:", reply_markup=reply_markup)
 
-def handle_technical_selection(update: Update, context: CallbackContext) -> None:
+async def handle_technical_selection(update: Update, context: CallbackContext) -> None:
     """Handle instrument selection and send chart."""
     query = update.callback_query
     instrument_map = {
@@ -35,7 +35,7 @@ def handle_technical_selection(update: Update, context: CallbackContext) -> None
 
     instrument_key = query.data
     if instrument_key not in instrument_map:
-        query.message.reply_text("❌ Invalid selection. Please try again.")
+        await query.message.reply_text("❌ Invalid selection. Please try again.")
         return
 
     instrument = instrument_map[instrument_key]
@@ -48,8 +48,8 @@ def handle_technical_selection(update: Update, context: CallbackContext) -> None
         chart_url = response.json().get("chart_url")
 
         if chart_url:
-            query.message.reply_photo(photo=chart_url, caption=f"📊 {instrument.upper()} 1H Chart")
+            await query.message.reply_photo(photo=chart_url, caption=f"📊 {instrument.upper()} 1H Chart")
         else:
-            query.message.reply_text("❌ Failed to retrieve chart. Please try again.")
+            await query.message.reply_text("❌ Failed to retrieve chart. Please try again.")
     else:
-        query.message.reply_text("❌ Error retrieving chart. Please try again.")
+        await query.message.reply_text("❌ Error retrieving chart. Please try again.")
