@@ -234,7 +234,7 @@ def main():
     
     # Connect "VPASS SMART SIGNAL" button to subscription system
     from subscription_handler import show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
-    from ai_technical import show_technical_menu, handle_technical_selection
+    from ai_technical import show_technical_menu, show_timeframe_menu, handle_technical_selection
 
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="vpass_smart_signal"))
     app.add_handler(CallbackQueryHandler(show_subscription_menu, pattern="^select_"))
@@ -243,7 +243,8 @@ def main():
     app.add_handler(CallbackQueryHandler(back_to_main, pattern="back_to_main"))
     app.add_handler(CallbackQueryHandler(back_to_instruments, pattern="back_to_instruments"))
     app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^ai_technical$"))
-    app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^technical_.*$"))
+    app.add_handler(CallbackQueryHandler(show_timeframe_menu, pattern="^instrument_.*$"))
+    app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
     
     print("Bot is running...")  
 
