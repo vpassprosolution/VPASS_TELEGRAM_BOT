@@ -72,9 +72,9 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await query.message.edit_text(
-        "*WELCOME  TO  VPASS PRO  VERSION TWO* \n"
+        "*WELCOME  TO  VPASS PRO  VERSION  TWO* \n"
         "    The Future of Intelligent Starts Here\n"
-        "          *CHOOSE YOUR STRATEGY*",
+        "            *CHOOSE YOUR STRATEGY*",
         parse_mode="MarkdownV2",
         reply_markup=reply_markup
     )
