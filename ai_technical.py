@@ -18,7 +18,7 @@ def show_technical_menu(update: Update, context: CallbackContext) -> None:
         [InlineKeyboardButton("🔙 Back", callback_data="back_to_main")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.callback_query.message.reply_text("📊 **Select an Instrument for AI Technical Analysis**:", reply_markup=reply_markup)
+    await update.callback_query.message.reply_text("📊 **Select an Instrument for AI Technical Analysis**:", reply_markup=reply_markup)
 
 def handle_technical_selection(update: Update, context: CallbackContext) -> None:
     """Handle instrument selection and send chart."""
