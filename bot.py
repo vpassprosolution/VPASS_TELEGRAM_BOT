@@ -5,7 +5,8 @@ from db import connect_db
 from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_prompt, handle_admin_input
 import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
-
+from telegram.ext import CallbackQueryHandler
+from ai_technical import show_technical_menu, handle_technical_selection
 
 
 # Bot Token
@@ -59,7 +60,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("VPASS SMART SIGNAL", callback_data="vpass_smart_signal")],
         [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="ai_sentiment")],
-        [InlineKeyboardButton("VPASS AI TECHNICAL ANALYSIS", callback_data="coming_soon_2024")],  # New button
+        [InlineKeyboardButton("VPASS AI TECHNICAL ANALYSIS", callback_data="ai_technical")],  # New button
         [InlineKeyboardButton("AI AGENT INSTANT SIGNAL", callback_data="ai_agent_signal")],
         [InlineKeyboardButton("🔥 NEWS WAR ROOM 🔥", callback_data="news_war_room")],  # Updated button
         [
@@ -83,26 +84,6 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def ai_agent_signal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await ai_signal_handler.show_instruments(update, context)
 
-
-async def show_coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Shows 'COMING SOON' messages for AI Technical Analysis & AI Agent Instant Signal, then disappears"""
-    query = update.callback_query
-
-    # Determine the correct message
-    if query.data == "coming_soon_2024":
-        message_text = "📢 COMING SOON ON APRIL 2025"  # Fixed incorrect text
-    else:
-        message_text = "📢 COMING SOON ON APRIL 2025"
-
-    await query.answer()  # Acknowledge button press
-    sent_message = await query.message.reply_text(message_text)
-
-    # Auto-delete the message after 10 seconds
-    await asyncio.sleep(2)
-    try:
-        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=sent_message.message_id)  # Fixed deletion issue
-    except Exception:
-        pass  # Ignore errors if message was already deleted
 
 
 async def show_vip_room_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -247,7 +228,6 @@ def main():
     app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
     app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))  
-    app.add_handler(CallbackQueryHandler(show_coming_soon, pattern="coming_soon_2024"))  # For VPASS AI TECHNICAL ANALYSIS
     app.add_handler(CallbackQueryHandler(ai_agent_signal, pattern="ai_agent_signal"))  # ✅ New AI button handler
     app.add_handler(CallbackQueryHandler(show_vip_room_message, pattern="news_war_room"))  # For NEWS WAR ROOM
     app.add_handler(CallbackQueryHandler(delete_vip_message, pattern="delete_vip_message"))  # Handles "I UNDERSTAND"
@@ -262,7 +242,9 @@ def main():
     app.add_handler(CallbackQueryHandler(unsubscribe, pattern="^unsubscribe_"))
     app.add_handler(CallbackQueryHandler(back_to_main, pattern="back_to_main"))
     app.add_handler(CallbackQueryHandler(back_to_instruments, pattern="back_to_instruments"))
-
+    app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^ai_technical$"))
+    app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^technical_.*$"))
+    
     print("Bot is running...")  
 
     app.run_polling()
