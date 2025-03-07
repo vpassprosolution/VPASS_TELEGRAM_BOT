@@ -73,7 +73,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await query.message.edit_text(
         "*WELCOME TO VPASS PRO VERSION II* 🆅²\n"
-        "Data-Driven AI-Powered Designed for PRO\\.",
+        "The Future of Intelligent Starts Here\\.",
         parse_mode="MarkdownV2",
         reply_markup=reply_markup
     )
