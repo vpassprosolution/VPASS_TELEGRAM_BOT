@@ -48,7 +48,7 @@ async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
         [InlineKeyboardButton("⏳ H1", callback_data="timeframe_1h"),
          InlineKeyboardButton("⏳ H4", callback_data="timeframe_4h"),
          InlineKeyboardButton("⏳ Daily", callback_data="timeframe_1d")],
-        [InlineKeyboardButton("🔙 Back", callback_data="back_to_instruments")]
+        [InlineKeyboardButton("🔙 Back", callback_data="back_to_technical_instruments")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.edit_text(f"📊 **Selected: {context.user_data['selected_instrument']}**\n\nNow choose a timeframe:", reply_markup=reply_markup)

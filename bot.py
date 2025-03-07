@@ -245,7 +245,8 @@ def main():
     app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^ai_technical$"))
     app.add_handler(CallbackQueryHandler(show_timeframe_menu, pattern="^instrument_.*$"))
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
-    
+    app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^back_to_technical_instruments$"))
+
     print("Bot is running...")  
 
     app.run_polling()
