@@ -74,8 +74,9 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
     timeframe_key = query.data
     if timeframe_key not in timeframe_map:
         msg = await query.message.reply_text("❌ Failed to retrieve chart. Please try again.")
-await asyncio.sleep(1)  # ✅ Wait for 1 second
-await msg.delete()  # ✅ Delete the error message after 1 second
+        await asyncio.sleep(1)  # ✅ Wait for 1 second
+        await msg.delete()  # ✅ Delete the error message after 1 second
+        return  # ✅ Stop execution here to prevent errors
 
 
     timeframe = timeframe_map[timeframe_key]
