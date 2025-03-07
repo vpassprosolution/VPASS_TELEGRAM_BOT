@@ -12,16 +12,16 @@ INSTRUMENTS = ["GOLD", "BITCOIN", "ETHEREUM", "DOW JONES", "NASDAQ", "EUR/USD", 
 async def show_instruments(update: Update, context: CallbackContext) -> None:
     """Display the instrument selection menu with the requested layout."""
     keyboard = [
-        [InlineKeyboardButton("GOLD", callback_data="select_GOLD")],
-        [InlineKeyboardButton("BITCOIN", callback_data="select_BITCOIN"), InlineKeyboardButton("ETHEREUM", callback_data="select_ETHEREUM")],
-        [InlineKeyboardButton("DOW JONES", callback_data="select_DOW JONES"), InlineKeyboardButton("NASDAQ", callback_data="select_NASDAQ")],
-        [InlineKeyboardButton("EUR/USD", callback_data="select_EUR/USD"), InlineKeyboardButton("GBP/USD", callback_data="select_GBP/USD")],
+        [InlineKeyboardButton("🏆 GOLD (XAUUSD)", callback_data="select_GOLD")],
+        [InlineKeyboardButton("₿ BITCOIN (BTC)", callback_data="select_BITCOIN"), InlineKeyboardButton("🟣 ETHEREUM (ETH)", callback_data="select_ETHEREUM")],
+        [InlineKeyboardButton("📈 DOW JONES (DJI)", callback_data="select_DOW JONES"), InlineKeyboardButton("📊 NASDAQ (IXIC)", callback_data="select_NASDAQ")],
+        [InlineKeyboardButton("💶 EUR/USD (EURUSD)", callback_data="select_EUR/USD"), InlineKeyboardButton("💷 GBP/USD (GBPUSD)", callback_data="select_GBP/USD")],
         [InlineKeyboardButton("🔙 Back", callback_data="back_to_main")]
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.callback_query.message.edit_text(
-        "💎 *Select Your Exclusive Instrument for Elite AI Insights* 💎📈",
+        "*Select Your Exclusive Instrument & Receive Solid Daily Signals – No Noise, Just Precision!* 🎯💎",
         reply_markup=reply_markup,
         parse_mode="Markdown"
     )
