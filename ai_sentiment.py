@@ -29,10 +29,10 @@ async def show_instruments(update: Update, context: CallbackContext):
 
     # Arrange instruments in the requested layout
     keyboard = [
-        [InlineKeyboardButton("GOLD", callback_data="sentiment_gold")],
-        [InlineKeyboardButton("BITCOIN", callback_data="sentiment_bitcoin"), InlineKeyboardButton("ETHEREUM", callback_data="sentiment_ethereum")],
-        [InlineKeyboardButton("DOW JONES", callback_data="sentiment_dowjones"), InlineKeyboardButton("NASDAQ", callback_data="sentiment_nasdaq")],
-        [InlineKeyboardButton("EUR/USD", callback_data="sentiment_eur/usd"), InlineKeyboardButton("GBP/USD", callback_data="sentiment_gbp/usd")],  
+        [InlineKeyboardButton("🏆 GOLD (XAUUSD)", callback_data="sentiment_gold")],
+        [InlineKeyboardButton("₿ BITCOIN (BTC)", callback_data="sentiment_bitcoin"), InlineKeyboardButton("🟣 ETHEREUM (ETH)", callback_data="sentiment_ethereum")],
+        [InlineKeyboardButton("📈 DOW JONES (DJI)", callback_data="sentiment_dowjones"), InlineKeyboardButton("📊 NASDAQ (IXIC)", callback_data="sentiment_nasdaq")],
+        [InlineKeyboardButton("💶 EUR/USD (EURUSD)", callback_data="sentiment_eur/usd"), InlineKeyboardButton("💷 GBP/USD (GBPUSD)", callback_data="sentiment_gbp/usd")],  
         [InlineKeyboardButton("⬅️ Back", callback_data="main_menu")]
     ]
     
