@@ -39,9 +39,9 @@ async def fetch_ai_signal(update: Update, context: CallbackContext):
 async def show_instruments(update, context):
     keyboard = [
         [InlineKeyboardButton("🏆 Gold", callback_data="ai_signal_XAUUSD")],  # ✅ Fixed: Now correctly calls XAUUSD
-        [InlineKeyboardButton("₿ Bitcoin (BTC)", callback_data="ai_signal_BTC"), InlineKeyboardButton("🪙 Ethereum (ETH)", callback_data="ai_signal_ETH")],
-        [InlineKeyboardButton("📊 Dow Jones (DJI)", callback_data="ai_signal_DJI"), InlineKeyboardButton("📈 Nasdaq (IXIC)", callback_data="ai_signal_IXIC")],
-        [InlineKeyboardButton("💵 EUR/USD", callback_data="ai_signal_EURUSD"), InlineKeyboardButton("💷 GBP/USD", callback_data="ai_signal_GBPUSD")],
+        [InlineKeyboardButton("₿ Bitcoin (BTC)", callback_data="ai_signal_BTC"), InlineKeyboardButton("🪙 ETHEREUM (ETH)", callback_data="ai_signal_ETH")],
+        [InlineKeyboardButton("📊 Dow Jones (DJI)", callback_data="ai_signal_DJI"), InlineKeyboardButton("📊 NASDAQ (IXIC)", callback_data="ai_signal_IXIC")],
+        [InlineKeyboardButton("💶 EUR/USD (EURUSD)", callback_data="ai_signal_EURUSD"), InlineKeyboardButton("💷 GBP/USD (GBPUSD)", callback_data="ai_signal_GBPUSD")],
         [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]  # Back button
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)

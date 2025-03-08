@@ -13,7 +13,7 @@ async def show_instruments(update: Update, context: CallbackContext) -> None:
     """Display the instrument selection menu with the requested layout."""
     keyboard = [
         [InlineKeyboardButton("🏆 GOLD (XAUUSD)", callback_data="select_GOLD")],
-        [InlineKeyboardButton("₿ BITCOIN (BTC)", callback_data="select_BITCOIN"), InlineKeyboardButton("🟣 ETHEREUM (ETH)", callback_data="select_ETHEREUM")],
+        [InlineKeyboardButton("₿ BITCOIN (BTC)", callback_data="select_BITCOIN"), InlineKeyboardButton("🪙 ETHEREUM (ETH)", callback_data="select_ETHEREUM")],
         [InlineKeyboardButton("📈 DOW JONES (DJI)", callback_data="select_DOW JONES"), InlineKeyboardButton("📊 NASDAQ (IXIC)", callback_data="select_NASDAQ")],
         [InlineKeyboardButton("💶 EUR/USD (EURUSD)", callback_data="select_EUR/USD"), InlineKeyboardButton("💷 GBP/USD (GBPUSD)", callback_data="select_GBP/USD")],
         [InlineKeyboardButton("🔙 Back", callback_data="back_to_main")]
