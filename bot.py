@@ -6,7 +6,7 @@ from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_p
 import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
-import copy_signal_handler  # Import the Copy Signal Handler
+
 
 
 # Bot Token
@@ -52,14 +52,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["button_message"] = sent_message.message_id
 
 
-async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles user text input for collecting group link and signal format."""
-    if context.user_data.get("waiting_for_group_link"):
-        return await copy_signal_handler.collect_group_link(update, context)
-    elif context.user_data.get("waiting_for_signal_format"):
-        return await copy_signal_handler.collect_signal_format(update, context)
-
-
 
 async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Returns to the main menu"""
@@ -70,7 +62,6 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="ai_sentiment")],
         [InlineKeyboardButton("VPASS AI TECHNICAL ANALYSIS", callback_data="ai_technical")],  # New button
         [InlineKeyboardButton("AI AGENT INSTANT SIGNAL", callback_data="ai_agent_signal")],
-        [InlineKeyboardButton("VPASS COPY SIGNAL", callback_data="vpass_copy_signal")],
         [InlineKeyboardButton("🔥 NEWS WAR ROOM 🔥", callback_data="news_war_room")],  # Updated button
         [
             InlineKeyboardButton("F.Factory", url="https://www.forexfactory.com"),
@@ -257,17 +248,7 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
     app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^back_to_technical_instruments$"))
     
-    # ✅ COPY SIGNAL HANDLERS (Fixed Version)
-    app.add_handler(CallbackQueryHandler(copy_signal_handler.handle_vpass_copy_signal_button, pattern="vpass_copy_signal"))
-    app.add_handler(CallbackQueryHandler(copy_signal_handler.handle_copy_telegram_button, pattern="copy_telegram"))  # ✅ FIXED
-    app.add_handler(CallbackQueryHandler(copy_signal_handler.show_subscribed_groups, pattern="check_list"))
-    app.add_handler(CallbackQueryHandler(copy_signal_handler.unsubscribe_user, pattern="^unsubscribe:"))
-    app.add_handler(CallbackQueryHandler(copy_signal_handler.subscribe_user, pattern="subscribe"))
-    app.add_handler(CallbackQueryHandler(copy_signal_handler.ask_group_link, pattern="add_new_group"))  # ✅ Now correctly triggers only for "Add New Telegram Group"
-    app.add_handler(CallbackQueryHandler(copy_signal_handler.handle_copy_telegram_button, pattern="handle_copy_telegram_button"))
-
-    # ✅ Handles User Input for Group Link & Signal Format
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, copy_signal_handler.handle_text_messages))
+   
 
 
 
