@@ -6,7 +6,14 @@ from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_p
 import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
-from copy_signal_handler import handle_copy_signal
+from copy_signal_handler import (
+    handle_copy_signal,
+    ask_group_link,
+    collect_group_link,
+    collect_signal_format,
+    subscribe_user,
+    unsubscribe_user
+)
 
 
 # Bot Token
@@ -248,12 +255,15 @@ def main():
     app.add_handler(CallbackQueryHandler(show_timeframe_menu, pattern="^instrument_.*$"))
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
     app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^back_to_technical_instruments$"))
-    app.add_handler(CallbackQueryHandler(handle_copy_signal, pattern="vpass_copy_signal"))
     
-    from copy_signal_handler import subscribe_user, unsubscribe_user
-
-    app.add_handler(CallbackQueryHandler(subscribe_user, pattern="subscribe"))
+    # VPASS COPY SIGNAL Handlers
+    app.add_handler(CallbackQueryHandler(handle_copy_signal, pattern="vpass_copy_signal"))
+    app.add_handler(CallbackQueryHandler(ask_group_link, pattern="copy_telegram"))  # ✅ First, ask for the group link
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_group_link))  # ✅ Then, collect the group link
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_signal_format))  # ✅ Then, collect the signal format
+    app.add_handler(CallbackQueryHandler(subscribe_user, pattern="subscribe"))  # ✅ Finally, allow subscription
     app.add_handler(CallbackQueryHandler(unsubscribe_user, pattern="unsubscribe"))
+
 
     print("Bot is running...")  
 

@@ -18,7 +18,9 @@ async def handle_copy_signal(update: Update, context: CallbackContext) -> None:
 # Function to ask for the Telegram group link
 async def ask_group_link(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
-    await query.message.edit_text("🔗 Please send the Telegram group link where you want to copy signals from:")
+    keyboard = [[InlineKeyboardButton("⬅ Back", callback_data="vpass_copy_signal")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.message.edit_text("🔗 Please send the Telegram group link where you want to copy signals from:", reply_markup=reply_markup)
     context.user_data["waiting_for_group_link"] = True
 
 # Function to collect the group link
@@ -49,7 +51,7 @@ async def collect_signal_format(update: Update, context: CallbackContext) -> Non
 # Function to handle subscription
 async def subscribe_user(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
-    user_id = query.message.chat_id
+    user_id = query.from_user.id  # ✅ FIXED: Use from_user.id instead of message.chat_id
 
     # Get stored group link & signal format
     signal_data = context.user_data.get("signal_data", {})
@@ -73,7 +75,7 @@ async def subscribe_user(update: Update, context: CallbackContext) -> None:
 # Function to handle unsubscription
 async def unsubscribe_user(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
-    user_id = query.message.chat_id
+    user_id = query.from_user.id  # ✅ FIXED: Use from_user.id
     data = {"user_id": user_id}
     
     response = requests.post(f"{API_URL}/unsubscribe", json=data)
