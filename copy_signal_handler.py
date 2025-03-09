@@ -34,10 +34,18 @@ async def handle_copy_telegram_button(update: Update, context: CallbackContext) 
 # ✅ Function: Handle User Text Input for Group Link & Signal Format
 async def handle_text_messages(update: Update, context: CallbackContext) -> None:
     """Handles user text input for collecting group link and signal format."""
+    
+    print(f"✅ Received User Input: {update.message.text}")  # ✅ Debugging
+
     if "waiting_for_group_link" in context.user_data and context.user_data["waiting_for_group_link"]:
+        print("✅ Processing as Group Link")  # ✅ Debugging
         return await collect_group_link(update, context)
     elif "waiting_for_signal_format" in context.user_data and context.user_data["waiting_for_signal_format"]:
+        print("✅ Processing as Signal Format")  # ✅ Debugging
         return await collect_signal_format(update, context)
+    else:
+        print("❌ No Matching Condition Found!")  # ✅ Debugging
+
 
 
 # ✅ Function: Ask for Group Link
