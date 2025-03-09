@@ -275,5 +275,13 @@ def main():
 
     app.run_polling()
 
+import os
+
 if __name__ == "__main__":
-    main()
+    # Prevent multiple bot instances
+    if os.environ.get("RUNNING_ON_RAILWAY"):
+        print("Bot is already running on Railway. Skipping local execution.")
+    else:
+        os.environ["RUNNING_ON_RAILWAY"] = "1"
+        main()
+
