@@ -39,11 +39,10 @@ async def handle_copy_telegram_button(update: Update, context: CallbackContext) 
 
 # ✅ Function: Ask for Group Link
 async def ask_group_link(update: Update, context: CallbackContext) -> None:
-    """Asks the user to provide a Telegram group link and prevents multiple requests."""
+    """Asks the user to provide a Telegram group link."""
     query = update.callback_query
     await query.message.delete()
 
-    # Check if the bot is already waiting for input, prevent duplicate messages
     if context.user_data.get("waiting_for_group_link"):
         await query.answer("⚠️ You are already providing a group link. Send it now!")
         return
@@ -53,7 +52,6 @@ async def ask_group_link(update: Update, context: CallbackContext) -> None:
 
     await query.message.reply_text("🔗 Please send the Telegram group link where you want to copy signals from:", reply_markup=reply_markup)
 
-    # ✅ Set flag to prevent repeated prompts
     context.user_data["waiting_for_group_link"] = True
 
 # ✅ Function: Collect Group Link
@@ -63,16 +61,13 @@ async def collect_group_link(update: Update, context: CallbackContext) -> None:
         await update.message.delete()
         group_link = update.message.text.strip()
 
-        # Validate link format
         if not group_link.startswith("https://t.me/"):
             await update.message.reply_text("⚠️ Invalid input! Please send a valid Telegram group link.")
             return
 
-        # ✅ Store the group link
         context.user_data["group_link"] = group_link
-        del context.user_data["waiting_for_group_link"]  # ✅ Remove flag after saving
+        del context.user_data["waiting_for_group_link"]
 
-        # ✅ Move to next step
         await update.message.reply_text("✅ Group link saved! Now, please enter the format of signals from this group:")
         context.user_data["waiting_for_signal_format"] = True
 
@@ -90,7 +85,6 @@ async def collect_signal_format(update: Update, context: CallbackContext) -> Non
         group_link = context.user_data.get("group_link", "Not provided")
         del context.user_data["waiting_for_signal_format"]
 
-        # ✅ Store subscription data
         context.user_data["signal_data"] = {"group_link": group_link, "signal_format": signal_format}
 
         keyboard = [[InlineKeyboardButton("✅ Subscribe", callback_data="subscribe")]]
@@ -118,7 +112,10 @@ async def subscribe_user(update: Update, context: CallbackContext) -> None:
     group_link = signal_data.get("group_link")
     signal_format = signal_data.get("signal_format")
 
-    data = {"user_id": user_id, "group_link": group_link, "signal_format": signal_format}
+    # ✅ Extract group_id from group_link
+    group_id = group_link.split("/")[-1] if "t.me/" in group_link else "Unknown"
+
+    data = {"user_id": user_id, "group_id": group_id, "group_link": group_link, "signal_format": signal_format}
     
     response = requests.post(f"{API_URL}/subscribe", json=data)
 
@@ -145,41 +142,22 @@ async def show_subscribed_groups(update: Update, context: CallbackContext) -> No
             message += f"🔗 [{group_id}]({group_link}) - *{signal_format}*\n"
             keyboard.append([InlineKeyboardButton(f"❌ Remove {group_id}", callback_data=f"unsubscribe:{group_id}")])
         
-        keyboard.append([InlineKeyboardButton("⬅ Back", callback_data="copy_telegram")])  # ✅ FIXED
+        keyboard.append([InlineKeyboardButton("⬅ Back", callback_data="copy_telegram")])
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.message.reply_text(message, parse_mode="Markdown", reply_markup=reply_markup)
     else:
         await query.message.reply_text("⚠️ You have no active subscriptions.", parse_mode="Markdown")
 
-async def unsubscribe_user(update: Update, context: CallbackContext) -> None:
-    """Handles unsubscription from a specific group."""
-    query = update.callback_query
-    await query.message.delete()
-    user_id = query.from_user.id
-    group_id = query.data.split(":")[1]  # Extract group ID
-
-    response = requests.post(f"{API_URL}/unsubscribe", json={"user_id": user_id, "group_id": group_id})
-
-    if response.status_code == 200:
-        await query.answer("✅ Unsubscription successful!")
-        await show_subscribed_groups(update, context)  # Refresh the list
-    else:
-        await query.answer("❌ Unsubscription failed. Try again.")
-
-# ✅ Function: Handle User Text Input for Group Link & Signal Format
+# ✅ Function: Handle User Text Input
 async def handle_text_messages(update: Update, context: CallbackContext) -> None:
     """Handles user text input for collecting group link and signal format."""
-
-    # ✅ Debugging: Print received message to Railway logs
-    print(f"✅ Received User Input: {update.message.text}")
-
-    if "waiting_for_group_link" in context.user_data and context.user_data["waiting_for_group_link"]:
-        print("✅ Processing as Group Link")  # Debugging log
-        return await collect_group_link(update, context)
+    if context.user_data.get("waiting_for_group_link"):
+        await collect_group_link(update, context)
+        return
     
-    elif "waiting_for_signal_format" in context.user_data and context.user_data["waiting_for_signal_format"]:
-        print("✅ Processing as Signal Format")  # Debugging log
-        return await collect_signal_format(update, context)
+    elif context.user_data.get("waiting_for_signal_format"):
+        await collect_signal_format(update, context)
+        return
     
     else:
-        print("❌ No Matching Condition Found!")  # Debugging log
+        await update.message.reply_text("❌ Unexpected input. Please follow the steps correctly.")
