@@ -133,3 +133,19 @@ async def show_subscribed_groups(update: Update, context: CallbackContext) -> No
         await query.message.reply_text(message, parse_mode="Markdown", reply_markup=reply_markup)
     else:
         await query.message.reply_text("⚠️ You have no active subscriptions.", parse_mode="Markdown")
+
+
+async def unsubscribe_user(update: Update, context: CallbackContext) -> None:
+    """Handles unsubscription from a specific group."""
+    query = update.callback_query
+    await query.message.delete()
+    user_id = query.from_user.id
+    group_id = query.data.split(":")[1]  # Extract group ID
+
+    response = requests.post(f"{API_URL}/unsubscribe", json={"user_id": user_id, "group_id": group_id})
+
+    if response.status_code == 200:
+        await query.answer("✅ Unsubscription successful!")
+        await show_subscribed_groups(update, context)  # Refresh the list
+    else:
+        await query.answer("❌ Unsubscription failed. Try again.")
