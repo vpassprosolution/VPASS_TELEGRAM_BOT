@@ -6,6 +6,7 @@ from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_p
 import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
+from copy_signal_handler import handle_copy_signal
 
 
 # Bot Token
@@ -61,6 +62,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="ai_sentiment")],
         [InlineKeyboardButton("VPASS AI TECHNICAL ANALYSIS", callback_data="ai_technical")],  # New button
         [InlineKeyboardButton("AI AGENT INSTANT SIGNAL", callback_data="ai_agent_signal")],
+        [InlineKeyboardButton("VPASS COPY SIGNAL", callback_data="vpass_copy_signal")],
         [InlineKeyboardButton("🔥 NEWS WAR ROOM 🔥", callback_data="news_war_room")],  # Updated button
         [
             InlineKeyboardButton("F.Factory", url="https://www.forexfactory.com"),
@@ -246,6 +248,12 @@ def main():
     app.add_handler(CallbackQueryHandler(show_timeframe_menu, pattern="^instrument_.*$"))
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
     app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^back_to_technical_instruments$"))
+    app.add_handler(CallbackQueryHandler(handle_copy_signal, pattern="vpass_copy_signal"))
+    
+    from copy_signal_handler import subscribe_user, unsubscribe_user
+
+    app.add_handler(CallbackQueryHandler(subscribe_user, pattern="subscribe"))
+    app.add_handler(CallbackQueryHandler(unsubscribe_user, pattern="unsubscribe"))
 
     print("Bot is running...")  
 
