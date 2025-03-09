@@ -106,6 +106,7 @@ async def subscribe_user(update: Update, context: CallbackContext) -> None:
     signal_data = context.user_data.get("signal_data", {})
 
     if not signal_data:
+        print("❌ No subscription data found.")  # ✅ Debugging log
         await query.answer("❌ No subscription data found. Please enter your group link and signal format first.")
         return
 
@@ -116,14 +117,19 @@ async def subscribe_user(update: Update, context: CallbackContext) -> None:
     group_id = group_link.split("/")[-1] if "t.me/" in group_link else "Unknown"
 
     data = {"user_id": user_id, "group_id": group_id, "group_link": group_link, "signal_format": signal_format}
-    
+
+    print(f"✅ Sending Data to API: {data}")  # 🚀 Debugging log
+
     response = requests.post(f"{API_URL}/subscribe", json=data)
+
+    print(f"✅ API Response: {response.status_code}, {response.text}")  # 🚀 Debugging log
 
     if response.status_code == 200:
         await query.answer("✅ Subscription successful!")
         await query.message.reply_text("✅ You have successfully subscribed!")
     else:
         await query.answer("❌ Subscription failed. Try again.")
+
 
 # ✅ Function: Show Subscribed Groups
 async def show_subscribed_groups(update: Update, context: CallbackContext) -> None:
