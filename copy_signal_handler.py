@@ -21,25 +21,38 @@ async def ask_group_link(update: Update, context: CallbackContext) -> None:
     keyboard = [[InlineKeyboardButton("⬅ Back", callback_data="vpass_copy_signal")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.edit_text("🔗 Please send the Telegram group link where you want to copy signals from:", reply_markup=reply_markup)
-    context.user_data["waiting_for_group_link"] = True
+    context.user_data["waiting_for_group_link"] = True  # ✅ Now correctly sets flag
 
 # Function to collect the group link
 async def collect_group_link(update: Update, context: CallbackContext) -> None:
-    if "waiting_for_group_link" in context.user_data:
-        group_link = update.message.text
+    if context.user_data.get("waiting_for_group_link"):  # ✅ Fix: Properly check flag
+        group_link = update.message.text.strip()
+
+        # Ensure input is not empty
+        if not group_link:
+            await update.message.reply_text("⚠️ Invalid input! Please send a valid Telegram group link.")
+            return
+
         context.user_data["group_link"] = group_link
-        del context.user_data["waiting_for_group_link"]
+        del context.user_data["waiting_for_group_link"]  # ✅ Remove flag after receiving input
         await update.message.reply_text("✅ Group link saved! Now, please enter the format of signals from this group:")
-        context.user_data["waiting_for_signal_format"] = True
+        context.user_data["waiting_for_signal_format"] = True  # ✅ Set next step
 
 # Function to collect the signal format
 async def collect_signal_format(update: Update, context: CallbackContext) -> None:
-    if "waiting_for_signal_format" in context.user_data:
-        signal_format = update.message.text
+    if context.user_data.get("waiting_for_signal_format"):  # ✅ Fix: Properly check flag
+        signal_format = update.message.text.strip()
+
+        # Ensure input is not empty
+        if not signal_format:
+            await update.message.reply_text("⚠️ Invalid input! Please enter a valid signal format.")
+            return
+
         group_link = context.user_data.get("group_link", "Not provided")
-        del context.user_data["waiting_for_signal_format"]
+        del context.user_data["waiting_for_signal_format"]  # ✅ Remove flag after receiving input
+
         await update.message.reply_text(f"✅ Format saved!\n\n🔗 *Group Link:* {group_link}\n📊 *Signal Format:* {signal_format}\n\nNow, click 'Subscribe' to start receiving signals.")
-        
+
         # Store group link & format for subscription
         context.user_data["signal_data"] = {"group_link": group_link, "signal_format": signal_format}
 
@@ -51,10 +64,15 @@ async def collect_signal_format(update: Update, context: CallbackContext) -> Non
 # Function to handle subscription
 async def subscribe_user(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
-    user_id = query.from_user.id  # ✅ FIXED: Use from_user.id instead of message.chat_id
+    user_id = query.from_user.id  # ✅ Fix: Correctly get user ID
 
     # Get stored group link & signal format
     signal_data = context.user_data.get("signal_data", {})
+
+    if not signal_data:
+        await query.answer("❌ No subscription data found. Please enter your group link and signal format first.")
+        return
+
     group_link = signal_data.get("group_link", "Unknown")
     signal_format = signal_data.get("signal_format", "Unknown")
 
@@ -75,7 +93,7 @@ async def subscribe_user(update: Update, context: CallbackContext) -> None:
 # Function to handle unsubscription
 async def unsubscribe_user(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
-    user_id = query.from_user.id  # ✅ FIXED: Use from_user.id
+    user_id = query.from_user.id  # ✅ Fix: Correctly get user ID
     data = {"user_id": user_id}
     
     response = requests.post(f"{API_URL}/unsubscribe", json=data)
