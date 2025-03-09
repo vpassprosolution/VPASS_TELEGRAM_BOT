@@ -8,7 +8,7 @@ API_URL = "https://vpasscopysignal-production.up.railway.app"
 async def handle_vpass_copy_signal_button(update: Update, context: CallbackContext) -> None:
     """Handles the VPASS COPY SIGNAL button and shows options."""
     query = update.callback_query
-    await query.message.delete()  # ❌ Delete previous message
+    await query.message.delete()
     keyboard = [
         [InlineKeyboardButton("📢 Another Telegram Group", callback_data="copy_telegram")],
         [InlineKeyboardButton("📈 TradingView (Coming Soon)", callback_data="ignore")],
@@ -29,7 +29,6 @@ async def handle_copy_telegram_button(update: Update, context: CallbackContext) 
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.reply_text("📡 Choose an action:", reply_markup=reply_markup)
 
-
 async def handle_text_messages(update: Update, context: CallbackContext) -> None:
     """Handles user text input for collecting group link and signal format."""
     if context.user_data.get("waiting_for_group_link"):
@@ -41,7 +40,7 @@ async def ask_group_link(update: Update, context: CallbackContext) -> None:
     """Asks the user to provide a Telegram group link."""
     query = update.callback_query
     await query.message.delete()
-    keyboard = [[InlineKeyboardButton("⬅ Back", callback_data="copy_telegram")]]
+    keyboard = [[InlineKeyboardButton("⬅ Back", callback_data="handle_copy_telegram_button")]]  # ✅ FIXED
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.reply_text("🔗 Please send the Telegram group link where you want to copy signals from:", reply_markup=reply_markup)
     context.user_data["waiting_for_group_link"] = True
@@ -121,7 +120,7 @@ async def show_subscribed_groups(update: Update, context: CallbackContext) -> No
             message += f"🔗 [{group_id}]({group_link}) - *{signal_format}*\n"
             keyboard.append([InlineKeyboardButton(f"❌ Remove {group_id}", callback_data=f"unsubscribe:{group_id}")])
         
-        keyboard.append([InlineKeyboardButton("⬅ Back", callback_data="copy_telegram")])
+        keyboard.append([InlineKeyboardButton("⬅ Back", callback_data="handle_copy_telegram_button")])  # ✅ FIXED
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.message.reply_text(message, parse_mode="Markdown", reply_markup=reply_markup)
     else:
