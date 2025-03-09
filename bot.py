@@ -257,17 +257,17 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
     app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^back_to_technical_instruments$"))
     
-    # ✅ COPY SIGNAL HANDLERS
+    # ✅ COPY SIGNAL HANDLERS (Fixed Version)
     app.add_handler(CallbackQueryHandler(copy_signal_handler.handle_vpass_copy_signal_button, pattern="vpass_copy_signal"))
-    app.add_handler(CallbackQueryHandler(copy_signal_handler.ask_group_link, pattern="copy_telegram"))
+    app.add_handler(CallbackQueryHandler(copy_signal_handler.handle_copy_telegram_button, pattern="copy_telegram"))  # ✅ FIXED
     app.add_handler(CallbackQueryHandler(copy_signal_handler.show_subscribed_groups, pattern="check_list"))
     app.add_handler(CallbackQueryHandler(copy_signal_handler.unsubscribe_user, pattern="^unsubscribe:"))
     app.add_handler(CallbackQueryHandler(copy_signal_handler.subscribe_user, pattern="subscribe"))
-    app.add_handler(CallbackQueryHandler(copy_signal_handler.handle_copy_telegram_button, pattern="copy_telegram"))
-    app.add_handler(CallbackQueryHandler(copy_signal_handler.ask_group_link, pattern="add_new_group"))
+    app.add_handler(CallbackQueryHandler(copy_signal_handler.ask_group_link, pattern="add_new_group"))  # ✅ Now correctly triggers only for "Add New Telegram Group"
 
     # ✅ Handles User Input for Group Link & Signal Format
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, copy_signal_handler.handle_text_messages))
+
 
 
     print("Bot is running...")

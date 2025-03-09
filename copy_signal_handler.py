@@ -29,6 +29,7 @@ async def handle_copy_telegram_button(update: Update, context: CallbackContext) 
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.reply_text("📡 Choose an action:", reply_markup=reply_markup)
 
+
 async def handle_text_messages(update: Update, context: CallbackContext) -> None:
     """Handles user text input for collecting group link and signal format."""
     if context.user_data.get("waiting_for_group_link"):
@@ -40,10 +41,11 @@ async def ask_group_link(update: Update, context: CallbackContext) -> None:
     """Asks the user to provide a Telegram group link."""
     query = update.callback_query
     await query.message.delete()
-    keyboard = [[InlineKeyboardButton("⬅ Back", callback_data="handle_copy_telegram_button")]]  # ✅ FIXED
+    keyboard = [[InlineKeyboardButton("⬅ Back", callback_data="handle_copy_telegram_button")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.reply_text("🔗 Please send the Telegram group link where you want to copy signals from:", reply_markup=reply_markup)
     context.user_data["waiting_for_group_link"] = True
+
 
 async def collect_group_link(update: Update, context: CallbackContext) -> None:
     """Receives the Telegram group link and asks for signal format."""
