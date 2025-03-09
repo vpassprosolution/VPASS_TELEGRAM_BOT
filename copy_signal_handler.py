@@ -34,10 +34,11 @@ async def handle_copy_telegram_button(update: Update, context: CallbackContext) 
 # ✅ Function: Handle User Text Input for Group Link & Signal Format
 async def handle_text_messages(update: Update, context: CallbackContext) -> None:
     """Handles user text input for collecting group link and signal format."""
-    if context.user_data.get("waiting_for_group_link"):
+    if "waiting_for_group_link" in context.user_data and context.user_data["waiting_for_group_link"]:
         return await collect_group_link(update, context)
-    elif context.user_data.get("waiting_for_signal_format"):
+    elif "waiting_for_signal_format" in context.user_data and context.user_data["waiting_for_signal_format"]:
         return await collect_signal_format(update, context)
+
 
 # ✅ Function: Ask for Group Link
 async def ask_group_link(update: Update, context: CallbackContext) -> None:
@@ -52,7 +53,7 @@ async def ask_group_link(update: Update, context: CallbackContext) -> None:
 # ✅ Function: Collect Group Link
 async def collect_group_link(update: Update, context: CallbackContext) -> None:
     """Receives the Telegram group link and asks for signal format."""
-    if context.user_data.get("waiting_for_group_link"):
+    if "waiting_for_group_link" in context.user_data and context.user_data["waiting_for_group_link"]:
         await update.message.delete()
         group_link = update.message.text.strip()
 
@@ -61,9 +62,10 @@ async def collect_group_link(update: Update, context: CallbackContext) -> None:
             return
 
         context.user_data["group_link"] = group_link
-        del context.user_data["waiting_for_group_link"]
+        del context.user_data["waiting_for_group_link"]  # ✅ Ensure this flag is removed
         await update.message.reply_text("✅ Group link saved! Now, please enter the format of signals from this group:")
-        context.user_data["waiting_for_signal_format"] = True
+        context.user_data["waiting_for_signal_format"] = True  # ✅ Set next flag
+
 
 # ✅ Function: Collect Signal Format
 async def collect_signal_format(update: Update, context: CallbackContext) -> None:
