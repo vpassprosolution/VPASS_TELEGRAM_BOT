@@ -173,21 +173,24 @@ async def unsubscribe_user(update: Update, context: CallbackContext) -> None:
 
 
 
-
-
-
-
-
 # ✅ Function: Handle User Text Input
 async def handle_text_messages(update: Update, context: CallbackContext) -> None:
     """Handles user text input for collecting group link and signal format."""
+
+    # ✅ Debugging: Print received message to Railway logs
+    print(f"✅ Received User Input: {update.message.text}")
+
     if context.user_data.get("waiting_for_group_link"):
+        print("✅ Processing as Group Link")
         await collect_group_link(update, context)
         return
     
     elif context.user_data.get("waiting_for_signal_format"):
+        print("✅ Processing as Signal Format")
         await collect_signal_format(update, context)
         return
     
     else:
+        print("❌ No Matching Condition Found!")
         await update.message.reply_text("❌ Unexpected input. Please follow the steps correctly.")
+
