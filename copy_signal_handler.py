@@ -51,20 +51,23 @@ async def ask_group_link(update: Update, context: CallbackContext) -> None:
     context.user_data["waiting_for_group_link"] = True  # ✅ Ensuring the flag is set correctly
 
 # ✅ Function: Collect Group Link
-async def collect_group_link(update: Update, context: CallbackContext) -> None:
+
+async def collect_group_link(update, context):
     """Receives the Telegram group link and asks for signal format."""
-    if "waiting_for_group_link" in context.user_data and context.user_data["waiting_for_group_link"]:
-        await update.message.delete()
-        group_link = update.message.text.strip()
+    
+    group_link = update.message.text.strip()
 
-        if not group_link.startswith("https://t.me/"):
-            await update.message.reply_text("⚠️ Invalid input! Please send a valid Telegram group link.")
-            return
+    # ✅ Debug: Print to Railway logs
+    print(f"✅ Received Link in Bot: {group_link}")
 
-        context.user_data["group_link"] = group_link
-        del context.user_data["waiting_for_group_link"]  # ✅ Ensure this flag is removed
-        await update.message.reply_text("✅ Group link saved! Now, please enter the format of signals from this group:")
-        context.user_data["waiting_for_signal_format"] = True  # ✅ Set next flag
+    # ✅ Test API Connection
+    response = requests.post(f"{API_URL}/test", json={"test": "data"})
+
+    # ✅ Debug: Log API response
+    print(f"✅ API Test Response: {response.status_code}, {response.text}")
+
+    # ✅ Send confirmation message to Telegram
+    await update.message.reply_text("✅ Group link saved! Now, please enter the format of signals from this group:")
 
 
 # ✅ Function: Collect Signal Format
