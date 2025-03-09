@@ -17,11 +17,23 @@ async def handle_vpass_copy_signal_button(update: Update, context: CallbackConte
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.reply_text("📡 *Choose Your Copy Signal Source:*", parse_mode="Markdown", reply_markup=reply_markup)
 
+async def handle_copy_telegram_button(update: Update, context: CallbackContext) -> None:
+    """Handles the 'Another Telegram Group' button."""
+    query = update.callback_query
+    await query.message.delete()  # ❌ Delete previous message
+    keyboard = [
+        [InlineKeyboardButton("➕ Add New Telegram Group", callback_data="add_new_group")],
+        [InlineKeyboardButton("📋 Check List Copy Signal", callback_data="check_list")],
+        [InlineKeyboardButton("⬅ Back", callback_data="vpass_copy_signal")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.message.reply_text("📡 Choose an action:", reply_markup=reply_markup)
+
 async def ask_group_link(update: Update, context: CallbackContext) -> None:
     """Asks the user to provide a Telegram group link."""
     query = update.callback_query
     await query.message.delete()  # ❌ Delete previous message
-    keyboard = [[InlineKeyboardButton("⬅ Back", callback_data="vpass_copy_signal")]]
+    keyboard = [[InlineKeyboardButton("⬅ Back", callback_data="copy_telegram")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.reply_text("🔗 Please send the Telegram group link where you want to copy signals from:", reply_markup=reply_markup)
     context.user_data["waiting_for_group_link"] = True  # Set flag to expect input
