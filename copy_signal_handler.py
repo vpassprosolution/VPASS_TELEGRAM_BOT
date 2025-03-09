@@ -20,7 +20,7 @@ async def handle_vpass_copy_signal_button(update: Update, context: CallbackConte
 async def handle_copy_telegram_button(update: Update, context: CallbackContext) -> None:
     """Handles the 'Another Telegram Group' button."""
     query = update.callback_query
-    await query.message.delete()  # ❌ Delete previous message
+    await query.message.delete()
     keyboard = [
         [InlineKeyboardButton("➕ Add New Telegram Group", callback_data="add_new_group")],
         [InlineKeyboardButton("📋 Check List Copy Signal", callback_data="check_list")],
@@ -28,6 +28,7 @@ async def handle_copy_telegram_button(update: Update, context: CallbackContext) 
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.reply_text("📡 Choose an action:", reply_markup=reply_markup)
+
 
 async def handle_text_messages(update: Update, context: CallbackContext) -> None:
     """Handles user text input for collecting group link and signal format."""
