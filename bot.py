@@ -259,10 +259,15 @@ def main():
 import os
 
 if __name__ == "__main__":
-    # Prevent multiple bot instances
-    if os.environ.get("RUNNING_ON_RAILWAY"):
-        print("Bot is already running on Railway. Skipping local execution.")
+    lock_file = "/tmp/bot_running.lock"
+
+    if os.path.exists(lock_file):
+        print("❌ Another instance of the bot is already running. Exiting...")
     else:
-        os.environ["RUNNING_ON_RAILWAY"] = "1"
+        with open(lock_file, "w") as f:
+            f.write("running")
+
+        print("✅ Starting the bot...")
         main()
+
 
