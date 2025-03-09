@@ -165,3 +165,21 @@ async def unsubscribe_user(update: Update, context: CallbackContext) -> None:
         await show_subscribed_groups(update, context)  # Refresh the list
     else:
         await query.answer("❌ Unsubscription failed. Try again.")
+
+# ✅ Function: Handle User Text Input for Group Link & Signal Format
+async def handle_text_messages(update: Update, context: CallbackContext) -> None:
+    """Handles user text input for collecting group link and signal format."""
+
+    # ✅ Debugging: Print received message to Railway logs
+    print(f"✅ Received User Input: {update.message.text}")
+
+    if "waiting_for_group_link" in context.user_data and context.user_data["waiting_for_group_link"]:
+        print("✅ Processing as Group Link")  # Debugging log
+        return await collect_group_link(update, context)
+    
+    elif "waiting_for_signal_format" in context.user_data and context.user_data["waiting_for_signal_format"]:
+        print("✅ Processing as Signal Format")  # Debugging log
+        return await collect_signal_format(update, context)
+    
+    else:
+        print("❌ No Matching Condition Found!")  # Debugging log
