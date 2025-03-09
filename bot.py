@@ -6,14 +6,7 @@ from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_p
 import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
-from copy_signal_handler import (
-    handle_copy_signal,
-    ask_group_link,
-    collect_group_link,
-    collect_signal_format,
-    subscribe_user,
-    unsubscribe_user
-)
+import copy_signal_handler  # Import the Copy Signal Handler
 
 
 # Bot Token
@@ -57,6 +50,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Store message ID so we can delete it later
     context.user_data["button_message"] = sent_message.message_id
+
+
+async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles user text input for collecting group link and signal format."""
+    if context.user_data.get("waiting_for_group_link"):
+        return await copy_signal_handler.collect_group_link(update, context)
+    elif context.user_data.get("waiting_for_signal_format"):
+        return await copy_signal_handler.collect_signal_format(update, context)
 
 
 
@@ -240,7 +241,7 @@ def main():
     app.add_handler(CallbackQueryHandler(show_vip_room_message, pattern="news_war_room"))  # For NEWS WAR ROOM
     app.add_handler(CallbackQueryHandler(delete_vip_message, pattern="delete_vip_message"))  # Handles "I UNDERSTAND"
     app.add_handler(CallbackQueryHandler(ai_signal_handler.fetch_ai_signal, pattern="^ai_signal_"))
-    
+
     # Connect "VPASS SMART SIGNAL" button to subscription system
     from subscription_handler import show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
     from ai_technical import show_technical_menu, show_timeframe_menu, handle_technical_selection
@@ -256,16 +257,17 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
     app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^back_to_technical_instruments$"))
     
-    # VPASS COPY SIGNAL Handlers
-    app.add_handler(CallbackQueryHandler(handle_copy_signal, pattern="vpass_copy_signal"))
-    app.add_handler(CallbackQueryHandler(ask_group_link, pattern="copy_telegram"))  # ✅ First, ask for the group link
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_group_link))  # ✅ Then, collect the group link
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_signal_format))  # ✅ Then, collect the signal format
-    app.add_handler(CallbackQueryHandler(subscribe_user, pattern="subscribe"))  # ✅ Finally, allow subscription
-    app.add_handler(CallbackQueryHandler(unsubscribe_user, pattern="unsubscribe"))
+    # ✅ COPY SIGNAL HANDLERS
+    app.add_handler(CallbackQueryHandler(copy_signal_handler.handle_vpass_copy_signal_button, pattern="vpass_copy_signal"))
+    app.add_handler(CallbackQueryHandler(copy_signal_handler.ask_group_link, pattern="copy_telegram"))
+    app.add_handler(CallbackQueryHandler(copy_signal_handler.show_subscribed_groups, pattern="check_list"))
+    app.add_handler(CallbackQueryHandler(copy_signal_handler.unsubscribe_user, pattern="^unsubscribe:"))
+    app.add_handler(CallbackQueryHandler(copy_signal_handler.subscribe_user, pattern="subscribe"))
 
+    # ✅ FIXED Message Handler
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_messages))
 
-    print("Bot is running...")  
+    print("Bot is running...")
 
     app.run_polling()
 
