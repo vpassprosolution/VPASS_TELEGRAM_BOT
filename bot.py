@@ -263,9 +263,12 @@ def main():
     app.add_handler(CallbackQueryHandler(copy_signal_handler.show_subscribed_groups, pattern="check_list"))
     app.add_handler(CallbackQueryHandler(copy_signal_handler.unsubscribe_user, pattern="^unsubscribe:"))
     app.add_handler(CallbackQueryHandler(copy_signal_handler.subscribe_user, pattern="subscribe"))
+    app.add_handler(CallbackQueryHandler(copy_signal_handler.handle_copy_telegram_button, pattern="copy_telegram"))
+    app.add_handler(CallbackQueryHandler(copy_signal_handler.ask_group_link, pattern="add_new_group"))
 
-    # ✅ FIXED Message Handler
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_messages))
+    # ✅ Handles User Input for Group Link & Signal Format
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, copy_signal_handler.handle_text_messages))
+
 
     print("Bot is running...")
 
