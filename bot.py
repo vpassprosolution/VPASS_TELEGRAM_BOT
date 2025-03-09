@@ -264,6 +264,7 @@ def main():
     app.add_handler(CallbackQueryHandler(copy_signal_handler.unsubscribe_user, pattern="^unsubscribe:"))
     app.add_handler(CallbackQueryHandler(copy_signal_handler.subscribe_user, pattern="subscribe"))
     app.add_handler(CallbackQueryHandler(copy_signal_handler.ask_group_link, pattern="add_new_group"))  # ✅ Now correctly triggers only for "Add New Telegram Group"
+    app.add_handler(CallbackQueryHandler(copy_signal_handler.handle_copy_telegram_button, pattern="handle_copy_telegram_button"))
 
     # ✅ Handles User Input for Group Link & Signal Format
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, copy_signal_handler.handle_text_messages))

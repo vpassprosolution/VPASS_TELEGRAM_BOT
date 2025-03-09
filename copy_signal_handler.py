@@ -44,7 +44,7 @@ async def ask_group_link(update: Update, context: CallbackContext) -> None:
     """Asks the user to provide a Telegram group link."""
     query = update.callback_query
     await query.message.delete()
-    keyboard = [[InlineKeyboardButton("⬅ Back", callback_data="copy_telegram")]]  # ✅ FIXED: Correct back button
+    keyboard = [[InlineKeyboardButton("⬅ Back", callback_data="handle_copy_telegram_button")]]  # ✅ FIXED: Correct back button
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.reply_text("🔗 Please send the Telegram group link where you want to copy signals from:", reply_markup=reply_markup)
     context.user_data["waiting_for_group_link"] = True  # ✅ Ensuring the flag is set correctly
