@@ -92,22 +92,32 @@ async def show_about_news_war_room(update: Update, context: CallbackContext):
 # Function: Handle Chat Room Entry
 async def enter_chat_room(update: Update, context: CallbackContext):
     query = update.callback_query
-    await query.answer()
+    user_id = query.from_user.id
 
-    # Notify users about chat rules
     message = (
         "💬 **Welcome to the NEWS WAR ROOM Chat** 💬\n\n"
         "🔹 You can discuss the upcoming news here.\n"
-        "🔹 The chat will be closed **20 minutes after news is released**.\n"
+        "🔹 The chat will close **20 minutes after news is released**.\n"
         "🔹 Stay respectful and share valuable insights!\n\n"
-        "🚀 **Happy Trading!**"
+        "💬 Send a message, and it will be shared with all users!"
     )
 
-    # Add a Back Button
     keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="news_war_room")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await query.edit_message_text(message, reply_markup=reply_markup)
+
+async def forward_chat_message(update: Update, context: CallbackContext):
+    user = update.message.from_user
+    message = update.message.text
+
+    if not message:
+        return
+
+    # Send message to API for broadcasting
+    api_url = "https://vpassnewswarroom-production.up.railway.app/send_chat_message"
+    requests.post(api_url, json={"user_id": user.id, "message": f"{user.first_name}: {message}"})
+
 
 # Handle Button Clicks
 async def news_war_room_button_handler(update: Update, context: CallbackContext):

@@ -235,6 +235,7 @@ def main():
     app.add_handler(CallbackQueryHandler(ai_signal_handler.fetch_ai_signal, pattern="^ai_signal_"))
     app.add_handler(CallbackQueryHandler(news_war_room_handler.show_about_news_war_room, pattern="about_news_war_room"))
     app.add_handler(CallbackQueryHandler(news_war_room_handler.enter_chat_room, pattern="enter_chat"))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, news_war_room_handler.forward_chat_message))
 
     # Connect "VPASS SMART SIGNAL" button to subscription system
     from subscription_handler import show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
