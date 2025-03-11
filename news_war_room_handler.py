@@ -145,15 +145,27 @@ async def enter_chat_room(update: Update, context: CallbackContext):
     message = (
         "💬 **Welcome to the NEWS WAR ROOM Chat** 💬\n\n"
         "🔹 You can discuss the upcoming news here.\n"
-        "🔹 The chat will close **20 minutes after news is released**.\n"
+        "🔹 Your messages will be sent to all other subscribers.\n"
         "🔹 Stay respectful and share valuable insights!\n\n"
-        "💬 Send a message, and it will be shared with all users!"
+        "💬 **Send a message, and it will be visible to all users!**"
     )
 
     keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="news_war_room")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await query.edit_message_text(message, reply_markup=reply_markup)
+
+async def forward_chat_message(update: Update, context: CallbackContext):
+    user = update.message.from_user
+    message = update.message.text
+
+    if not message:
+        return
+
+    # ✅ Send message to API for broadcasting
+    api_url = "https://vpassnewswarroom-production.up.railway.app/send_chat_message"
+    requests.post(api_url, json={"user_id": user.id, "message": f"{user.first_name}: {message}"})
+
 
 async def forward_chat_message(update: Update, context: CallbackContext):
     user = update.message.from_user
