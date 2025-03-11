@@ -43,14 +43,21 @@ async def unsubscribe_user(update: Update, context: CallbackContext):
     user = query.from_user
     payload = {"user_id": user.id}
 
-    response = requests.post(f"{API_BASE_URL}/unsubscribe", json=payload)
-    message = response.json().get("message", "Something went wrong.")
+    try:
+        response = requests.post(f"{API_BASE_URL}/unsubscribe", json=payload)
+        if response.status_code != 200 or not response.text.strip():
+            raise ValueError("Invalid response from API")
+
+        message = response.json().get("message", "Something went wrong.")
+    except (requests.exceptions.RequestException, ValueError) as e:
+        message = f"❌ Unsubscription failed: {e}"
 
     # Add Back Button
     keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="news_war_room")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await query.edit_message_text(message, reply_markup=reply_markup)
+
 
 # Function: Show News War Room Menu
 async def show_news_war_room(update: Update, context: CallbackContext):
