@@ -48,15 +48,18 @@ async def trigger_alerts(update: Update, context: CallbackContext):
 
     await update.message.reply_text(message)
 
-# Function: Show News War Room Menu
+# Function: Show News War Room Menu with Back Button
 async def show_news_war_room(update: Update, context: CallbackContext):
     query = update.callback_query
     user_id = query.from_user.id
     is_subscribed = check_subscription(user_id)
 
     keyboard = [
-        [InlineKeyboardButton("✅ Subscribe", callback_data="subscribe_news")] if not is_subscribed else 
-        [InlineKeyboardButton("❌ Unsubscribe", callback_data="unsubscribe_news")]
+        [
+            InlineKeyboardButton("✅ Subscribe", callback_data="subscribe_news") if not is_subscribed else 
+            InlineKeyboardButton("❌ Unsubscribe", callback_data="unsubscribe_news"),
+            InlineKeyboardButton("🔙 Back", callback_data="main_menu")  # Back to Main Menu
+        ]
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -71,3 +74,6 @@ async def news_war_room_button_handler(update: Update, context: CallbackContext)
         await subscribe_user(update, context)
     elif query.data == "unsubscribe_news":
         await unsubscribe_user(update, context)
+    elif query.data == "main_menu":
+        from bot import main_menu
+        await main_menu(update, context)
