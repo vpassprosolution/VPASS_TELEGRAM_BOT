@@ -165,24 +165,6 @@ async def forward_chat_message(update: Update, context: CallbackContext):
     requests.post(api_url, json={"user_id": user.id, "message": f"{user.first_name}: {message}"})
 
 
-async def refresh_news_war_room(query, is_subscribed):
-    keyboard = [
-        [
-            InlineKeyboardButton("✅ Subscribe", callback_data="subscribe_news") if not is_subscribed else 
-            InlineKeyboardButton("❌ Unsubscribe", callback_data="unsubscribe_news"),
-            InlineKeyboardButton("ℹ️ About News War Room", callback_data="about_news_war_room")
-        ],
-        [InlineKeyboardButton("💬 Enter Chat Room", callback_data="enter_chat")],
-        [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]
-    ]
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    try:
-        await query.edit_message_text("🔴 **NEWS WAR ROOM** 🔴\n📢 Get real-time alerts for high-impact USD news.", reply_markup=reply_markup)
-    except Exception as e:
-        print(f"❌ Error updating message: {e}")
-
 
 
 # Handle Button Clicks
