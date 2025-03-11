@@ -11,11 +11,15 @@ def check_subscription(user_id):
         response = requests.get(f"{API_BASE_URL}/check_subscription?user_id={user_id}")
         response.raise_for_status()
         data = response.json()
-        print(f"🔍 Subscription Status: {data}")  # Debugging
+
+        # ✅ Debugging log to verify API response
+        print(f"🔍 Subscription API Response for {user_id}: {data}")
+
         return data.get("subscribed", False)
     except requests.exceptions.RequestException as e:
         print(f"❌ Error checking subscription: {e}")
         return False
+
 
 
 # Function: Subscribe User
@@ -74,8 +78,11 @@ async def show_news_war_room(update: Update, context: CallbackContext):
     query = update.callback_query
     user_id = query.from_user.id
 
-    # ✅ Always check the latest subscription status before updating buttons
+    # ✅ Force refresh the subscription status from API
     is_subscribed = check_subscription(user_id)
+
+    # ✅ Debugging log (Check what is returned)
+    print(f"🔍 User {user_id} Subscription Status: {is_subscribed}")
 
     keyboard = [
         [
@@ -90,10 +97,8 @@ async def show_news_war_room(update: Update, context: CallbackContext):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     try:
-        if query.message.text != "🔴 **NEWS WAR ROOM** 🔴\n📢 Get real-time alerts for high-impact USD news.":
-            await query.message.edit_text("🔴 **NEWS WAR ROOM** 🔴\n📢 Get real-time alerts for high-impact USD news.", reply_markup=reply_markup)
-        else:
-            print("⚠️ No changes detected. Skipping edit.")
+        # ✅ Ensure we force a refresh instead of using old data
+        await query.message.edit_text("🔴 **NEWS WAR ROOM** 🔴\n📢 Get real-time alerts for high-impact USD news.", reply_markup=reply_markup)
     except Exception as e:
         print(f"❌ Error updating message: {e}")
 
