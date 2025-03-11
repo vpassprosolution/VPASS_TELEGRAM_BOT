@@ -45,7 +45,7 @@ async def subscribe_user(update: Update, context: CallbackContext):
         is_subscribed = False
 
     # ✅ Refresh News War Room Menu
-    await refresh_news_war_room(query, is_subscribed)
+    await show_news_war_room(update, context)
 
 
 
@@ -77,7 +77,7 @@ async def unsubscribe_user(update: Update, context: CallbackContext):
         is_subscribed = True
 
     # ✅ Refresh News War Room Menu
-    await refresh_news_war_room(query, is_subscribed)
+    await show_news_war_room(update, context)
 
 
 
