@@ -92,13 +92,20 @@ async def unsubscribe_user(update: Update, context: CallbackContext):
 # Function: Show News War Room Menu
 async def show_news_war_room(update: Update, context: CallbackContext):
     query = update.callback_query
+    user_id = query.from_user.id
+
+    # ✅ Force refresh the subscription status from API
+    is_subscribed = check_subscription(user_id)
+
+    # ✅ Debugging log to check if the status actually changes
+    print(f"🔍 User {user_id} Subscription Status (Updated): {is_subscribed}")
 
     keyboard = [
         [
             InlineKeyboardButton("✅ Subscribe", callback_data="subscribe_news"),
             InlineKeyboardButton("❌ Unsubscribe", callback_data="unsubscribe_news"),
+            InlineKeyboardButton("ℹ️ About News War Room", callback_data="about_news_war_room")
         ],
-        [InlineKeyboardButton("ℹ️ About News War Room", callback_data="about_news_war_room")],
         [InlineKeyboardButton("💬 Enter Chat Room", callback_data="enter_chat")],
         [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]
     ]
@@ -106,9 +113,17 @@ async def show_news_war_room(update: Update, context: CallbackContext):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     try:
+        # ✅ Force a slight change to prevent "Message is not modified" error
+        new_message_text = "🔴 **NEWS WAR ROOM** 🔴\n📢 Get real-time alerts for high-impact USD news.\n\n🆕 Status Updated."
+
+        await query.message.edit_text(new_message_text)
+        await asyncio.sleep(1)  # ✅ Small delay to allow Telegram to recognize the update
+
+        # ✅ Now update the real message with the correct buttons
         await query.message.edit_text("🔴 **NEWS WAR ROOM** 🔴\n📢 Get real-time alerts for high-impact USD news.", reply_markup=reply_markup)
     except Exception as e:
         print(f"❌ Error updating message: {e}")
+
 
 
 # Function: Show About News War Room Info
