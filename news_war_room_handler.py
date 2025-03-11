@@ -1,6 +1,7 @@
 import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
+import asyncio
 
 # VPASS_NEWS_WAR_ROOM API URL
 API_BASE_URL = "https://vpassnewswarroom-production.up.railway.app"
@@ -32,8 +33,11 @@ async def subscribe_user(update: Update, context: CallbackContext):
         response = requests.post(f"{API_BASE_URL}/subscribe", json=payload)
         data = response.json()
 
-        # ✅ Force refresh of the subscription status
-        is_subscribed = data.get("subscribed", False)
+        # ✅ Wait 1 second to ensure the database updates
+        await asyncio.sleep(1)
+
+        # ✅ Force a new API request to check the latest subscription status
+        is_subscribed = check_subscription(user.id)
 
         message = data.get("message", "Subscription successful.")
     except (requests.exceptions.RequestException, ValueError) as e:
@@ -61,8 +65,11 @@ async def unsubscribe_user(update: Update, context: CallbackContext):
         response = requests.post(f"{API_BASE_URL}/unsubscribe", json=payload)
         data = response.json()
 
-        # ✅ Force refresh of the subscription status
-        is_subscribed = data.get("subscribed", True)
+        # ✅ Wait 1 second to ensure the database updates
+        await asyncio.sleep(1)
+
+        # ✅ Force a new API request to check the latest subscription status
+        is_subscribed = check_subscription(user.id)
 
         message = data.get("message", "Unsubscription successful.")
     except (requests.exceptions.RequestException, ValueError) as e:
@@ -71,6 +78,7 @@ async def unsubscribe_user(update: Update, context: CallbackContext):
 
     # ✅ Refresh News War Room Menu
     await refresh_news_war_room(query, is_subscribed)
+
 
 
 
