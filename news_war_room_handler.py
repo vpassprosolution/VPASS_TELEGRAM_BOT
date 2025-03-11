@@ -84,7 +84,11 @@ async def show_news_war_room(update: Update, context: CallbackContext):
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.message.edit_text("🔴 **NEWS WAR ROOM** 🔴\n📢 Get real-time alerts for high-impact USD news.", reply_markup=reply_markup)
+
+    try:
+        await query.message.edit_text("🔴 **NEWS WAR ROOM** 🔴\n📢 Get real-time alerts for high-impact USD news.", reply_markup=reply_markup)
+    except Exception as e:
+        print(f"❌ Error updating message: {e}")
 
 # Function: Show About News War Room Info
 async def show_about_news_war_room(update: Update, context: CallbackContext):
