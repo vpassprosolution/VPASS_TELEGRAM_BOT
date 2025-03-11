@@ -30,15 +30,19 @@ async def subscribe_user(update: Update, context: CallbackContext):
 
     try:
         response = requests.post(f"{API_BASE_URL}/subscribe", json=payload)
-        if response.status_code != 200 or not response.text.strip():
-            raise ValueError("Invalid response from API")
+        data = response.json()
 
-        message = response.json().get("message", "Subscription successful.")
+        # ✅ Force refresh of the subscription status
+        is_subscribed = data.get("subscribed", False)
+
+        message = data.get("message", "Subscription successful.")
     except (requests.exceptions.RequestException, ValueError) as e:
         message = f"❌ Subscription failed: {e}"
+        is_subscribed = False
 
-    # Refresh the News War Room menu after subscribing
-    await show_news_war_room(update, context)
+    # ✅ Refresh News War Room Menu
+    await refresh_news_war_room(query, is_subscribed)
+
 
 
     # Add Back Button
@@ -55,15 +59,19 @@ async def unsubscribe_user(update: Update, context: CallbackContext):
 
     try:
         response = requests.post(f"{API_BASE_URL}/unsubscribe", json=payload)
-        if response.status_code != 200 or not response.text.strip():
-            raise ValueError("Invalid response from API")
+        data = response.json()
 
-        message = response.json().get("message", "Unsubscription successful.")
+        # ✅ Force refresh of the subscription status
+        is_subscribed = data.get("subscribed", True)
+
+        message = data.get("message", "Unsubscription successful.")
     except (requests.exceptions.RequestException, ValueError) as e:
         message = f"❌ Unsubscription failed: {e}"
+        is_subscribed = True
 
-    # Refresh the News War Room menu after unsubscribing
-    await show_news_war_room(update, context)
+    # ✅ Refresh News War Room Menu
+    await refresh_news_war_room(query, is_subscribed)
+
 
 
     # Add Back Button
@@ -155,6 +163,26 @@ async def forward_chat_message(update: Update, context: CallbackContext):
     # Send message to API for broadcasting
     api_url = "https://vpassnewswarroom-production.up.railway.app/send_chat_message"
     requests.post(api_url, json={"user_id": user.id, "message": f"{user.first_name}: {message}"})
+
+
+async def refresh_news_war_room(query, is_subscribed):
+    keyboard = [
+        [
+            InlineKeyboardButton("✅ Subscribe", callback_data="subscribe_news") if not is_subscribed else 
+            InlineKeyboardButton("❌ Unsubscribe", callback_data="unsubscribe_news"),
+            InlineKeyboardButton("ℹ️ About News War Room", callback_data="about_news_war_room")
+        ],
+        [InlineKeyboardButton("💬 Enter Chat Room", callback_data="enter_chat")],
+        [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    try:
+        await query.edit_message_text("🔴 **NEWS WAR ROOM** 🔴\n📢 Get real-time alerts for high-impact USD news.", reply_markup=reply_markup)
+    except Exception as e:
+        print(f"❌ Error updating message: {e}")
+
 
 
 # Handle Button Clicks
