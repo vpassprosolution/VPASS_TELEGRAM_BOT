@@ -38,20 +38,22 @@ async def show_instruments(update: Update, context: CallbackContext):
     
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # Send a NEW menu message and store its message_id
+    # Send a NEW menu message and store its message_id safely
     sent_message = await query.message.reply_text("Select our exclusive range of instruments", reply_markup=reply_markup)
-    context.user_data["instrument_menu_message_id"] = sent_message.message_id  # Store message ID
+    context.user_data["instrument_menu_message_id"] = sent_message.message_id  # Store message ID safely
 
 async def handle_instrument_selection(update: Update, context: CallbackContext):
     """Handles when a user selects an instrument."""
     query = update.callback_query
     selected_instrument = query.data.replace("sentiment_", "")  # Extract the instrument name
 
-    # Delete the instrument menu message (so the selection disappears)
-    try:
-        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=context.user_data["instrument_menu_message_id"])
-    except Exception:
-        pass  
+    # Delete the instrument menu message safely
+    menu_message_id = context.user_data.get("instrument_menu_message_id")  # Avoid KeyError
+    if menu_message_id:
+        try:
+            await context.bot.delete_message(chat_id=query.message.chat_id, message_id=menu_message_id)
+        except Exception:
+            pass  
 
     # Show fetching message
     fetching_message = await query.message.reply_text("Fetching sentiment analysis...")
@@ -64,20 +66,19 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         try:
             response = requests.get(api_url)
             if response.status_code == 200:
-                # Extract the nested storyline text from the API response
-                storyline_data = response.json().get("storyline", {})  
-                storyline_text = storyline_data.get("storyline", "No sufficient data available.")  
+                # Extract storyline text from the API response
+                storyline_text = response.json().get("storyline", "No sufficient data available.")  
 
-                # Escape special characters for Telegram Markdown V2
-                formatted_storyline = escape_markdown(storyline_text, version=2)
+                # Escape special characters for Telegram MarkdownV2 BEFORE formatting
+                escaped_storyline = escape_markdown(storyline_text, version=2)
 
-                response_text = f"📌 *{selected_instrument.upper()} Sentiment Analysis*\n\n{formatted_storyline}"
+                response_text = f"📌 *{escape_markdown(selected_instrument.upper(), version=2)} Sentiment Analysis*\n\n{escaped_storyline}"
             else:
-                response_text = f"⚠️ No sufficient data available for {selected_instrument.upper()}."
+                response_text = f"⚠️ No sufficient data available for *{escape_markdown(selected_instrument.upper(), version=2)}*."
         except Exception as e:
             response_text = f"❌ Error fetching data: {escape_markdown(str(e), version=2)}"
 
-        # Delete the "Fetching sentiment analysis..." message
+        # Delete the "Fetching sentiment analysis..." message safely
         try:
             await context.bot.delete_message(chat_id=query.message.chat_id, message_id=fetching_message.message_id)
         except Exception:
@@ -88,5 +89,3 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await query.message.reply_text(response_text, parse_mode="MarkdownV2", reply_markup=reply_markup)
-
-
