@@ -69,9 +69,9 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
                 storyline_text = storyline_data.get("storyline", "No sufficient data available.")  
 
                 # Escape special characters for Telegram Markdown V2
-                formatted_storyline = escape_markdown(storyline_text, version=2).replace(".", "\\.").replace("-", "\\-")
+                formatted_storyline = escape_markdown(storyline_text, version=2)
 
-                response_text = f"📌 *{escape_markdown(selected_instrument.upper(), version=2)} Sentiment Analysis*\n\n{formatted_storyline}"
+                response_text = f"📌 *{selected_instrument.upper()} Sentiment Analysis*\n\n{formatted_storyline}"
             else:
                 response_text = f"⚠️ No sufficient data available for {selected_instrument.upper()}."
         except Exception as e:
