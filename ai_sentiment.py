@@ -87,5 +87,6 @@ async def handle_instrument_selection(update: Update, context: CallbackContext):
         keyboard = [[InlineKeyboardButton("🔙 Menu", callback_data="ai_sentiment")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await query.message.reply_text(formatted_storyline, parse_mode="MarkdownV2", reply_markup=reply_markup)
+        await query.message.reply_text(response_text, parse_mode="MarkdownV2", reply_markup=reply_markup)
+
 
