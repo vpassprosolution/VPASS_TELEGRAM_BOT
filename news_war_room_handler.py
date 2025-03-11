@@ -7,9 +7,14 @@ API_BASE_URL = "https://vpassnewswarroom-production.up.railway.app"
 
 # Function: Check Subscription Status
 def check_subscription(user_id):
-    response = requests.get(f"{API_BASE_URL}/check_subscription?user_id={user_id}")
-    data = response.json()
-    return data.get("subscribed", False)
+    try:
+        response = requests.get(f"{API_BASE_URL}/check_subscription?user_id={user_id}")
+        response.raise_for_status()  # Raise error if response is not OK (200)
+        data = response.json()
+        return data.get("subscribed", False)
+    except requests.exceptions.RequestException as e:
+        print(f"Error checking subscription: {e}")
+        return False  # Assume user is not subscribed if API fails
 
 # Function: Subscribe User
 async def subscribe_user(update: Update, context: CallbackContext):
@@ -98,7 +103,11 @@ async def enter_chat_room(update: Update, context: CallbackContext):
         "🚀 **Happy Trading!**"
     )
 
-    await query.edit_message_text(message)
+    # Add a Back Button
+    keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="news_war_room")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await query.edit_message_text(message, reply_markup=reply_markup)
 
 # Handle Button Clicks
 async def news_war_room_button_handler(update: Update, context: CallbackContext):
@@ -114,5 +123,8 @@ async def news_war_room_button_handler(update: Update, context: CallbackContext)
     elif query.data == "enter_chat":
         await enter_chat_room(update, context)
     elif query.data == "main_menu":
-        from bot import main_menu
-        await main_menu(update, context)
+        try:
+            from bot import main_menu
+            await main_menu(update, context)
+        except ImportError:
+            await query.message.edit_text("⚠️ Error: Main Menu function not found!")
