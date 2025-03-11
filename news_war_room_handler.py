@@ -84,11 +84,17 @@ async def show_news_war_room(update: Update, context: CallbackContext):
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
+    new_message_text = "🔴 **NEWS WAR ROOM** 🔴\n📢 Get real-time alerts for high-impact USD news."
 
     try:
-        await query.message.edit_text("🔴 **NEWS WAR ROOM** 🔴\n📢 Get real-time alerts for high-impact USD news.", reply_markup=reply_markup)
+        # Only edit the message if the text or buttons are different
+        if query.message.text != new_message_text or query.message.reply_markup != reply_markup:
+            await query.message.edit_text(new_message_text, reply_markup=reply_markup)
+        else:
+            print("⚠️ No changes detected. Skipping edit.")
     except Exception as e:
         print(f"❌ Error updating message: {e}")
+
 
 # Function: Show About News War Room Info
 async def show_about_news_war_room(update: Update, context: CallbackContext):
