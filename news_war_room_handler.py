@@ -23,15 +23,20 @@ async def subscribe_user(update: Update, context: CallbackContext):
     await query.edit_message_text(message)
 
 # Function: Unsubscribe User
-async def unsubscribe_user(update: Update, context: CallbackContext):
+async def subscribe_user(update: Update, context: CallbackContext):
     query = update.callback_query
     user = query.from_user
-    payload = {"user_id": user.id}
+    payload = {"user_id": user.id, "username": user.username"}
 
-    response = requests.post(f"{API_BASE_URL}/unsubscribe", json=payload)
+    response = requests.post(f"{API_BASE_URL}/subscribe", json=payload)
     message = response.json().get("message", "Something went wrong.")
 
-    await query.edit_message_text(message)
+    # Add Back Button
+    keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="news_war_room")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await query.edit_message_text(message, reply_markup=reply_markup)
+
 
 # Function: Trigger Alerts (Admin Only)
 async def trigger_alerts(update: Update, context: CallbackContext):
