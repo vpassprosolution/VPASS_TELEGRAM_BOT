@@ -27,9 +27,13 @@ async def subscribe_user(update: Update, context: CallbackContext):
         if response.status_code != 200 or not response.text.strip():
             raise ValueError("Invalid response from API")
 
-        message = response.json().get("message", "Something went wrong.")
+        message = response.json().get("message", "Subscription successful.")
     except (requests.exceptions.RequestException, ValueError) as e:
         message = f"❌ Subscription failed: {e}"
+
+    # Refresh the News War Room menu after subscribing
+    await show_news_war_room(update, context)
+
 
     # Add Back Button
     keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="news_war_room")]]
@@ -48,9 +52,13 @@ async def unsubscribe_user(update: Update, context: CallbackContext):
         if response.status_code != 200 or not response.text.strip():
             raise ValueError("Invalid response from API")
 
-        message = response.json().get("message", "Something went wrong.")
+        message = response.json().get("message", "Unsubscription successful.")
     except (requests.exceptions.RequestException, ValueError) as e:
         message = f"❌ Unsubscription failed: {e}"
+
+    # Refresh the News War Room menu after unsubscribing
+    await show_news_war_room(update, context)
+
 
     # Add Back Button
     keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="news_war_room")]]
