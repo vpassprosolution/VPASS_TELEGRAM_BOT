@@ -9,12 +9,14 @@ API_BASE_URL = "https://vpassnewswarroom-production.up.railway.app"
 def check_subscription(user_id):
     try:
         response = requests.get(f"{API_BASE_URL}/check_subscription?user_id={user_id}")
-        response.raise_for_status()  # Raise error if response is not OK (200)
+        response.raise_for_status()
         data = response.json()
+        print(f"🔍 Subscription Status: {data}")  # Debugging
         return data.get("subscribed", False)
     except requests.exceptions.RequestException as e:
-        print(f"Error checking subscription: {e}")
-        return False  # Assume user is not subscribed if API fails
+        print(f"❌ Error checking subscription: {e}")
+        return False
+
 
 # Function: Subscribe User
 async def subscribe_user(update: Update, context: CallbackContext):
@@ -71,6 +73,8 @@ async def unsubscribe_user(update: Update, context: CallbackContext):
 async def show_news_war_room(update: Update, context: CallbackContext):
     query = update.callback_query
     user_id = query.from_user.id
+
+    # ✅ Always check the latest subscription status before updating buttons
     is_subscribed = check_subscription(user_id)
 
     keyboard = [
@@ -79,17 +83,15 @@ async def show_news_war_room(update: Update, context: CallbackContext):
             InlineKeyboardButton("❌ Unsubscribe", callback_data="unsubscribe_news"),
             InlineKeyboardButton("ℹ️ About News War Room", callback_data="about_news_war_room")
         ],
-        [InlineKeyboardButton("💬 Enter Chat Room", callback_data="enter_chat")],  # Button to enter chat
-        [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]  # Back to Main Menu
+        [InlineKeyboardButton("💬 Enter Chat Room", callback_data="enter_chat")],
+        [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    new_message_text = "🔴 **NEWS WAR ROOM** 🔴\n📢 Get real-time alerts for high-impact USD news."
 
     try:
-        # Only edit the message if the text or buttons are different
-        if query.message.text != new_message_text or query.message.reply_markup != reply_markup:
-            await query.message.edit_text(new_message_text, reply_markup=reply_markup)
+        if query.message.text != "🔴 **NEWS WAR ROOM** 🔴\n📢 Get real-time alerts for high-impact USD news.":
+            await query.message.edit_text("🔴 **NEWS WAR ROOM** 🔴\n📢 Get real-time alerts for high-impact USD news.", reply_markup=reply_markup)
         else:
             print("⚠️ No changes detected. Skipping edit.")
     except Exception as e:
