@@ -1,7 +1,7 @@
 import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
-import asyncio
+
 
 # VPASS_NEWS_WAR_ROOM API URL
 API_BASE_URL = "https://vpassnewswarroom-production.up.railway.app"
@@ -33,8 +33,6 @@ async def subscribe_user(update: Update, context: CallbackContext):
         response = requests.post(f"{API_BASE_URL}/subscribe", json=payload)
         data = response.json()
 
-        # ✅ Wait 1 second to ensure the database updates
-        await asyncio.sleep(1)
 
         # ✅ Force a new API request to check the latest subscription status
         is_subscribed = check_subscription(user.id)
@@ -64,9 +62,6 @@ async def unsubscribe_user(update: Update, context: CallbackContext):
     try:
         response = requests.post(f"{API_BASE_URL}/unsubscribe", json=payload)
         data = response.json()
-
-        # ✅ Wait 1 second to ensure the database updates
-        await asyncio.sleep(1)
 
         # ✅ Force a new API request to check the latest subscription status
         is_subscribed = check_subscription(user.id)
