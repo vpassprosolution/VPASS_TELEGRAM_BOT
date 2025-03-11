@@ -41,14 +41,7 @@ async def unsubscribe_user(update: Update, context: CallbackContext):
 
     await query.edit_message_text(message, reply_markup=reply_markup)
 
-# Function: Trigger Alerts (Admin Only)
-async def trigger_alerts(update: Update, context: CallbackContext):
-    response = requests.post(f"{API_BASE_URL}/trigger_alerts")
-    message = response.json().get("message", "Failed to trigger alerts.")
-
-    await update.message.reply_text(message)
-
-# Function: Show News War Room Menu with "About News War Room" Button
+# Function: Show News War Room Menu
 async def show_news_war_room(update: Update, context: CallbackContext):
     query = update.callback_query
     user_id = query.from_user.id
@@ -60,6 +53,7 @@ async def show_news_war_room(update: Update, context: CallbackContext):
             InlineKeyboardButton("❌ Unsubscribe", callback_data="unsubscribe_news"),
             InlineKeyboardButton("ℹ️ About News War Room", callback_data="about_news_war_room")
         ],
+        [InlineKeyboardButton("💬 Enter Chat Room", callback_data="enter_chat")],  # Button to enter chat
         [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]  # Back to Main Menu
     ]
 
@@ -90,6 +84,22 @@ async def show_about_news_war_room(update: Update, context: CallbackContext):
 
     await query.edit_message_text(message, parse_mode="Markdown", reply_markup=reply_markup)
 
+# Function: Handle Chat Room Entry
+async def enter_chat_room(update: Update, context: CallbackContext):
+    query = update.callback_query
+    await query.answer()
+
+    # Notify users about chat rules
+    message = (
+        "💬 **Welcome to the NEWS WAR ROOM Chat** 💬\n\n"
+        "🔹 You can discuss the upcoming news here.\n"
+        "🔹 The chat will be closed **20 minutes after news is released**.\n"
+        "🔹 Stay respectful and share valuable insights!\n\n"
+        "🚀 **Happy Trading!**"
+    )
+
+    await query.edit_message_text(message)
+
 # Handle Button Clicks
 async def news_war_room_button_handler(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -101,6 +111,8 @@ async def news_war_room_button_handler(update: Update, context: CallbackContext)
         await unsubscribe_user(update, context)
     elif query.data == "about_news_war_room":
         await show_about_news_war_room(update, context)
+    elif query.data == "enter_chat":
+        await enter_chat_room(update, context)
     elif query.data == "main_menu":
         from bot import main_menu
         await main_menu(update, context)
