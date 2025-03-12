@@ -7,7 +7,7 @@ import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
 import news_war_room_handler  # Import the new file
-
+from news_war_room_handler import forward_user_message
 
 
 # Bot Token
@@ -236,6 +236,7 @@ def main():
     app.add_handler(CallbackQueryHandler(news_war_room_handler.show_about_news_war_room, pattern="about_news_war_room"))
     app.add_handler(CallbackQueryHandler(news_war_room_handler.enter_chat_room, pattern="enter_chat"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, news_war_room_handler.forward_chat_message))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, forward_user_message))
 
     # Connect "VPASS SMART SIGNAL" button to subscription system
     from subscription_handler import show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments

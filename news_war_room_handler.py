@@ -200,3 +200,25 @@ async def news_war_room_button_handler(update: Update, context: CallbackContext)
             await main_menu(update, context)
         except ImportError:
             await query.message.edit_text("⚠️ Error: Main Menu function not found!")
+
+import requests
+from telegram import Update
+from telegram.ext import CallbackContext
+
+API_URL = "https://vpassnewswarroom-production.up.railway.app/send_chat_message"
+
+async def forward_user_message(update: Update, context: CallbackContext):
+    """Forwards user messages to the API for broadcasting."""
+    user = update.message.from_user
+    message = update.message.text
+
+    if not message:
+        return
+
+    payload = {"user_id": user.id, "message": f"{user.first_name}: {message}"}
+    response = requests.post(API_URL, json=payload)
+
+    if response.status_code == 200:
+        print(f"✅ Forwarded message from {user.id}")
+    else:
+        print(f"❌ Failed to forward message: {response.text}")
