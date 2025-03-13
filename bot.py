@@ -6,6 +6,7 @@ from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_p
 import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
+import phone_verifier  # Import phone verification module
 
 
 # Bot Token
@@ -140,67 +141,84 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id in user_steps:
         step = user_steps[user_id]["step"]
 
-        # Delete user's input and previous bot prompt before asking the next question
+        # Delete old messages
         try:
             await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)  
             await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["prompt_message_id"])  
         except Exception:
             pass  
 
-        if step == "name":
-            user_steps[user_id]["name"] = user_input
-            user_steps[user_id]["step"] = "username"
-            sent_message = await update.message.reply_text("Enter your Telegram username:")
+        if step == "contact":
+            # Try to get phone number from Telegram automatically
+            telegram_phone = await phone_verifier.get_telegram_phone(update, context)
 
-        elif step == "username":
-            user_steps[user_id]["username"] = user_input
-            user_steps[user_id]["step"] = "contact"
-            sent_message = await update.message.reply_text("Enter your contact number:")
+            if telegram_phone:
+                # ✅ If Telegram provides a phone number, save it and skip OTP
+                user_steps[user_id]["contact"] = telegram_phone
+                user_steps[user_id]["step"] = "next_step"  # Move to the next registration step
+                await update.message.reply_text(f"✅ Your phone number ({telegram_phone}) has been automatically verified!")
+                
+                # Continue with the next registration step (email, etc.)
+                await update.message.reply_text("📧 Please enter your email address:")
+                user_steps[user_id]["step"] = "email"
+            
+            else:
+                # ❌ If Telegram doesn’t provide a number, ask the user to enter it manually
+                user_steps[user_id]["step"] = "manual_phone"
+                sent_message = await update.message.reply_text("📞 We couldn't detect your phone number from Telegram.\n"
+                                                               "Please enter your phone number manually (e.g., +1234567890):")
 
-        elif step == "contact":
+        elif step == "manual_phone":
+            # Store the manually entered phone number
             user_steps[user_id]["contact"] = user_input
-            user_steps[user_id]["step"] = "email"
-            sent_message = await update.message.reply_text("Enter your email address:")
 
-        elif step == "email":
-            user_steps[user_id]["email"] = user_input
+            # Send OTP via Telegram
+            await phone_verifier.send_telegram_otp(update, context, user_input)
 
-            # Save user data to the database (including Chat ID)
-            conn = connect_db()
-            if conn:
-                try:
-                    cur = conn.cursor()
-                    cur.execute(
-                        """
-                        INSERT INTO users (user_id, chat_id, name, username, contact, email)
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                        ON CONFLICT (user_id) 
-                        DO UPDATE SET chat_id = EXCLUDED.chat_id, 
-                                      name = EXCLUDED.name, 
-                                      username = EXCLUDED.username, 
-                                      contact = EXCLUDED.contact, 
-                                      email = EXCLUDED.email;
-                        """,
-                        (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"],
-                         user_steps[user_id]["contact"], user_steps[user_id]["email"])
-                    )
-                    conn.commit()
-                    cur.close()
-                    conn.close()
-                except Exception as e:
-                    await update.message.reply_text(f"Error saving your data: {e}")
+            user_steps[user_id]["step"] = "verify_phone"
+            sent_message = await update.message.reply_text("📩 An OTP has been sent to your Telegram. Please enter it:")
 
-            # Remove user from tracking
-            del user_steps[user_id]
+        elif step == "verify_phone":
+            # Check if OTP is correct
+            is_verified = await phone_verifier.verify_otp(update, context)
 
-            # Send confirmation message with a button
-            keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await update.message.reply_text("Registration complete, VPASS PRO V2 is now activated for full access.", reply_markup=reply_markup)
-            return
+            if is_verified:
+                # ✅ Save user data after successful verification
+                conn = connect_db()
+                if conn:
+                    try:
+                        cur = conn.cursor()
+                        cur.execute(
+                            """
+                            INSERT INTO users (user_id, chat_id, name, username, contact, verified)
+                            VALUES (%s, %s, %s, %s, %s, TRUE)
+                            ON CONFLICT (user_id) 
+                            DO UPDATE SET chat_id = EXCLUDED.chat_id, 
+                                          name = EXCLUDED.name, 
+                                          username = EXCLUDED.username, 
+                                          contact = EXCLUDED.contact,
+                                          verified = TRUE;
+                            """,
+                            (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"], user_steps[user_id]["contact"])
+                        )
+                        conn.commit()
+                        cur.close()
+                        conn.close()
+                    except Exception as e:
+                        await update.message.reply_text(f"❌ Error saving your data: {e}")
 
+                del user_steps[user_id]  # Remove user tracking
+
+                # ✅ Continue with the next registration step (email, etc.)
+                await update.message.reply_text("✅ Phone verified successfully!\n📧 Now, please enter your email address:")
+                user_steps[user_id]["step"] = "email"
+
+            else:
+                sent_message = await update.message.reply_text("❌ Incorrect OTP. Please try again:")
+        
         # Store last sent prompt message ID for deletion
         user_steps[user_id]["prompt_message_id"] = sent_message.message_id
+
 
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the 'START VPASS PRO NOW' button click"""
