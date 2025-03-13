@@ -165,38 +165,30 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif step == "username":
         user_steps[user_id]["username"] = user_input
         user_steps[user_id]["step"] = "contact"
-        sent_message = await update.message.reply_text("📞 Enter your phone number (e.g., +1234567890):")
+        sent_message = await update.message.reply_text("📞 Enter your phone number (e.g., +601123020037):")
 
-    # ✅ Step 3: Handle Phone Number (Ensures OTP is sent before proceeding)
+    # ✅ Step 3: Handle Phone Number (Ensures OTP is sent only after confirmation)
     elif step == "contact":
-    # ✅ Check if user has a linked phone number in Telegram
-    user_data = await context.bot.get_chat(user_id)
-    
-    if not user_data or not user_data.phone_number:
-        sent_message = await update.message.reply_text(
-            "❌ Telegram does not provide your phone number automatically.\n"
-            "📌 Please enter a valid phone number in international format (e.g., +601123020037)."
-        )
-    elif user_input != f"+{user_data.phone_number}":
-        sent_message = await update.message.reply_text(
-            "❌ The phone number you entered does not match your Telegram number.\n"
-            "📌 Please enter the correct phone number linked to your Telegram account."
-        )
-    else:
-        user_steps[user_id]["contact"] = user_input
-        otp_sent = await phone_verifier.send_telegram_otp(context, user_id)
-
-        if otp_sent:
-            user_steps[user_id]["step"] = "verify_phone"
+        # ✅ Validate phone number format
+        if not phone_verifier.validate_phone_number(user_input):
             sent_message = await update.message.reply_text(
-                "📩 OTP has been sent to your Telegram inbox.\n"
-                "📌 Please check your Telegram messages and enter the code here to verify:"
+                "❌ Invalid phone number format.\n📌 Please enter a valid phone number in international format (e.g., +601123020037)."
             )
         else:
-            sent_message = await update.message.reply_text(
-                "❌ Failed to send OTP. Please make sure you entered a valid Telegram phone number."
-            )
+            user_steps[user_id]["contact"] = user_input  # ✅ Store phone number
 
+            # ✅ Ask user to confirm the phone number before OTP is sent
+            keyboard = [
+                [InlineKeyboardButton("✅ Confirm", callback_data="confirm_phone")],
+                [InlineKeyboardButton("❌ Re-enter", callback_data="reenter_phone")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            sent_message = await update.message.reply_text(
+                f"📞 You entered: {user_input}\n"
+                "📌 Please confirm your phone number before we send the OTP.",
+                reply_markup=reply_markup
+            )
 
     # ✅ Step 4: Ensure OTP verification before proceeding
     elif step == "verify_phone":
@@ -259,6 +251,29 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_steps[user_id]["prompt_message_id"] = sent_message.message_id
 
 
+async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles the confirmation of the phone number before sending OTP"""
+    query = update.callback_query
+    user_id = query.from_user.id
+
+    if query.data == "confirm_phone":
+        phone_number = user_steps[user_id]["contact"]
+
+        otp_sent = await phone_verifier.send_telegram_otp(context, user_id)
+        if otp_sent:
+            user_steps[user_id]["step"] = "verify_phone"
+            await query.message.edit_text(
+                "📩 OTP has been sent to your Telegram inbox.\n"
+                "📌 Please check your messages and enter the code here to verify:"
+            )
+        else:
+            await query.message.edit_text(
+                "❌ Failed to send OTP. Please make sure you entered a valid Telegram phone number."
+            )
+    elif query.data == "reenter_phone":
+        user_steps[user_id]["step"] = "contact"
+        await query.message.edit_text("📞 Please enter your phone number again (e.g., +601123020037):")
+
 
 
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -290,7 +305,9 @@ def main():
     app.add_handler(CallbackQueryHandler(ai_signal_handler.fetch_ai_signal, pattern="^ai_signal_"))
     app.add_handler(CallbackQueryHandler(show_vip_room_message, pattern="news_war_room"))
     app.add_handler(CallbackQueryHandler(delete_vip_message, pattern="delete_vip_message"))
-  
+    app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="confirm_phone"))
+    app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="reenter_phone"))
+
     
 
     # Connect "VPASS SMART SIGNAL" button to subscription system

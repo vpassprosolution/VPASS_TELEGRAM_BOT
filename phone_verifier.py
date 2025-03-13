@@ -2,7 +2,7 @@ import re
 import random
 from telegram import Bot
 
-# Store OTPs temporarily
+# Store OTPs temporarily (linked to user ID, not phone number)
 phone_verification_codes = {}
 
 def validate_phone_number(phone_number):
@@ -16,10 +16,8 @@ def generate_otp():
 
 async def send_telegram_otp(context, user_id):
     """Send OTP via Telegram message to the user's chat ID"""
-    import random
-
-    otp_code = random.randint(100000, 999999)
-    phone_verification_codes[user_id] = otp_code  # ✅ Store OTP linked to user ID
+    otp_code = generate_otp()
+    phone_verification_codes[user_id] = otp_code  # ✅ Store OTP linked to user ID (not phone number)
 
     bot = context.bot  # Get bot instance
     try:
@@ -34,12 +32,11 @@ async def send_telegram_otp(context, user_id):
         print(f"❌ Failed to send OTP via Telegram: {e}")
         return False  # ❌ OTP failed to send
 
-
-async def verify_otp(phone_number, user_input):
+async def verify_otp(user_id, user_input):
     """Check if the entered OTP is correct"""
-    if phone_number in phone_verification_codes:
-        if str(user_input) == str(phone_verification_codes[phone_number]):
-            del phone_verification_codes[phone_number]  # ✅ Remove OTP after successful verification
+    if user_id in phone_verification_codes:  # ✅ Use `user_id` instead of `phone_number`
+        if str(user_input) == str(phone_verification_codes[user_id]):
+            del phone_verification_codes[user_id]  # ✅ Remove OTP after successful verification
             return True  # ✅ OTP is correct
         else:
             return False  # ❌ OTP is incorrect
