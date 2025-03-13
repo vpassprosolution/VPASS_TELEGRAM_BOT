@@ -154,7 +154,7 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_steps[user_id]["step"] = "contact"
         await update.message.reply_text("📞 Enter your phone number (e.g., +601123020037):")
 
-    # ✅ Step 3: Validate Phone Number (No OTP)
+    # ✅ Step 3: Validate Phone Number
     elif step == "contact":
         if not re.match(r"^\+\d{7,15}$", user_input):  # Ensures phone number is valid
             await update.message.reply_text(
@@ -162,9 +162,20 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "📌 Please enter a valid phone number in international format (e.g., +601123020037):"
             )
         else:
-            user_steps[user_id]["contact"] = user_input
-            user_steps[user_id]["step"] = "email"
-            await update.message.reply_text("📧 Enter your email address:")
+            user_steps[user_id]["contact"] = user_input  # ✅ Store phone number
+
+            # ✅ Ask user to confirm the phone number before proceeding
+            keyboard = [
+                [InlineKeyboardButton("✅ Confirm", callback_data="confirm_phone")],
+                [InlineKeyboardButton("❌ Re-enter", callback_data="reenter_phone")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            await update.message.reply_text(
+                f"📞 You entered: {user_input}\n"
+                "📌 Please confirm your phone number before proceeding.",
+                reply_markup=reply_markup
+            )
 
     # ✅ Step 4: Validate Email and Save Data
     elif step == "email":
@@ -204,6 +215,21 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             await update.message.reply_text("✅ Registration complete! VPASS PRO is now activated.", reply_markup=reply_markup)
 
+
+async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles confirmation of the phone number"""
+    query = update.callback_query
+    user_id = query.from_user.id
+
+    if query.data == "confirm_phone":
+        # ✅ Move to email step
+        user_steps[user_id]["step"] = "email"
+        await query.message.edit_text("📧 Enter your email address:")
+
+    elif query.data == "reenter_phone":
+        # ✅ Ask user to enter phone number again
+        user_steps[user_id]["step"] = "contact"
+        await query.message.edit_text("📞 Please enter your phone number again (e.g., +601123020037):")
 
 
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
