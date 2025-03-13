@@ -248,37 +248,6 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if sent_message:
         user_steps[user_id]["prompt_message_id"] = sent_message.message_id
 
-            # ✅ Confirm registration complete
-            keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-
-            sent_message = await update.message.reply_text("✅ Registration complete! VPASS PRO is now activated.", reply_markup=reply_markup)
-
-        else:
-            # ❌ Handle unknown steps (Debugging)
-            sent_message = await update.message.reply_text("⚠️ Unexpected error. Please restart your registration.")
-            print(f"❌ Error: User {user_id} is in an unknown state: {step}")
-
-        # ✅ Store last sent prompt message ID for deletion
-        if sent_message:
-            user_steps[user_id]["prompt_message_id"] = sent_message.message_id
-
-
-            # ✅ Confirm registration complete
-            keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-
-            sent_message = await update.message.reply_text("✅ Registration complete! VPASS PRO is now activated.", reply_markup=reply_markup)
-
-        else:
-            # ❌ Handle unknown steps (Debugging)
-            sent_message = await update.message.reply_text("⚠️ Unexpected error. Please restart your registration.")
-            print(f"❌ Error: User {user_id} is in an unknown state: {step}")
-
-        # ✅ Store last sent prompt message ID for deletion
-        if sent_message:  # ✅ Only store message ID if `sent_message` exists
-            user_steps[user_id]["prompt_message_id"] = sent_message.message_id
-
 
 
 
