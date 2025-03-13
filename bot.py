@@ -143,6 +143,7 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if user_id in user_steps:
         step = user_steps[user_id]["step"]
+        sent_message = None  # ✅ Ensure `sent_message` is always initialized
 
         # ✅ Delete old messages (to keep chat clean)
         try:
@@ -158,7 +159,6 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             user_steps[user_id]["step"] = "username"  # Move to next step
 
             sent_message = await update.message.reply_text("📛 Enter your Telegram username (@username):")
-            user_steps[user_id]["prompt_message_id"] = sent_message.message_id
 
         # ✅ Step 2: Ask for Username
         elif step == "username":
@@ -166,7 +166,6 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             user_steps[user_id]["step"] = "contact"  # Move to next step
 
             sent_message = await update.message.reply_text("📞 Enter your phone number:")
-            user_steps[user_id]["prompt_message_id"] = sent_message.message_id
 
         # ✅ Step 3: Handle Phone Number
         elif step == "contact":
@@ -228,21 +227,22 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     cur.close()
                     conn.close()
                 except Exception as e:
-                    await update.message.reply_text(f"❌ Error saving your data: {e}")
+                    sent_message = await update.message.reply_text(f"❌ Error saving your data: {e}")
 
             # ✅ Confirm registration complete
             keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
 
-            await update.message.reply_text("✅ Registration complete! VPASS PRO is now activated.", reply_markup=reply_markup)
+            sent_message = await update.message.reply_text("✅ Registration complete! VPASS PRO is now activated.", reply_markup=reply_markup)
 
         else:
             # ❌ Handle unknown steps (Debugging)
-            await update.message.reply_text("⚠️ Unexpected error. Please restart your registration.")
+            sent_message = await update.message.reply_text("⚠️ Unexpected error. Please restart your registration.")
             print(f"❌ Error: User {user_id} is in an unknown state: {step}")
 
         # ✅ Store last sent prompt message ID for deletion
-        user_steps[user_id]["prompt_message_id"] = sent_message.message_id
+        if sent_message:  # ✅ Only store message ID if `sent_message` exists
+            user_steps[user_id]["prompt_message_id"] = sent_message.message_id
 
 
 
