@@ -6,8 +6,6 @@ from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_p
 import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
-import news_war_room_handler  # Import the new file
-from news_war_room_handler import forward_user_message
 
 
 # Bot Token
@@ -230,13 +228,11 @@ def main():
     app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))  
     app.add_handler(CallbackQueryHandler(ai_agent_signal, pattern="ai_agent_signal"))  # ✅ New AI button handler
-    app.add_handler(CallbackQueryHandler(news_war_room_handler.show_news_war_room, pattern="news_war_room"))
-    app.add_handler(CallbackQueryHandler(news_war_room_handler.news_war_room_button_handler, pattern="subscribe_news|unsubscribe_news"))
     app.add_handler(CallbackQueryHandler(ai_signal_handler.fetch_ai_signal, pattern="^ai_signal_"))
-    app.add_handler(CallbackQueryHandler(news_war_room_handler.show_about_news_war_room, pattern="about_news_war_room"))
-    app.add_handler(CallbackQueryHandler(news_war_room_handler.enter_chat_room, pattern="enter_chat"))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, news_war_room_handler.forward_chat_message))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, forward_user_message))
+    app.add_handler(CallbackQueryHandler(show_vip_room_message, pattern="news_war_room"))
+    app.add_handler(CallbackQueryHandler(delete_vip_message, pattern="delete_vip_message"))
+  
+    
 
     # Connect "VPASS SMART SIGNAL" button to subscription system
     from subscription_handler import show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
