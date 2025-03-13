@@ -132,88 +132,92 @@ async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_steps[user_id]["prompt_message_id"] = sent_message.message_id  
 
 async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Collects user registration details step by step"""
+    """Collects user registration details step by step with auto-delete feature"""
     user_id = update.message.from_user.id
     chat_id = update.message.chat_id
     user_input = update.message.text
 
-    if user_id not in user_steps:
-        user_steps[user_id] = {"step": "name"}  # Ensure user starts at the first step
+    if user_id in user_steps:
+        step = user_steps[user_id]["step"]
 
-    step = user_steps[user_id]["step"]
+        # ✅ Try deleting user's input message
+        try:
+            await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)
+            await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["prompt_message_id"])
+        except Exception:
+            pass  # Ignore if message is already deleted
 
-    # ✅ Step 1: Ask for Name
-    if step == "name":
-        user_steps[user_id]["name"] = user_input
-        user_steps[user_id]["step"] = "username"
-        await update.message.reply_text("📛 Enter your Telegram username (@username):")
+        if step == "name":
+            user_steps[user_id]["name"] = user_input
+            user_steps[user_id]["step"] = "username"
+            sent_message = await update.message.reply_text("📛 Enter your Telegram username (@username):")
 
-    # ✅ Step 2: Ask for Username
-    elif step == "username":
-        user_steps[user_id]["username"] = user_input
-        user_steps[user_id]["step"] = "contact"
-        await update.message.reply_text("📞 Enter your phone number (e.g., +601123020037):")
+        elif step == "username":
+            user_steps[user_id]["username"] = user_input
+            user_steps[user_id]["step"] = "contact"
+            sent_message = await update.message.reply_text("📞 Enter your phone number (e.g., +601123020037):")
 
-    # ✅ Step 3: Validate Phone Number
-    elif step == "contact":
-        if not re.match(r"^\+\d{7,15}$", user_input):  # Ensures phone number is valid
-            await update.message.reply_text(
-                "❌ Invalid phone number format.\n"
-                "📌 Please enter a valid phone number in international format (e.g., +601123020037):"
-            )
-        else:
-            user_steps[user_id]["contact"] = user_input  # ✅ Store phone number
+        elif step == "contact":
+            if not re.match(r"^\+\d{7,15}$", user_input):
+                sent_message = await update.message.reply_text(
+                    "❌ Invalid phone number format.\n"
+                    "📌 Please enter a valid phone number in international format (e.g., +601123020037):"
+                )
+            else:
+                user_steps[user_id]["contact"] = user_input
 
-            # ✅ Ask user to confirm the phone number before proceeding
-            keyboard = [
-                [InlineKeyboardButton("✅ Confirm", callback_data="confirm_phone")],
-                [InlineKeyboardButton("❌ Re-enter", callback_data="reenter_phone")]
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
+                # ✅ Ask user to confirm the phone number before proceeding
+                keyboard = [
+                    [InlineKeyboardButton("✅ Confirm", callback_data="confirm_phone")],
+                    [InlineKeyboardButton("❌ Re-enter", callback_data="reenter_phone")]
+                ]
+                reply_markup = InlineKeyboardMarkup(keyboard)
 
-            await update.message.reply_text(
-                f"📞 You entered: {user_input}\n"
-                "📌 Please confirm your phone number before proceeding.",
-                reply_markup=reply_markup
-            )
+                sent_message = await update.message.reply_text(
+                    f"📞 You entered: {user_input}\n"
+                    "📌 Please confirm your phone number before proceeding.",
+                    reply_markup=reply_markup
+                )
 
-    # ✅ Step 4: Validate Email and Save Data
-    elif step == "email":
-        if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", user_input):
-            await update.message.reply_text("❌ Invalid email format. Please enter a valid email address:")
-        else:
-            user_steps[user_id]["email"] = user_input
+        elif step == "email":
+            if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", user_input):
+                sent_message = await update.message.reply_text("❌ Invalid email format. Please enter a valid email address:")
+            else:
+                user_steps[user_id]["email"] = user_input
 
-            # ✅ Save user data to the database
-            conn = connect_db()
-            if conn:
-                try:
-                    cur = conn.cursor()
-                    cur.execute(
-                        """
-                        INSERT INTO users (user_id, chat_id, name, username, contact, email)
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                        ON CONFLICT (user_id) 
-                        DO UPDATE SET chat_id = EXCLUDED.chat_id, 
-                                      name = EXCLUDED.name, 
-                                      username = EXCLUDED.username, 
-                                      contact = EXCLUDED.contact, 
-                                      email = EXCLUDED.email;
-                        """,
-                        (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"],
-                         user_steps[user_id]["contact"], user_steps[user_id]["email"])
-                    )
-                    conn.commit()
-                    cur.close()
-                    conn.close()
-                except Exception as e:
-                    await update.message.reply_text(f"❌ Error saving your data: {e}")
+                # ✅ Save user data to the database
+                conn = connect_db()
+                if conn:
+                    try:
+                        cur = conn.cursor()
+                        cur.execute(
+                            """
+                            INSERT INTO users (user_id, chat_id, name, username, contact, email)
+                            VALUES (%s, %s, %s, %s, %s, %s)
+                            ON CONFLICT (user_id) 
+                            DO UPDATE SET chat_id = EXCLUDED.chat_id, 
+                                          name = EXCLUDED.name, 
+                                          username = EXCLUDED.username, 
+                                          contact = EXCLUDED.contact, 
+                                          email = EXCLUDED.email;
+                            """,
+                            (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"],
+                            user_steps[user_id]["contact"], user_steps[user_id]["email"])
+                        )
+                        conn.commit()
+                        cur.close()
+                        conn.close()
+                    except Exception as e:
+                        sent_message = await update.message.reply_text(f"❌ Error saving your data: {e}")
 
-            # ✅ Confirm registration complete
-            keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
+                # ✅ Confirm registration complete
+                keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
 
-            await update.message.reply_text("✅ Registration complete! VPASS PRO is now activated.", reply_markup=reply_markup)
+                sent_message = await update.message.reply_text("✅ Registration complete! VPASS PRO is now activated.", reply_markup=reply_markup)
+
+        # ✅ Store last bot message ID for deletion
+        user_steps[user_id]["prompt_message_id"] = sent_message.message_id
 
 
 async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
