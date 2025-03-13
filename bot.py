@@ -6,8 +6,7 @@ from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_p
 import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
-import phone_verifier  # Import phone verification module
-
+import re
 
 # Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
@@ -138,77 +137,41 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.message.chat_id
     user_input = update.message.text
 
-    # Debugging step: Print current user step
-    print(f"Current step for user {user_id}: {user_steps.get(user_id, {}).get('step', 'Unknown')}")
-
     if user_id not in user_steps:
-        user_steps[user_id] = {"step": "name"}  # ✅ Ensure user starts at the first step
+        user_steps[user_id] = {"step": "name"}  # Ensure user starts at the first step
 
     step = user_steps[user_id]["step"]
-    sent_message = None  # ✅ Ensure `sent_message` is always initialized
-
-    # ✅ Delete old messages (to keep chat clean)
-    try:
-        await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)
-        if "prompt_message_id" in user_steps[user_id]:
-            await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["prompt_message_id"])
-    except Exception:
-        pass  
 
     # ✅ Step 1: Ask for Name
     if step == "name":
         user_steps[user_id]["name"] = user_input
         user_steps[user_id]["step"] = "username"
-        sent_message = await update.message.reply_text("📛 Enter your Telegram username (@username):")
+        await update.message.reply_text("📛 Enter your Telegram username (@username):")
 
     # ✅ Step 2: Ask for Username
     elif step == "username":
         user_steps[user_id]["username"] = user_input
         user_steps[user_id]["step"] = "contact"
-        sent_message = await update.message.reply_text("📞 Enter your phone number (e.g., +601123020037):")
+        await update.message.reply_text("📞 Enter your phone number (e.g., +601123020037):")
 
-    # ✅ Step 3: Handle Phone Number (Ensures OTP is sent only after confirmation)
+    # ✅ Step 3: Validate Phone Number (No OTP)
     elif step == "contact":
-        # ✅ Validate phone number format
-        if not phone_verifier.validate_phone_number(user_input):
-            sent_message = await update.message.reply_text(
-                "❌ Invalid phone number format.\n📌 Please enter a valid phone number in international format (e.g., +601123020037)."
+        if not re.match(r"^\+\d{7,15}$", user_input):  # Ensures phone number is valid
+            await update.message.reply_text(
+                "❌ Invalid phone number format.\n"
+                "📌 Please enter a valid phone number in international format (e.g., +601123020037):"
             )
         else:
-            user_steps[user_id]["contact"] = user_input  # ✅ Store phone number
-
-            # ✅ Ask user to confirm the phone number before OTP is sent
-            keyboard = [
-                [InlineKeyboardButton("✅ Confirm", callback_data="confirm_phone")],
-                [InlineKeyboardButton("❌ Re-enter", callback_data="reenter_phone")]
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-
-            sent_message = await update.message.reply_text(
-                f"📞 You entered: {user_input}\n"
-                "📌 Please confirm your phone number before we send the OTP.",
-                reply_markup=reply_markup
-            )
-
-    # ✅ Step 4: Ensure OTP verification before proceeding
-    elif step == "verify_phone":
-        phone_number = user_steps[user_id]["contact"]  # ✅ Retrieve correct phone number
-        is_verified = await phone_verifier.verify_otp(phone_number, user_input)  # ✅ Use phone_number as key
-
-        if is_verified:
+            user_steps[user_id]["contact"] = user_input
             user_steps[user_id]["step"] = "email"
-            sent_message = await update.message.reply_text("✅ Phone verified!\n📧 Please enter your email address:")
-        else:
-            user_steps[user_id]["step"] = "verify_phone"  # Ensure user stays in OTP step
-            sent_message = await update.message.reply_text("❌ Incorrect OTP. Please try again:")
+            await update.message.reply_text("📧 Enter your email address:")
 
-    # ✅ Step 5: Ask for Email and Save Data to Database
+    # ✅ Step 4: Validate Email and Save Data
     elif step == "email":
-        if "@" not in user_input or "." not in user_input:
-            sent_message = await update.message.reply_text("❌ Invalid email format. Please enter a valid email address:")
+        if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", user_input):
+            await update.message.reply_text("❌ Invalid email format. Please enter a valid email address:")
         else:
-            user_steps[user_id]["email"] = user_input  # Save email
-            user_steps[user_id]["step"] = "complete"  # ✅ Move to final step
+            user_steps[user_id]["email"] = user_input
 
             # ✅ Save user data to the database
             conn = connect_db()
@@ -233,47 +196,13 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     cur.close()
                     conn.close()
                 except Exception as e:
-                    sent_message = await update.message.reply_text(f"❌ Error saving your data: {e}")
+                    await update.message.reply_text(f"❌ Error saving your data: {e}")
 
             # ✅ Confirm registration complete
             keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
 
-            sent_message = await update.message.reply_text("✅ Registration complete! VPASS PRO is now activated.", reply_markup=reply_markup)
-
-    else:
-        # ❌ Handle unknown steps (Debugging)
-        sent_message = await update.message.reply_text("⚠️ Unexpected error. Please restart your registration.")
-        print(f"❌ Error: User {user_id} is in an unknown state: {step}")
-
-    # ✅ Store last sent prompt message ID for deletion
-    if sent_message:
-        user_steps[user_id]["prompt_message_id"] = sent_message.message_id
-
-
-
-async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles the confirmation of the phone number before sending OTP"""
-    query = update.callback_query
-    user_id = query.from_user.id
-
-    if query.data == "confirm_phone":
-        phone_number = user_steps[user_id]["contact"]
-
-        otp_sent = await phone_verifier.send_telegram_otp(context, user_id)
-        if otp_sent:
-            user_steps[user_id]["step"] = "verify_phone"
-            await query.message.edit_text(
-                "📩 OTP has been sent to your Telegram inbox.\n"
-                "📌 Please check your messages and enter the code here to verify:"
-            )
-        else:
-            await query.message.edit_text(
-                "❌ Failed to send OTP. Please make sure you entered a valid Telegram phone number."
-            )
-    elif query.data == "reenter_phone":
-        user_steps[user_id]["step"] = "contact"
-        await query.message.edit_text("📞 Please enter your phone number again (e.g., +601123020037):")
+            await update.message.reply_text("✅ Registration complete! VPASS PRO is now activated.", reply_markup=reply_markup)
 
 
 
