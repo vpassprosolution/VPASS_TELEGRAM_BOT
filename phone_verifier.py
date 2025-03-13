@@ -2,7 +2,7 @@ import re
 import random
 from telegram import Bot
 
-# Store OTPs temporarily (linked to `user_id`)
+# Store OTPs temporarily (linked to user ID)
 phone_verification_codes = {}
 
 def validate_phone_number(phone_number):
@@ -12,13 +12,13 @@ def validate_phone_number(phone_number):
 
 def generate_otp():
     """Generate a random 6-digit OTP"""
-    return str(random.randint(100000, 999999))  # ✅ Ensure OTP is a string for proper comparison
+    return str(random.randint(100000, 999999))  # ✅ Ensure OTP is stored as a string for exact matching
 
 async def send_telegram_otp(context, user_id):
     """Send OTP via Telegram message to the user's chat ID"""
 
     otp_code = generate_otp()
-    phone_verification_codes[user_id] = otp_code  # ✅ Store OTP linked to `user_id`
+    phone_verification_codes[user_id] = otp_code  # ✅ Store OTP linked to user ID
 
     bot = context.bot  # Get bot instance
     try:
@@ -37,8 +37,12 @@ async def send_telegram_otp(context, user_id):
 
 async def verify_otp(user_id, user_input):
     """Check if the entered OTP is correct"""
-    stored_otp = phone_verification_codes.get(user_id)  # ✅ Get stored OTP using `user_id`
-    
+
+    # ✅ Ensure OTP is retrieved correctly
+    stored_otp = phone_verification_codes.get(user_id)
+
+    print(f"🔍 DEBUG: Retrieving OTP for user {user_id} - Stored OTP: {stored_otp}, User Input: {user_input}")
+
     if stored_otp and user_input.strip() == stored_otp.strip():
         del phone_verification_codes[user_id]  # ✅ Remove OTP after successful verification
         print(f"✅ DEBUG: OTP verified successfully for user {user_id}")
