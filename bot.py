@@ -191,19 +191,16 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
     # ✅ Step 4: Ensure OTP verification before proceeding
-      elif step == "verify_phone":
-          phone_number = user_steps[user_id]["contact"]  # ✅ Retrieve correct phone number
-          is_verified = await phone_verifier.verify_otp(phone_number, user_input)  # ✅ Use phone_number as key
+    elif step == "verify_phone":
+        phone_number = user_steps[user_id]["contact"]  # ✅ Retrieve correct phone number
+        is_verified = await phone_verifier.verify_otp(phone_number, user_input)  # ✅ Use phone_number as key
 
-
-          if is_verified:
-              user_steps[user_id]["step"] = "email"
-              sent_message = await update.message.reply_text("✅ Phone verified!\n📧 Please enter your email address:")
-          else:
-              user_steps[user_id]["step"] = "verify_phone"  # Ensure user stays in OTP step
-              sent_message = await update.message.reply_text("❌ Incorrect OTP. Please try again:")
-
-
+        if is_verified:
+            user_steps[user_id]["step"] = "email"
+            sent_message = await update.message.reply_text("✅ Phone verified!\n📧 Please enter your email address:")
+        else:
+            user_steps[user_id]["step"] = "verify_phone"  # Ensure user stays in OTP step
+            sent_message = await update.message.reply_text("❌ Incorrect OTP. Please try again:")
 
     # ✅ Step 5: Ask for Email and Save Data to Database
     elif step == "email":
@@ -252,6 +249,7 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ✅ Store last sent prompt message ID for deletion
     if sent_message:
         user_steps[user_id]["prompt_message_id"] = sent_message.message_id
+
 
 
 async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
