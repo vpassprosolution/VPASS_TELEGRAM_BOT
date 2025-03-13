@@ -14,23 +14,26 @@ def generate_otp():
     """Generate a random 6-digit OTP"""
     return random.randint(100000, 999999)
 
-async def send_telegram_otp(context, phone_number):
-    """Send OTP via Telegram message to the user's phone number (outside the bot)"""
-    otp_code = generate_otp()
-    phone_verification_codes[phone_number] = otp_code  # ✅ Store OTP linked to phone number
+async def send_telegram_otp(context, user_id):
+    """Send OTP via Telegram message to the user's chat ID"""
+    import random
+
+    otp_code = random.randint(100000, 999999)
+    phone_verification_codes[user_id] = otp_code  # ✅ Store OTP linked to user ID
 
     bot = context.bot  # Get bot instance
     try:
-        # ✅ Send OTP as a direct Telegram message to the phone number
+        # ✅ Send OTP as a Telegram message to the user (NOT to phone number)
         await bot.send_message(
-            chat_id=phone_number,  # Sending OTP to Telegram user associated with this number
+            chat_id=user_id,  # Use `user_id` (chat_id) instead of `phone_number`
             text=f"🔑 Your VPASS PRO verification code is: {otp_code}\n"
                  "Please enter this code in the bot to verify your phone number."
         )
         return True  # ✅ OTP sent successfully
     except Exception as e:
-        print(f"❌ Failed to send OTP via Telegram to {phone_number}: {e}")
+        print(f"❌ Failed to send OTP via Telegram: {e}")
         return False  # ❌ OTP failed to send
+
 
 async def verify_otp(phone_number, user_input):
     """Check if the entered OTP is correct"""

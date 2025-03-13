@@ -169,24 +169,34 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ✅ Step 3: Handle Phone Number (Ensures OTP is sent before proceeding)
     elif step == "contact":
-        if not phone_verifier.validate_phone_number(user_input):
+    # ✅ Check if user has a linked phone number in Telegram
+    user_data = await context.bot.get_chat(user_id)
+    
+    if not user_data or not user_data.phone_number:
+        sent_message = await update.message.reply_text(
+            "❌ Telegram does not provide your phone number automatically.\n"
+            "📌 Please enter a valid phone number in international format (e.g., +601123020037)."
+        )
+    elif user_input != f"+{user_data.phone_number}":
+        sent_message = await update.message.reply_text(
+            "❌ The phone number you entered does not match your Telegram number.\n"
+            "📌 Please enter the correct phone number linked to your Telegram account."
+        )
+    else:
+        user_steps[user_id]["contact"] = user_input
+        otp_sent = await phone_verifier.send_telegram_otp(context, user_id)
+
+        if otp_sent:
+            user_steps[user_id]["step"] = "verify_phone"
             sent_message = await update.message.reply_text(
-                "❌ Invalid phone number format.\n📌 Please enter a valid phone number in international format (e.g., +1234567890):"
+                "📩 OTP has been sent to your Telegram inbox.\n"
+                "📌 Please check your Telegram messages and enter the code here to verify:"
             )
         else:
-            user_steps[user_id]["contact"] = user_input
-            otp_sent = await phone_verifier.send_telegram_otp(context, user_input)
+            sent_message = await update.message.reply_text(
+                "❌ Failed to send OTP. Please make sure you entered a valid Telegram phone number."
+            )
 
-            if otp_sent:
-                user_steps[user_id]["step"] = "verify_phone"
-                sent_message = await update.message.reply_text(
-                    "📩 OTP has been sent to your Telegram inbox.\n"
-                    "📌 Please check your Telegram messages and enter the code here to verify:"
-                )
-            else:
-                sent_message = await update.message.reply_text(
-                    "❌ Failed to send OTP. Please make sure you entered a valid Telegram phone number."
-                )
 
     # ✅ Step 4: Ensure OTP verification before proceeding
     elif step == "verify_phone":
