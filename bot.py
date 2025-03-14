@@ -264,8 +264,10 @@ async def main():
 
     app = Application.builder().token(BOT_TOKEN).build()
 
-    # ✅ Schedule automatic membership check
-    app.job_queue.run_repeating(verify_active_membership, interval=3600, first=10)  # Runs every 1 hour
+    # ✅ Ensure JobQueue is initialized
+    job_queue = app.job_queue  # Ensure JobQueue is set up
+    job_queue.run_repeating(verify_active_membership, interval=3600, first=10)  # Runs every 1 hour
+
 
     # Handlers
     app.add_handler(CommandHandler("start", start))
@@ -316,7 +318,7 @@ async def main():
     app.run_polling()
 
 if __name__ == "__main__":
-    import nest_asyncio
-    nest_asyncio.apply()  # ✅ Fixes nested event loop issues
-    asyncio.get_event_loop().run_until_complete(main())  # ✅ Correct way to run an async function
+    import asyncio
+    asyncio.run(main())  # ✅ Correct way to start the bot
+
 
