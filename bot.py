@@ -146,7 +146,7 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)
             await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["prompt_message_id"])
         except Exception:
-            pass  
+            pass  # Ignore if message was already deleted
 
         if step == "name":
             user_steps[user_id]["name"] = user_input
@@ -176,6 +176,8 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     "📌 Please confirm your phone number before proceeding.",
                     reply_markup=reply_markup
                 )
+                # Store last bot message ID for deletion
+                user_steps[user_id]["prompt_message_id"] = sent_message.message_id
                 return  # ⛔ Stop here until user confirms
 
         elif step == "email":
@@ -196,11 +198,9 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     "📌 Please confirm your email before proceeding.",
                     reply_markup=reply_markup
                 )
+                # Store last bot message ID for deletion
+                user_steps[user_id]["prompt_message_id"] = sent_message.message_id
                 return  # ⛔ Stop here until user confirms
-
-        # ✅ Store last bot message ID for deletion
-        user_steps[user_id]["prompt_message_id"] = sent_message.message_id
-
 
 async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles confirmation of the phone number"""
@@ -219,7 +219,6 @@ async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYP
         # ✅ Ask user to enter phone number again
         user_steps[user_id]["step"] = "contact"
         await query.message.edit_text("📞 Please enter your phone number again (e.g., +601123020037):")
-
 
 async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles email confirmation & saves data to DB"""
@@ -267,6 +266,7 @@ async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # ✅ Ask user to enter email again
         user_steps[user_id]["step"] = "email"
         await query.message.edit_text("📧 Please enter your email address again:")
+
 
 
 
