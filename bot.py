@@ -261,6 +261,8 @@ async def check_membership_callback(update: Update, context: ContextTypes.DEFAUL
 async def main():
     """Main function to run the bot"""
     from ai_sentiment import show_instruments, handle_instrument_selection  
+    from subscription_handler import show_instruments as sub_show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
+    from ai_technical import show_technical_menu, show_timeframe_menu, handle_technical_selection
 
     app = Application.builder().token(BOT_TOKEN).build()
 
@@ -268,57 +270,52 @@ async def main():
     job_queue = app.job_queue
     job_queue.run_repeating(verify_active_membership, interval=3600, first=10)
 
-
-
-
-    # Handlers
+    # ✅ Command Handlers
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("admin", admin_panel))
+
+    # ✅ Callback Query Handlers (Buttons)
     app.add_handler(CallbackQueryHandler(register_user, pattern="register"))
-    app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))  # ✅ FIXED
+    app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))  
     app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))  
     app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))  
-    app.add_handler(CommandHandler("admin", admin_panel))
     app.add_handler(CallbackQueryHandler(add_user_prompt, pattern="admin_add_user"))
     app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
     app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))  
-    app.add_handler(CallbackQueryHandler(ai_agent_signal, pattern="ai_agent_signal"))  # ✅ New AI button handler
+
+    # ✅ AI Agent Instant Signal
+    app.add_handler(CallbackQueryHandler(ai_agent_signal, pattern="ai_agent_signal"))  
     app.add_handler(CallbackQueryHandler(ai_signal_handler.fetch_ai_signal, pattern="^ai_signal_"))
+
+    # ✅ News War Room
     app.add_handler(CallbackQueryHandler(show_vip_room_message, pattern="news_war_room"))
     app.add_handler(CallbackQueryHandler(delete_vip_message, pattern="delete_vip_message"))
+
+    # ✅ Registration Steps
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))  
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="confirm_phone"))
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="reenter_phone"))
     app.add_handler(CallbackQueryHandler(confirm_email, pattern="confirm_email"))
     app.add_handler(CallbackQueryHandler(confirm_email, pattern="reenter_email"))
     app.add_handler(CallbackQueryHandler(check_membership_callback, pattern="check_membership"))
 
-
-    
-
-    # Connect "VPASS SMART SIGNAL" button to subscription system
-    from subscription_handler import show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
-    from ai_technical import show_technical_menu, show_timeframe_menu, handle_technical_selection
-
-    app.add_handler(CallbackQueryHandler(show_instruments, pattern="vpass_smart_signal"))
+    # ✅ Subscription System (VPASS Smart Signal)
+    app.add_handler(CallbackQueryHandler(sub_show_instruments, pattern="vpass_smart_signal"))
     app.add_handler(CallbackQueryHandler(show_subscription_menu, pattern="^select_"))
     app.add_handler(CallbackQueryHandler(subscribe, pattern="^subscribe_"))
     app.add_handler(CallbackQueryHandler(unsubscribe, pattern="^unsubscribe_"))
     app.add_handler(CallbackQueryHandler(back_to_main, pattern="back_to_main"))
     app.add_handler(CallbackQueryHandler(back_to_instruments, pattern="back_to_instruments"))
+
+    # ✅ AI Technical Analysis
     app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^ai_technical$"))
     app.add_handler(CallbackQueryHandler(show_timeframe_menu, pattern="^instrument_.*$"))
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
     app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^back_to_technical_instruments$"))
-    
-   
+
     print("Bot is running...")
 
-    app.run_polling()
+    app.run_polling()  # ✅ Correctly runs the bot
 
-if __name__ == "__main__":
-    import asyncio
-    import nest_asyncio
 
-    nest_asyncio.apply()  # Prevents event loop issues
-    main()  # Run the bot without asyncio.run()
