@@ -132,7 +132,6 @@ async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sent_message = await query.message.reply_text("Please enter your name:")
     user_steps[user_id]["prompt_message_id"] = sent_message.message_id  
 
-
 async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Collects user registration details step by step and saves to database"""
     user_id = update.message.from_user.id
@@ -164,8 +163,20 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 sent_message = await update.message.reply_text("❌ Invalid phone number. Please enter in international format (e.g., +601123020037):")
             else:
                 user_steps[user_id]["contact"] = user_input
-                user_steps[user_id]["step"] = "email"
-                sent_message = await update.message.reply_text("📧 Enter your email address:")
+
+                # ✅ Ask user to confirm phone number before proceeding
+                keyboard = [
+                    [InlineKeyboardButton("✅ Confirm", callback_data="confirm_phone")],
+                    [InlineKeyboardButton("❌ Re-enter", callback_data="reenter_phone")]
+                ]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+
+                sent_message = await update.message.reply_text(
+                    f"📞 You entered: {user_input}\n"
+                    "📌 Please confirm your phone number before proceeding.",
+                    reply_markup=reply_markup
+                )
+                return  # ⛔ Stop here until user confirms
 
         elif step == "email":
             if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", user_input):
@@ -173,51 +184,31 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 user_steps[user_id]["email"] = user_input
 
-                # ✅ Save user data to the database
-                conn = connect_db()
-                if conn:
-                    try:
-                        cur = conn.cursor()
-                        cur.execute(
-                            """
-                            INSERT INTO users (user_id, chat_id, name, username, contact, email)
-                            VALUES (%s, %s, %s, %s, %s, %s)
-                            ON CONFLICT (user_id) 
-                            DO UPDATE SET chat_id = EXCLUDED.chat_id, 
-                                          name = EXCLUDED.name, 
-                                          username = EXCLUDED.username, 
-                                          contact = EXCLUDED.contact, 
-                                          email = EXCLUDED.email;
-                            """,
-                            (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"],
-                             user_steps[user_id]["contact"], user_steps[user_id]["email"])
-                        )
-                        conn.commit()
-                        cur.close()
-                        conn.close()
-                    except Exception as e:
-                        await update.message.reply_text(f"❌ Error saving your data: {e}")
-
-                # ✅ Ask the user to proceed manually by clicking "Start VPASS PRO"
-                keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
+                # ✅ Ask user to confirm email before proceeding
+                keyboard = [
+                    [InlineKeyboardButton("✅ Confirm", callback_data="confirm_email")],
+                    [InlineKeyboardButton("❌ Re-enter", callback_data="reenter_email")]
+                ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
 
-                sent_message = await update.message.reply_text("✅ Registration complete! Click below to start VPASS PRO.", reply_markup=reply_markup)
-
-                # ✅ Remove user from tracking after completion
-                del user_steps[user_id]
-
-                return  
+                sent_message = await update.message.reply_text(
+                    f"📧 You entered: {user_input}\n"
+                    "📌 Please confirm your email before proceeding.",
+                    reply_markup=reply_markup
+                )
+                return  # ⛔ Stop here until user confirms
 
         # ✅ Store last bot message ID for deletion
         user_steps[user_id]["prompt_message_id"] = sent_message.message_id
-
 
 
 async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles confirmation of the phone number"""
     query = update.callback_query
     user_id = query.from_user.id
+
+    # ✅ Acknowledge button press
+    await query.answer()
 
     if query.data == "confirm_phone":
         # ✅ Move to email step
@@ -228,6 +219,55 @@ async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYP
         # ✅ Ask user to enter phone number again
         user_steps[user_id]["step"] = "contact"
         await query.message.edit_text("📞 Please enter your phone number again (e.g., +601123020037):")
+
+
+async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles email confirmation & saves data to DB"""
+    query = update.callback_query
+    user_id = query.from_user.id
+    chat_id = query.message.chat_id
+
+    # ✅ Acknowledge button press
+    await query.answer()
+
+    if query.data == "confirm_email":
+        # ✅ Save user data to the database
+        conn = connect_db()
+        if conn:
+            try:
+                cur = conn.cursor()
+                cur.execute(
+                    """
+                    INSERT INTO users (user_id, chat_id, name, username, contact, email)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (user_id) 
+                    DO UPDATE SET chat_id = EXCLUDED.chat_id, 
+                                  name = EXCLUDED.name, 
+                                  username = EXCLUDED.username, 
+                                  contact = EXCLUDED.contact, 
+                                  email = EXCLUDED.email;
+                    """,
+                    (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"],
+                     user_steps[user_id]["contact"], user_steps[user_id]["email"])
+                )
+                conn.commit()
+                cur.close()
+                conn.close()
+            except Exception as e:
+                await query.message.reply_text(f"❌ Error saving your data: {e}")
+
+        keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.edit_text("✅ Registration complete! Click below to start VPASS PRO.", reply_markup=reply_markup)
+
+        # ✅ Remove user from tracking
+        del user_steps[user_id]
+
+    elif query.data == "reenter_email":
+        # ✅ Ask user to enter email again
+        user_steps[user_id]["step"] = "email"
+        await query.message.edit_text("📧 Please enter your email address again:")
+
 
 
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -261,6 +301,8 @@ def main():
     app.add_handler(CallbackQueryHandler(delete_vip_message, pattern="delete_vip_message"))
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="confirm_phone"))
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="reenter_phone"))
+    app.add_handler(CallbackQueryHandler(confirm_email, pattern="confirm_email"))
+    app.add_handler(CallbackQueryHandler(confirm_email, pattern="reenter_email"))
 
     
 
@@ -288,16 +330,22 @@ def main():
     app.run_polling()
 
 import os
+import sys
 
-if __name__ == "__main__":
-    lock_file = "/tmp/bot_running.lock"
+lock_file = "/tmp/bot_running.lock"
 
-    if os.path.exists(lock_file):
-        print("❌ Another instance of the bot is already running. Exiting...")
-    else:
-        with open(lock_file, "w") as f:
-            f.write("running")
+if os.path.exists(lock_file):
+    print("❌ Another instance of the bot is already running. Exiting...")
+    sys.exit(1)  # Exit immediately
+else:
+    with open(lock_file, "w") as f:
+        f.write("running")
 
+    try:
         print("✅ Starting the bot...")
         main()
+    finally:
+        if os.path.exists(lock_file):
+            os.remove(lock_file)  # Ensure the lock file is removed when the bot stops
+
 
