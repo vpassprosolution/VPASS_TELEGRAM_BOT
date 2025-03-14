@@ -18,13 +18,10 @@ BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
 user_steps = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles the /start command and checks if the user is still a channel member."""
+    """Handles the /start command and starts user registration."""
     from ai_sentiment import show_instruments  
 
     user_id = update.message.from_user.id
-
-    # ✅ Run membership verification before allowing access
-    await check_membership(update, context, user_steps)  # ✅ Now passing user_steps
 
     # ✅ Check if the user is already registered
     conn = connect_db()
@@ -42,9 +39,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"🌑 Welcome back to world of AI {username}🌑", reply_markup=reply_markup)
             return
 
+    # ✅ Do NOT check membership here! We allow users to register first.
+
     # Send welcome image
     welcome_image = "welcome.png"
-
     with open(welcome_image, "rb") as photo:
         await update.message.reply_photo(photo=photo)
 
@@ -55,6 +53,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Store message ID so we can delete it later
     context.user_data["button_message"] = sent_message.message_id
+
 
 
 
@@ -245,11 +244,45 @@ async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_steps[user_id]["step"] = "email"
         await query.message.edit_text("📧 Please enter your email address again:")
 
+
 async def check_membership_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles the '✅ I Have Joined' button by calling `check_membership()`."""
+    """Handles the '✅ I Have Joined' button by checking if the user joined the Telegram channel."""
     from channel_verification import check_membership  # ✅ Import function inside to prevent circular import
     global user_steps
-    return await check_membership(update, context, user_steps)
+
+    query = update.callback_query
+    await query.answer()  # ✅ Acknowledge button press (prevents UI bugs)
+
+    user_id = query.from_user.id
+
+    if user_id in user_steps:
+        # ✅ Call the function to check membership
+        is_member = await check_membership(update, context, user_steps)  
+
+        if is_member:  # ✅ If user has joined the channel
+            del user_steps[user_id]  # ✅ Remove user from pending registration list
+            keyboard = [[InlineKeyboardButton("Go to Main Menu", callback_data="main_menu")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.message.edit_text(
+                "✅ Membership verified! Welcome to VPASS PRO.\nClick below to continue:",
+                reply_markup=reply_markup
+            )
+        else:
+            # ❌ User is still NOT a member → Show the button again
+            keyboard = [[InlineKeyboardButton("✅ I Have Joined", callback_data="check_membership")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            await query.message.edit_text(
+                "❌ You have NOT joined the channel!\n\n"
+                "🚨 Please **join here first:** [Join Here](https://t.me/vessacommunity)\n"
+                "Then click '✅ I Have Joined' again.",
+                parse_mode="Markdown",
+                reply_markup=reply_markup
+            )
+    else:
+        await query.message.reply_text("❌ Registration process not found. Please restart by typing /start.")
+
 
 
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):

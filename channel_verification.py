@@ -55,44 +55,24 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                             conn.close()
 
                             # ✅ Now the bot confirms registration is complete
-                            keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
-                            reply_markup = InlineKeyboardMarkup(keyboard)
-
-                            await update.message.reply_text(
-                                "✅ Registration complete! You have successfully joined the channel!\n\n"
-                                "Click below to start VPASS PRO:",
-                                reply_markup=reply_markup
-                            )
-
-                            # ✅ Remove user tracking
-                            del user_steps[user_id]
-                        else:
-                            await update.message.reply_text("❌ User data not found. Please restart registration.")
+                            return True  # ✅ User is a member, return True
 
                     except Exception as e:
-                        await update.message.reply_text(f"❌ Database error: {e}")
+                        print(f"❌ Database error: {e}")
                         conn.rollback()
                     finally:
                         conn.close()
 
-            else:
-                # ❌ User is not a member - Block them until they join
-                keyboard = [[InlineKeyboardButton("✅ I Have Joined", callback_data="check_membership")]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-
-                await update.message.reply_text(
-                    "❌ You have NOT joined the channel!\n\n"
-                    "🚨 Please **join here first:** [Join Here](https://t.me/vessacommunity)\n"
-                    "Then click '✅ I Have Joined' again.",
-                    parse_mode="Markdown",
-                    reply_markup=reply_markup
-                )
+            # ❌ User is NOT a member
+            return False  
 
         else:
-            await update.message.reply_text("❌ Failed to check membership. Please try again later.")
+            print("❌ Failed to check membership. API Error.")
+            return False  # ❌ Return False in case of an API failure
 
     except Exception as e:
-        await update.message.reply_text(f"❌ Error checking Telegram membership: {e}")
+        print(f"❌ Error checking Telegram membership: {e}")
+        return False  # ❌ Return False in case of an exception
 
 
 
