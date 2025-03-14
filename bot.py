@@ -17,8 +17,6 @@ BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
 # Step tracking for user registration
 user_steps = {}
 
-
-
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the /start command and checks if the user is still a channel member."""
     from ai_sentiment import show_instruments  
@@ -57,6 +55,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Store message ID so we can delete it later
     context.user_data["button_message"] = sent_message.message_id
+
 
 
 
