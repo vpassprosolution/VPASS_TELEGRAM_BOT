@@ -345,23 +345,5 @@ def main():
 
     app.run_polling()
 
-import os
-import sys
-
-lock_file = "/tmp/bot_running.lock"
-
-if os.path.exists(lock_file):
-    print("❌ Another instance of the bot is already running. Exiting...")
-    sys.exit(1)  # Exit immediately
-else:
-    with open(lock_file, "w") as f:
-        f.write("running")
-
-    try:
-        print("✅ Starting the bot...")
-        main()
-    finally:
-        if os.path.exists(lock_file):
-            os.remove(lock_file)  # Ensure the lock file is removed when the bot stops
-
-
+if __name__ == "__main__":
+    main()
