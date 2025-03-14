@@ -18,13 +18,13 @@ BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
 user_steps = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles the /start command and starts user registration with cleanup."""
+    """Handles the /start command and resets everything before starting registration."""
     from ai_sentiment import show_instruments  
 
     user_id = update.message.from_user.id
     chat_id = update.message.chat_id
 
-    # ✅ Delete all previous registration messages
+    # ✅ DELETE ALL PREVIOUS MESSAGES (If Any)
     if user_id in user_steps and "messages" in user_steps[user_id]:
         for msg_id in user_steps[user_id]["messages"]:
             try:
@@ -32,10 +32,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception:
                 pass  # Ignore if message already deleted
 
-    # ✅ Reset user registration steps
+    # ✅ RESET USER REGISTRATION TRACKING
     user_steps[user_id] = {"messages": []}  
 
-    # ✅ Check if the user is already registered
+    # ✅ CHECK IF USER IS ALREADY REGISTERED
     conn = connect_db()
     if conn:
         cur = conn.cursor()
@@ -55,13 +55,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             user_steps[user_id]["messages"].append(sent_message.message_id)
             return
 
-    # ✅ Send welcome image
+    # ✅ SEND WELCOME IMAGE
     welcome_image = "welcome.png"
     with open(welcome_image, "rb") as photo:
         sent_photo = await update.message.reply_photo(photo=photo)
         user_steps[user_id]["messages"].append(sent_photo.message_id)
 
-    # ✅ Send welcome text with registration button
+    # ✅ SEND REGISTRATION BUTTON
     keyboard = [[InlineKeyboardButton("COMPLETE YOUR REGISTRATION", callback_data="register")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     sent_message = await update.message.reply_text(
@@ -69,8 +69,35 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
-    # ✅ Store message IDs for cleanup next time
+    # ✅ Store message IDs for cleanup on restart
     user_steps[user_id]["messages"].append(sent_message.message_id)
+
+
+async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles user registration when they click the button"""
+    query = update.callback_query
+    user_id = query.from_user.id
+    chat_id = query.message.chat_id
+
+    # ✅ DELETE THE "COMPLETE YOUR REGISTRATION" BUTTON
+    try:
+        await context.bot.delete_message(chat_id=chat_id, message_id=query.message.message_id)
+    except Exception:
+        pass  # Ignore if already deleted
+
+    # ✅ DELETE PREVIOUS REGISTRATION ATTEMPTS (IF ANY)
+    if user_id in user_steps and "messages" in user_steps[user_id]:
+        for msg_id in user_steps[user_id]["messages"]:
+            try:
+                await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
+            except Exception:
+                pass  # Ignore if message already deleted
+
+    # ✅ START REGISTRATION PROCESS
+    user_steps[user_id] = {"step": "name", "messages": []}
+    sent_message = await query.message.reply_text("Please enter your name:")
+    user_steps[user_id]["messages"].append(sent_message.message_id)
+
 
 
 async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
