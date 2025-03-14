@@ -227,14 +227,48 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 else:
                     update_channel_status(user_id, False)  # ❌ Mark user as NOT joined
-                    sent_message = await update.message.reply_text(
-                        "🚫 You must join [Vessa Community](https://t.me/vessacommunity) before accessing the bot.",
-                        parse_mode="Markdown"
+                    
+                    # ⛔️ STOP registration & ask user to join first
+                    keyboard = [[InlineKeyboardButton("✅ I Have Joined", callback_data="check_membership")]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+
+                    await update.message.reply_text(
+                        "🚫 You must join [Vessa Community](https://t.me/vessacommunity) before accessing the bot.\n\n"
+                        "🔹 **After joining, click the button below.**",
+                        parse_mode="Markdown",
+                        reply_markup=reply_markup
                     )
+
+                    return  # ⛔️ Stops registration here!
+
+
 
         # ✅ Store last bot message ID for deletion
         user_steps[user_id]["prompt_message_id"] = sent_message.message_id
 
+async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Checks if the user has joined the channel after clicking 'I Have Joined'."""
+    query = update.callback_query
+    user_id = query.from_user.id
+
+    from channel_verification import is_user_in_channel
+    from db import update_channel_status
+
+    if is_user_in_channel(user_id):
+        update_channel_status(user_id, True)  # ✅ Mark user as joined
+
+        # ✅ Show "Registration Complete"
+        keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        await query.message.edit_text("✅ Registration complete! VPASS PRO is now activated.", reply_markup=reply_markup)
+
+    else:
+        await query.message.edit_text(
+            "🚫 You are still not in the channel!\n\n"
+            "🔹 **Please join [Vessa Community](https://t.me/vessacommunity) and click the button again.**",
+            parse_mode="Markdown"
+        )
 
 
 async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -284,6 +318,7 @@ def main():
     app.add_handler(CallbackQueryHandler(delete_vip_message, pattern="delete_vip_message"))
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="confirm_phone"))
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="reenter_phone"))
+    app.add_handler(CallbackQueryHandler(check_membership, pattern="check_membership"))
 
     
 
