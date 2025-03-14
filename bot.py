@@ -121,20 +121,20 @@ async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
 
-    # ✅ Delete the button after clicking
+    # Delete the button after clicking
     try:
         await context.bot.delete_message(chat_id=query.message.chat_id, message_id=context.user_data["button_message"])
     except Exception:
         pass  
 
-    # ✅ Start registration process
+    # Start registration process
     user_steps[user_id] = {"step": "name"}
-    sent_message = await query.message.reply_text("📛 Please enter your full name:")
+    sent_message = await query.message.reply_text("Please enter your name:")
     user_steps[user_id]["prompt_message_id"] = sent_message.message_id  
 
 
 async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Collects user registration details step by step with auto-delete feature & double confirmation"""
+    """Collects user registration details step by step and saves to database"""
     user_id = update.message.from_user.id
     chat_id = update.message.chat_id
     user_input = update.message.text
@@ -142,7 +142,7 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id in user_steps:
         step = user_steps[user_id]["step"]
 
-        # ✅ Try deleting previous messages
+        # ✅ Delete user's input message and previous bot message
         try:
             await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)
             await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["prompt_message_id"])
@@ -164,19 +164,8 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 sent_message = await update.message.reply_text("❌ Invalid phone number. Please enter in international format (e.g., +601123020037):")
             else:
                 user_steps[user_id]["contact"] = user_input
-
-                # ✅ Ask user to confirm phone number before proceeding
-                keyboard = [
-                    [InlineKeyboardButton("✅ Confirm", callback_data="confirm_phone")],
-                    [InlineKeyboardButton("❌ Re-enter", callback_data="reenter_phone")]
-                ]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-
-                sent_message = await update.message.reply_text(
-                    f"📞 You entered: {user_input}\n"
-                    "📌 Please confirm your phone number before proceeding.",
-                    reply_markup=reply_markup
-                )
+                user_steps[user_id]["step"] = "email"
+                sent_message = await update.message.reply_text("📧 Enter your email address:")
 
         elif step == "email":
             if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", user_input):
@@ -184,60 +173,61 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 user_steps[user_id]["email"] = user_input
 
-                # ✅ Save user data to database
+                # ✅ Save user data to the database
                 conn = connect_db()
                 if conn:
                     try:
                         cur = conn.cursor()
                         cur.execute(
                             """
-                            INSERT INTO users (user_id, chat_id, name, username, contact, email, joined_channel)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s)
+                            INSERT INTO users (user_id, chat_id, name, username, contact, email)
+                            VALUES (%s, %s, %s, %s, %s, %s)
                             ON CONFLICT (user_id) 
                             DO UPDATE SET chat_id = EXCLUDED.chat_id, 
                                           name = EXCLUDED.name, 
                                           username = EXCLUDED.username, 
                                           contact = EXCLUDED.contact, 
-                                          email = EXCLUDED.email, 
-                                          joined_channel = EXCLUDED.joined_channel;
+                                          email = EXCLUDED.email;
                             """,
                             (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"],
-                             user_steps[user_id]["contact"], user_steps[user_id]["email"], False)
+                             user_steps[user_id]["contact"], user_steps[user_id]["email"])
                         )
                         conn.commit()
                         cur.close()
                         conn.close()
                     except Exception as e:
-                        sent_message = await update.message.reply_text(f"❌ Error saving your data: {e}")
+                        await update.message.reply_text(f"❌ Error saving your data: {e}")
 
-                # ✅ Registration Complete Message
+                # ✅ Ask the user to proceed manually by clicking "Start VPASS PRO"
                 keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
+
                 sent_message = await update.message.reply_text("✅ Registration complete! Click below to start VPASS PRO.", reply_markup=reply_markup)
 
-                # ✅ Remove user from tracking
+                # ✅ Remove user from tracking after completion
                 del user_steps[user_id]
+
+                return  
 
         # ✅ Store last bot message ID for deletion
         user_steps[user_id]["prompt_message_id"] = sent_message.message_id
 
 
+
 async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles phone number confirmation"""
+    """Handles confirmation of the phone number"""
     query = update.callback_query
     user_id = query.from_user.id
 
-    await query.answer()  
-
     if query.data == "confirm_phone":
+        # ✅ Move to email step
         user_steps[user_id]["step"] = "email"
         await query.message.edit_text("📧 Enter your email address:")
 
     elif query.data == "reenter_phone":
+        # ✅ Ask user to enter phone number again
         user_steps[user_id]["step"] = "contact"
         await query.message.edit_text("📞 Please enter your phone number again (e.g., +601123020037):")
-
-
 
 
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -271,8 +261,6 @@ def main():
     app.add_handler(CallbackQueryHandler(delete_vip_message, pattern="delete_vip_message"))
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="confirm_phone"))
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="reenter_phone"))
-    app.add_handler(CallbackQueryHandler(confirm_email, pattern="confirm_email"))
-    app.add_handler(CallbackQueryHandler(confirm_email, pattern="reenter_email"))
 
     
 
@@ -299,6 +287,17 @@ def main():
 
     app.run_polling()
 
+import os
 
-print("✅ Starting the bot...")
-main()
+if __name__ == "__main__":
+    lock_file = "/tmp/bot_running.lock"
+
+    if os.path.exists(lock_file):
+        print("❌ Another instance of the bot is already running. Exiting...")
+    else:
+        with open(lock_file, "w") as f:
+            f.write("running")
+
+        print("✅ Starting the bot...")
+        main()
+
