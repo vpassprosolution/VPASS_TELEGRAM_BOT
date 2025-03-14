@@ -264,9 +264,11 @@ async def main():
 
     app = Application.builder().token(BOT_TOKEN).build()
 
-    # ✅ Ensure JobQueue is initialized
-    job_queue = app.job_queue  # Ensure JobQueue is set up
+    # Initialize job_queue
+    job_queue = app.job_queue
     job_queue.run_repeating(verify_active_membership, interval=3600, first=10)  # Runs every 1 hour
+
+
 
 
     # Handlers
@@ -317,15 +319,7 @@ async def main():
 
     app.run_polling()
 
+
 if __name__ == "__main__":
     import asyncio
-
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-    loop.run_until_complete(main())  # ✅ Correct way to run the bot
-
-
+    asyncio.run(main())  # Starts the bot with polling
