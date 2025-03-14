@@ -218,7 +218,13 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 if is_user_in_channel(user_id):
                     update_channel_status(user_id, True)  # ✅ Mark user as joined
-                    sent_message = await update.message.reply_text("✅ You have successfully verified your email and joined the channel! Welcome to VPASS PRO.")
+
+                    # ✅ NOW show "Registration Complete" after channel verification
+                    keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+
+                    sent_message = await update.message.reply_text("✅ Registration complete! VPASS PRO is now activated.", reply_markup=reply_markup)
+
                 else:
                     update_channel_status(user_id, False)  # ❌ Mark user as NOT joined
                     sent_message = await update.message.reply_text(
@@ -226,15 +232,8 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         parse_mode="Markdown"
                     )
 
-                # ✅ Confirm registration complete
-                keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-
-                sent_message = await update.message.reply_text("✅ Registration complete! VPASS PRO is now activated.", reply_markup=reply_markup)
-
         # ✅ Store last bot message ID for deletion
         user_steps[user_id]["prompt_message_id"] = sent_message.message_id
-
 
 
 
