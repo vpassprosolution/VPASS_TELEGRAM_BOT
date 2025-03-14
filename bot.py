@@ -26,7 +26,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
 
     # ✅ Run membership verification before allowing access
-    await check_membership(update, context)  
+    await check_membership(update, context, user_steps)  # ✅ Now passing user_steps
 
     # ✅ Check if the user is already registered
     conn = connect_db()
@@ -44,7 +44,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"🌑 Welcome back to world of AI {username}🌑", reply_markup=reply_markup)
             return
 
-
     # Send welcome image
     welcome_image = "welcome.png"
 
@@ -58,6 +57,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Store message ID so we can delete it later
     context.user_data["button_message"] = sent_message.message_id
+
 
 
 
