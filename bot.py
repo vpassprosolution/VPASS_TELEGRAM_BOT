@@ -318,5 +318,7 @@ async def main():
 
 if __name__ == "__main__":
     import asyncio
-    asyncio.run(main())  # Starts the bot with polling
-   
+    import nest_asyncio
+
+    nest_asyncio.apply()  # Prevents event loop issues
+    main()  # Run the bot without asyncio.run()
