@@ -7,6 +7,8 @@ import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
 import re
+from channel_verification import is_user_in_channel
+from db import update_channel_status, get_user_status
 
 # Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
@@ -209,6 +211,20 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         conn.close()
                     except Exception as e:
                         sent_message = await update.message.reply_text(f"❌ Error saving your data: {e}")
+                
+                # ✅ Check if the user has joined the Telegram channel
+                from channel_verification import is_user_in_channel
+                from db import update_channel_status
+
+                if is_user_in_channel(user_id):
+                    update_channel_status(user_id, True)  # ✅ Mark user as joined
+                    sent_message = await update.message.reply_text("✅ You have successfully verified your email and joined the channel! Welcome to VPASS PRO.")
+                else:
+                    update_channel_status(user_id, False)  # ❌ Mark user as NOT joined
+                    sent_message = await update.message.reply_text(
+                        "🚫 You must join [Vessa Community](https://t.me/vessacommunity) before accessing the bot.",
+                        parse_mode="Markdown"
+                    )
 
                 # ✅ Confirm registration complete
                 keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
@@ -218,6 +234,8 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # ✅ Store last bot message ID for deletion
         user_steps[user_id]["prompt_message_id"] = sent_message.message_id
+
+
 
 
 async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
