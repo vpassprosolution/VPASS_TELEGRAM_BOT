@@ -7,7 +7,8 @@ import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
 import re
-from channel_verification import check_membership
+app.add_handler(CallbackQueryHandler(lambda update, context: check_membership(update, context, user_steps), pattern="check_membership"))
+
 
 
 # Bot Token

@@ -8,7 +8,7 @@ from telegram.ext import ContextTypes
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
 CHANNEL_USERNAME = "vessacommunity"  # Your channel username without @
 
-async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, user_steps):
     """Checks if the user has joined the Telegram channel before saving registration"""
     query = update.callback_query
     user_id = query.from_user.id
@@ -31,39 +31,43 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if conn:
                     try:
                         cur = conn.cursor()
-                        cur.execute(
-                            """
-                            INSERT INTO users (user_id, chat_id, name, username, contact, email, is_member)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s)
-                            ON CONFLICT (user_id) 
-                            DO UPDATE SET chat_id = EXCLUDED.chat_id, 
-                                          name = EXCLUDED.name, 
-                                          username = EXCLUDED.username, 
-                                          contact = EXCLUDED.contact, 
-                                          email = EXCLUDED.email,
-                                          is_member = TRUE;
-                            """,
-                            (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"],
-                             user_steps[user_id]["contact"], user_steps[user_id]["email"], True)
-                        )
-                        conn.commit()
-                        cur.close()
-                        conn.close()
+                        if user_id in user_steps:  # Ensure user data exists
+                            cur.execute(
+                                """
+                                INSERT INTO users (user_id, chat_id, name, username, contact, email, is_member)
+                                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                ON CONFLICT (user_id) 
+                                DO UPDATE SET chat_id = EXCLUDED.chat_id, 
+                                              name = EXCLUDED.name, 
+                                              username = EXCLUDED.username, 
+                                              contact = EXCLUDED.contact, 
+                                              email = EXCLUDED.email,
+                                              is_member = TRUE;
+                                """,
+                                (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"],
+                                 user_steps[user_id]["contact"], user_steps[user_id]["email"], True)
+                            )
+                            conn.commit()
+                            cur.close()
+                            conn.close()
+
+                            # ✅ Show "Start VPASS PRO" button after successful verification
+                            keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
+                            reply_markup = InlineKeyboardMarkup(keyboard)
+
+                            await query.message.edit_text(
+                                "✅ Registration complete! You have successfully joined the channel!\n\n"
+                                "Click below to start VPASS PRO:",
+                                reply_markup=reply_markup
+                            )
+
+                            # ✅ Remove user tracking
+                            del user_steps[user_id]
+                        else:
+                            await query.message.reply_text("❌ User data not found. Please restart registration.")
+
                     except Exception as e:
                         await query.message.reply_text(f"❌ Database error: {e}")
-
-                # ✅ Show "Start VPASS PRO" button after successful verification
-                keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-
-                await query.message.edit_text(
-                    "✅ Registration complete! You have successfully joined the channel!\n\n"
-                    "Click below to start VPASS PRO:",
-                    reply_markup=reply_markup
-                )
-
-                # ✅ Remove user tracking
-                del user_steps[user_id]
 
             else:
                 # ❌ User is not a member - Show temporary warning and delete after 5 seconds
