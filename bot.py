@@ -9,6 +9,7 @@ from telegram.ext import CallbackQueryHandler
 import re
 from telegram.ext import ContextTypes
 from channel_verification import check_membership
+from telegram.ext import JobQueue
 
 # Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
@@ -16,13 +17,18 @@ BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
 # Step tracking for user registration
 user_steps = {}
 
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles the /start command"""
+    """Handles the /start command and checks if the user is still a channel member."""
     from ai_sentiment import show_instruments  
 
     user_id = update.message.from_user.id
 
-    # Check if the user is already registered
+    # ✅ Run membership verification before allowing access
+    await check_membership(update, context)  
+
+    # ✅ Check if the user is already registered
     conn = connect_db()
     if conn:
         cur = conn.cursor()
@@ -37,6 +43,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup = InlineKeyboardMarkup(keyboard)
             await update.message.reply_text(f"🌑 Welcome back to world of AI {username}🌑", reply_markup=reply_markup)
             return
+
 
     # Send welcome image
     welcome_image = "welcome.png"
@@ -258,9 +265,13 @@ async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
     """Main function to run the bot"""
     from ai_sentiment import show_instruments, handle_instrument_selection  
+    from channel_verification import verify_active_membership  # ✅ Import the periodic check
 
     app = Application.builder().token(BOT_TOKEN).build()
+    job_queue = app.job_queue
 
+    # ✅ Run membership verification every 30 minutes
+    job_queue.run_repeating(verify_active_membership, interval=1800, first=10)  
     # Handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(register_user, pattern="register"))
