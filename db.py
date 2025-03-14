@@ -13,13 +13,13 @@ def connect_db():
         return None
 
 def create_table():
-    """Creates the users table if it doesn't exist."""
+    """Creates the users table if it doesn't exist (without joined_channel)."""
     conn = connect_db()
     if conn:
         try:
             cur = conn.cursor()
 
-            # ✅ Create the users table (if not exists) without the 'joined_channel' column
+            # ✅ Create the users table (if not exists) without joined_channel
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS users (
                     user_id BIGINT PRIMARY KEY,
@@ -34,24 +34,9 @@ def create_table():
             conn.commit()
             cur.close()
             conn.close()
-            print("Table created/updated successfully.")
+            print("Table created successfully.")
         except Exception as e:
             print("Error creating/updating table:", e)
-
-def get_user_status(user_id):
-    """Retrieves user's status from the database (checks if the user exists)."""
-    conn = connect_db()
-    if conn:
-        try:
-            cur = conn.cursor()
-            cur.execute("SELECT 1 FROM users WHERE user_id = %s;", (user_id,))
-            result = cur.fetchone()
-            cur.close()
-            conn.close()
-            return result is not None  # Returns True if user exists, otherwise False
-        except Exception as e:
-            print("Error fetching user status:", e)
-            return False
 
 # Run this function once to create/update the table
 if __name__ == "__main__":
