@@ -264,11 +264,6 @@ async def main():
 
     app = Application.builder().token(BOT_TOKEN).build()
 
-    # Initialize job_queue
-    job_queue = app.job_queue
-    job_queue.run_repeating(verify_active_membership, interval=3600, first=10)  # Runs every 1 hour
-
-
 
 
     # Handlers
