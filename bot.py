@@ -17,6 +17,16 @@ BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
 # Step tracking for user registration
 user_steps = {}
 
+async def delete_previous_messages(user_id, chat_id, context):
+    """Deletes all previous messages related to the user."""
+    if user_id in user_steps and "messages" in user_steps[user_id]:
+        for msg_id in user_steps[user_id]["messages"]:
+            try:
+                await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
+            except Exception:
+                pass  
+        user_steps[user_id]["messages"] = []  
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the /start command and resets everything before starting registration."""
     from ai_sentiment import show_instruments  
@@ -24,13 +34,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     chat_id = update.message.chat_id
 
-    # ✅ DELETE ALL PREVIOUS MESSAGES (If Any)
-    if user_id in user_steps and "messages" in user_steps[user_id]:
-        for msg_id in user_steps[user_id]["messages"]:
-            try:
-                await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
-            except Exception:
-                pass  # Ignore if message already deleted
+    # ✅ DELETE ALL PREVIOUS MESSAGES BEFORE RESTARTING
+    await delete_previous_messages(user_id, chat_id, context)
 
     # ✅ RESET USER REGISTRATION TRACKING
     user_steps[user_id] = {"messages": []}  
@@ -72,7 +77,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ✅ Store message IDs for cleanup on restart
     user_steps[user_id]["messages"].append(sent_message.message_id)
 
-
 async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles user registration when they click the button"""
     query = update.callback_query
@@ -83,20 +87,16 @@ async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         await context.bot.delete_message(chat_id=chat_id, message_id=query.message.message_id)
     except Exception:
-        pass  # Ignore if already deleted
+        pass  
 
-    # ✅ DELETE PREVIOUS REGISTRATION ATTEMPTS (IF ANY)
-    if user_id in user_steps and "messages" in user_steps[user_id]:
-        for msg_id in user_steps[user_id]["messages"]:
-            try:
-                await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
-            except Exception:
-                pass  # Ignore if message already deleted
+    # ✅ DELETE PREVIOUS REGISTRATION ATTEMPTS
+    await delete_previous_messages(user_id, chat_id, context)
 
     # ✅ START REGISTRATION PROCESS
     user_steps[user_id] = {"step": "name", "messages": []}
     sent_message = await query.message.reply_text("Please enter your name:")
     user_steps[user_id]["messages"].append(sent_message.message_id)
+
 
 
 
