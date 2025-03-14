@@ -264,22 +264,25 @@ async def check_membership_callback(update: Update, context: ContextTypes.DEFAUL
             keyboard = [[InlineKeyboardButton("Go to Main Menu", callback_data="main_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await query.message.edit_text(
-                "✅ Membership verified! Welcome to VPASS PRO.\nClick below to continue:",
-                reply_markup=reply_markup
-            )
+            # ✅ Check if the message needs to be updated before editing
+            new_text = "✅ Membership verified! Welcome to VPASS PRO.\nClick below to continue:"
+            if query.message.text != new_text:
+                await query.message.edit_text(new_text, reply_markup=reply_markup)
+
         else:
             # ❌ User is still NOT a member → Show the button again
             keyboard = [[InlineKeyboardButton("✅ I Have Joined", callback_data="check_membership")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
 
-            await query.message.edit_text(
+            new_text = (
                 "❌ You have NOT joined the channel!\n\n"
                 "🚨 Please **join here first:** [Join Here](https://t.me/vessacommunity)\n"
-                "Then click '✅ I Have Joined' again.",
-                parse_mode="Markdown",
-                reply_markup=reply_markup
+                "Then click '✅ I Have Joined' again."
             )
+
+            # ✅ Prevent unnecessary edits
+            if query.message.text != new_text:
+                await query.message.edit_text(new_text, parse_mode="Markdown", reply_markup=reply_markup)
     else:
         await query.message.reply_text("❌ Registration process not found. Please restart by typing /start.")
 
