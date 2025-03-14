@@ -273,7 +273,7 @@ def main():
 
     # Handlers
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(register_user, pattern="register"))
+    app.add_handler(CallbackQueryHandler(start_registration, pattern="register"))
     app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))  # ✅ FIXED
     app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))  
