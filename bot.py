@@ -245,7 +245,11 @@ async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_steps[user_id]["step"] = "email"
         await query.message.edit_text("📧 Please enter your email address again:")
 
-
+async def check_membership_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles the '✅ I Have Joined' button by calling `check_membership()`."""
+    from channel_verification import check_membership  # ✅ Import function inside to prevent circular import
+    global user_steps
+    return await check_membership(update, context, user_steps)
 
 
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
