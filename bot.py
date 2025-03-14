@@ -221,6 +221,25 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # ✅ Store last bot message ID for deletion
         user_steps[user_id]["prompt_message_id"] = sent_message.message_id
 
+
+async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles phone number confirmation"""
+    query = update.callback_query
+    user_id = query.from_user.id
+
+    await query.answer()  
+
+    if query.data == "confirm_phone":
+        user_steps[user_id]["step"] = "email"
+        await query.message.edit_text("📧 Enter your email address:")
+
+    elif query.data == "reenter_phone":
+        user_steps[user_id]["step"] = "contact"
+        await query.message.edit_text("📞 Please enter your phone number again (e.g., +601123020037):")
+
+
+
+
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the 'START VPASS PRO NOW' button click"""
     query = update.callback_query
