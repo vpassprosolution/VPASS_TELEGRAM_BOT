@@ -307,14 +307,8 @@ async def main():
     app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^back_to_technical_instruments$"))
     
    
-
-
-
     print("Bot is running...")
 
-    app.run_polling()
+    app.run_polling()  # Starts polling and running the bot
 
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())  # Starts the bot with polling
+   
