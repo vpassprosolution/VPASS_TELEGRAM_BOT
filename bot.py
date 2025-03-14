@@ -244,12 +244,6 @@ async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_steps[user_id]["step"] = "email"
         await query.message.edit_text("📧 Please enter your email address again:")
 
-
-async def schedule_membership_check(application):
-    """Schedule a periodic job to check if users are still in the channel."""
-    job_queue = application.job_queue
-    job_queue.run_repeating(verify_active_membership, interval=3600, first=10)  # Runs every 1 hour
-
     
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the 'START VPASS PRO NOW' button click"""
@@ -259,19 +253,19 @@ async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await main_menu(update, context)
 
 
+async def check_membership_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Passes `user_steps` correctly to check_membership"""
+    global user_steps
+    return await check_membership(update, context, user_steps)
 
-def check_membership_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    global user_steps  # Ensure it is accessible
-    return check_membership(update, context, user_steps)
-
-
-def main():
+async def main():
     """Main function to run the bot"""
     from ai_sentiment import show_instruments, handle_instrument_selection  
 
     app = Application.builder().token(BOT_TOKEN).build()
 
-    asyncio.create_task(schedule_membership_check(app))
+    # ✅ Schedule automatic membership check
+    app.job_queue.run_repeating(verify_active_membership, interval=3600, first=10)  # Runs every 1 hour
 
     # Handlers
     app.add_handler(CommandHandler("start", start))
@@ -322,4 +316,7 @@ def main():
     app.run_polling()
 
 if __name__ == "__main__":
-    main()
+    import nest_asyncio
+    nest_asyncio.apply()  # ✅ Fixes nested event loop issues
+    asyncio.get_event_loop().run_until_complete(main())  # ✅ Correct way to run an async function
+
