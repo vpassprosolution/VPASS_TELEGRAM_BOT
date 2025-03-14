@@ -134,7 +134,7 @@ async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Collects user registration details step by step"""
+    """Collects user registration details step by step and saves to database"""
     user_id = update.message.from_user.id
     chat_id = update.message.chat_id
     user_input = update.message.text
@@ -142,38 +142,75 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id in user_steps:
         step = user_steps[user_id]["step"]
 
+        # ✅ Delete user's input message and previous bot message
+        try:
+            await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)
+            await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["prompt_message_id"])
+        except Exception:
+            pass  
+
         if step == "name":
             user_steps[user_id]["name"] = user_input
             user_steps[user_id]["step"] = "username"
-            await update.message.reply_text("📛 Enter your Telegram username (@username):")
+            sent_message = await update.message.reply_text("📛 Enter your Telegram username (@username):")
 
         elif step == "username":
             user_steps[user_id]["username"] = user_input
             user_steps[user_id]["step"] = "contact"
-            await update.message.reply_text("📞 Enter your phone number (e.g., +601123020037):")
+            sent_message = await update.message.reply_text("📞 Enter your phone number (e.g., +601123020037):")
 
         elif step == "contact":
             if not re.match(r"^\+\d{7,15}$", user_input):
-                await update.message.reply_text("❌ Invalid phone number format. Please enter in international format (e.g., +601123020037):")
+                sent_message = await update.message.reply_text("❌ Invalid phone number. Please enter in international format (e.g., +601123020037):")
             else:
                 user_steps[user_id]["contact"] = user_input
                 user_steps[user_id]["step"] = "email"
-                await update.message.reply_text("📧 Enter your email address:")
+                sent_message = await update.message.reply_text("📧 Enter your email address:")
 
         elif step == "email":
             if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", user_input):
-                await update.message.reply_text("❌ Invalid email format. Please enter a valid email address:")
+                sent_message = await update.message.reply_text("❌ Invalid email format. Please enter a valid email address:")
             else:
                 user_steps[user_id]["email"] = user_input
+
+                # ✅ Save user data to the database
+                conn = connect_db()
+                if conn:
+                    try:
+                        cur = conn.cursor()
+                        cur.execute(
+                            """
+                            INSERT INTO users (user_id, chat_id, name, username, contact, email)
+                            VALUES (%s, %s, %s, %s, %s, %s)
+                            ON CONFLICT (user_id) 
+                            DO UPDATE SET chat_id = EXCLUDED.chat_id, 
+                                          name = EXCLUDED.name, 
+                                          username = EXCLUDED.username, 
+                                          contact = EXCLUDED.contact, 
+                                          email = EXCLUDED.email;
+                            """,
+                            (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"],
+                             user_steps[user_id]["contact"], user_steps[user_id]["email"])
+                        )
+                        conn.commit()
+                        cur.close()
+                        conn.close()
+                    except Exception as e:
+                        await update.message.reply_text(f"❌ Error saving your data: {e}")
 
                 # ✅ Ask the user to proceed manually by clicking "Start VPASS PRO"
                 keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
 
-                await update.message.reply_text("✅ Registration complete! Click below to start VPASS PRO.", reply_markup=reply_markup)
+                sent_message = await update.message.reply_text("✅ Registration complete! Click below to start VPASS PRO.", reply_markup=reply_markup)
 
-        # Store last bot message ID for deletion
-        user_steps[user_id]["prompt_message_id"] = update.message.message_id
+                # ✅ Remove user from tracking after completion
+                del user_steps[user_id]
+
+                return  
+
+        # ✅ Store last bot message ID for deletion
+        user_steps[user_id]["prompt_message_id"] = sent_message.message_id
 
 
 
