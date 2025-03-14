@@ -141,12 +141,12 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id in user_steps:
         step = user_steps[user_id]["step"]
 
-        # ✅ Delete the user's input message and previous bot message
+        # ✅ Delete user's input message and previous bot message
         try:
-            await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)
-            await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["prompt_message_id"])
+            await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)  # Delete user's message
+            await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["prompt_message_id"])  # Delete bot's prompt
         except Exception:
-            pass  # Ignore if message was already deleted
+            pass  # Ignore errors if message was already deleted
 
         if step == "name":
             user_steps[user_id]["name"] = user_input
@@ -163,21 +163,8 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 sent_message = await update.message.reply_text("❌ Invalid phone number. Please enter in international format (e.g., +601123020037):")
             else:
                 user_steps[user_id]["contact"] = user_input
-
-                # ✅ Ask user to confirm phone number before proceeding
-                keyboard = [
-                    [InlineKeyboardButton("✅ Confirm", callback_data="confirm_phone")],
-                    [InlineKeyboardButton("❌ Re-enter", callback_data="reenter_phone")]
-                ]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-
-                sent_message = await update.message.reply_text(
-                    f"📞 You entered: {user_input}\n"
-                    "📌 Please confirm your phone number before proceeding.",
-                    reply_markup=reply_markup
-                )
-                user_steps[user_id]["prompt_message_id"] = sent_message.message_id
-                return  # ⛔ Stop here until user confirms phone number
+                user_steps[user_id]["step"] = "email"
+                sent_message = await update.message.reply_text("📧 Enter your email address:")
 
         elif step == "email":
             if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", user_input):
@@ -185,20 +172,45 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 user_steps[user_id]["email"] = user_input
 
-                # ✅ Ask user to confirm email before proceeding
-                keyboard = [
-                    [InlineKeyboardButton("✅ Confirm", callback_data="confirm_email")],
-                    [InlineKeyboardButton("❌ Re-enter", callback_data="reenter_email")]
-                ]
+                # ✅ Save user data to the database
+                conn = connect_db()
+                if conn:
+                    try:
+                        cur = conn.cursor()
+                        cur.execute(
+                            """
+                            INSERT INTO users (user_id, chat_id, name, username, contact, email)
+                            VALUES (%s, %s, %s, %s, %s, %s)
+                            ON CONFLICT (user_id) 
+                            DO UPDATE SET chat_id = EXCLUDED.chat_id, 
+                                          name = EXCLUDED.name, 
+                                          username = EXCLUDED.username, 
+                                          contact = EXCLUDED.contact, 
+                                          email = EXCLUDED.email;
+                            """,
+                            (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"],
+                             user_steps[user_id]["contact"], user_steps[user_id]["email"])
+                        )
+                        conn.commit()
+                        cur.close()
+                        conn.close()
+                    except Exception as e:
+                        sent_message = await update.message.reply_text(f"❌ Error saving your data: {e}")
+
+                # ✅ Ask the user to proceed manually by clicking "Start VPASS PRO"
+                keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
 
-                sent_message = await update.message.reply_text(
-                    f"📧 You entered: {user_input}\n"
-                    "📌 Please confirm your email before proceeding.",
-                    reply_markup=reply_markup
-                )
-                user_steps[user_id]["prompt_message_id"] = sent_message.message_id
-                return  # ⛔ Stop here until user confirms email
+                sent_message = await update.message.reply_text("✅ Registration complete! Click below to start VPASS PRO.", reply_markup=reply_markup)
+
+                # ✅ Remove user from tracking after completion
+                del user_steps[user_id]
+
+                return  # End the function, no further steps will be processed
+
+        # ✅ Store last bot message ID for deletion
+        user_steps[user_id]["prompt_message_id"] = sent_message.message_id
+
 
 async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles confirmation of the phone number"""
@@ -209,7 +221,6 @@ async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYP
     await query.answer()
 
     if query.data == "confirm_phone":
-        # ✅ Move to email step
         user_steps[user_id]["step"] = "email"
         await query.message.edit_text("📧 Enter your email address:")
 
@@ -271,6 +282,7 @@ async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # ✅ Ask user to enter email again
         user_steps[user_id]["step"] = "email"
         await query.message.edit_text("📧 Please enter your email address again:")
+
 
 
 
