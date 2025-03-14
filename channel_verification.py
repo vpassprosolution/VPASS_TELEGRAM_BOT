@@ -12,7 +12,7 @@ CHANNEL_USERNAME = "vessacommunity"  # Your channel username without @
 bot = Bot(token=BOT_TOKEN)
 
 async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, user_steps):
-    """Checks if the user has joined the Telegram channel before saving registration"""
+    """Checks if the user has joined the Telegram channel AFTER email confirmation."""
     user_id = update.message.from_user.id if update.message else update.callback_query.from_user.id
     chat_id = update.message.chat_id if update.message else update.callback_query.message.chat_id
 
@@ -29,7 +29,7 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, u
         if response.get("ok"):
             status = response["result"]["status"]
             if status in ["member", "administrator", "creator"]:
-                # ✅ User is a member → Save full registration in DB
+                # ✅ User is a member → Proceed to next step
                 conn = connect_db()
                 if conn:
                     try:
@@ -54,7 +54,7 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                             cur.close()
                             conn.close()
 
-                            # ✅ Show "Start VPASS PRO" button after successful verification
+                            # ✅ Now the bot confirms registration is complete
                             keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
                             reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -76,26 +76,24 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                         conn.close()
 
             else:
-                # ❌ User is not a member - Show temporary warning and delete after 5 seconds
-                warning_message = await update.message.reply_text(
+                # ❌ User is not a member - Block them until they join
+                keyboard = [[InlineKeyboardButton("✅ I Have Joined", callback_data="check_membership")]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+
+                await update.message.reply_text(
                     "❌ You have NOT joined the channel!\n\n"
                     "🚨 Please **join here first:** [Join Here](https://t.me/vessacommunity)\n"
                     "Then click '✅ I Have Joined' again.",
-                    parse_mode="Markdown"
+                    parse_mode="Markdown",
+                    reply_markup=reply_markup
                 )
-
-                # ✅ Delete the warning message after 5 seconds
-                await asyncio.sleep(5)
-                try:
-                    await context.bot.delete_message(chat_id=chat_id, message_id=warning_message.message_id)
-                except Exception:
-                    pass  # Ignore if message already deleted
 
         else:
             await update.message.reply_text("❌ Failed to check membership. Please try again later.")
 
     except Exception as e:
         await update.message.reply_text(f"❌ Error checking Telegram membership: {e}")
+
 
 
 async def verify_active_membership(context: ContextTypes.DEFAULT_TYPE):

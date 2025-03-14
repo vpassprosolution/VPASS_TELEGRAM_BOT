@@ -220,7 +220,6 @@ async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles email confirmation & asks user to verify Telegram channel membership"""
     query = update.callback_query
     user_id = query.from_user.id
-    chat_id = query.message.chat_id
 
     # ✅ Acknowledge button press
     await query.answer()
@@ -245,11 +244,6 @@ async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # ✅ Ask user to enter email again
         user_steps[user_id]["step"] = "email"
         await query.message.edit_text("📧 Please enter your email address again:")
-
-async def check_membership_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """✅ Calls `channel_verification.py` to check Telegram channel membership"""
-    global user_steps
-    return await check_membership(update, context, user_steps)
 
 
 
