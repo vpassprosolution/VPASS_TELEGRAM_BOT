@@ -256,21 +256,28 @@ async def check_membership_callback(update: Update, context: ContextTypes.DEFAUL
     user_id = query.from_user.id
 
     if user_id in user_steps:
+        # Track failed attempts
+        if "failed_attempts" not in user_steps[user_id]:
+            user_steps[user_id]["failed_attempts"] = 0
+
         # ✅ Call the function to check membership
-        is_member = await check_membership(update, context, user_steps)  
+        is_member = await check_membership(update, context, user_steps)
 
         if is_member:  # ✅ If user has joined the channel
             del user_steps[user_id]  # ✅ Remove user from pending registration list
             keyboard = [[InlineKeyboardButton("Go to Main Menu", callback_data="main_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            
-            # ✅ Check if the message needs to be updated before editing
+
             new_text = "✅ Membership verified! Welcome to VPASS PRO.\nClick below to continue:"
+
+            # ✅ Check if the message text is already the same before updating
             if query.message.text != new_text:
                 await query.message.edit_text(new_text, reply_markup=reply_markup)
 
         else:
-            # ❌ User is still NOT a member → Show the button again
+            # ❌ User is still NOT a member → Increase failed attempts
+            user_steps[user_id]["failed_attempts"] += 1
+
             keyboard = [[InlineKeyboardButton("✅ I Have Joined", callback_data="check_membership")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -280,12 +287,21 @@ async def check_membership_callback(update: Update, context: ContextTypes.DEFAUL
                 "Then click '✅ I Have Joined' again."
             )
 
-            # ✅ Prevent unnecessary edits
+            # ✅ Check if the message text is already the same before updating
             if query.message.text != new_text:
                 await query.message.edit_text(new_text, parse_mode="Markdown", reply_markup=reply_markup)
+
+            # ⚠️ After 2 failed attempts, show a warning
+            if user_steps[user_id]["failed_attempts"] >= 2:
+                warning_message = (
+                    "⚠️ *Warning: You have clicked '✅ I Have Joined' multiple times without joining the channel.*\n\n"
+                    "❌ You must join the channel before proceeding!\n"
+                    "🔗 [Join Here](https://t.me/vessacommunity)"
+                )
+                await query.message.reply_text(warning_message, parse_mode="Markdown")
+
     else:
         await query.message.reply_text("❌ Registration process not found. Please restart by typing /start.")
-
 
 
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
