@@ -7,7 +7,7 @@ import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
 import re
-app.add_handler(CallbackQueryHandler(lambda update, context: check_membership(update, context, user_steps), pattern="check_membership"))
+from channel_verification import check_membership
 
 
 
@@ -254,6 +254,11 @@ async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Redirect to main menu
     await main_menu(update, context)
 
+
+
+def check_membership_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    return check_membership(update, context, user_steps)
+
 def main():
     """Main function to run the bot"""
     from ai_sentiment import show_instruments, handle_instrument_selection  
@@ -280,7 +285,8 @@ def main():
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="reenter_phone"))
     app.add_handler(CallbackQueryHandler(confirm_email, pattern="confirm_email"))
     app.add_handler(CallbackQueryHandler(confirm_email, pattern="reenter_email"))
-    app.add_handler(CallbackQueryHandler(check_membership, pattern="check_membership"))
+    app.add_handler(CallbackQueryHandler(check_membership_callback, pattern="check_membership"))
+
 
     
 
