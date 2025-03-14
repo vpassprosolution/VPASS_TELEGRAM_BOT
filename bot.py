@@ -7,9 +7,6 @@ import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
 import re
-from channel_verification import check_membership
-from channel_verification import verify_active_membership
-
 
 
 # Bot Token
@@ -214,7 +211,7 @@ async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYP
 
 
 async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles email confirmation & asks user to join Telegram channel BEFORE saving to DB"""
+    """Handles email confirmation & saves data to DB"""
     query = update.callback_query
     user_id = query.from_user.id
     chat_id = query.message.chat_id
@@ -223,28 +220,46 @@ async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     if query.data == "confirm_email":
-        # ✅ Update step to "check_membership"
-        user_steps[user_id]["step"] = "check_membership"
+        # ✅ Save user data to the database
+        conn = connect_db()
+        if conn:
+            try:
+                cur = conn.cursor()
+                cur.execute(
+                    """
+                    INSERT INTO users (user_id, chat_id, name, username, contact, email)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (user_id) 
+                    DO UPDATE SET chat_id = EXCLUDED.chat_id, 
+                                  name = EXCLUDED.name, 
+                                  username = EXCLUDED.username, 
+                                  contact = EXCLUDED.contact, 
+                                  email = EXCLUDED.email;
+                    """,
+                    (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"],
+                     user_steps[user_id]["contact"], user_steps[user_id]["email"])
+                )
+                conn.commit()
+                cur.close()
+                conn.close()
+            except Exception as e:
+                await query.message.reply_text(f"❌ Error saving your data: {e}")
 
-        # ✅ Ask the user to join the Telegram channel before completing registration
-        keyboard = [[InlineKeyboardButton("✅ I Have Joined", callback_data="check_membership")]]
+        keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.edit_text("✅ Registration complete! Click below to start VPASS PRO.", reply_markup=reply_markup)
 
-        await query.message.edit_text(
-            "✅ Email confirmed!\n\n"
-            "🚨 Before you can continue, you **must** join our Telegram channel:\n"
-            "🔗 [Join Here](https://t.me/vessacommunity)\n\n"
-            "Once you've joined, click the button below:",
-            parse_mode="Markdown",
-            reply_markup=reply_markup
-        )
+        # ✅ Remove user from tracking
+        del user_steps[user_id]
 
     elif query.data == "reenter_email":
         # ✅ Ask user to enter email again
         user_steps[user_id]["step"] = "email"
         await query.message.edit_text("📧 Please enter your email address again:")
 
-    
+
+
+
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the 'START VPASS PRO NOW' button click"""
     query = update.callback_query
@@ -252,70 +267,57 @@ async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Redirect to main menu
     await main_menu(update, context)
 
-
-async def check_membership_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Passes `user_steps` correctly to check_membership"""
-    global user_steps
-    return await check_membership(update, context, user_steps)
-
-async def main():
+def main():
     """Main function to run the bot"""
     from ai_sentiment import show_instruments, handle_instrument_selection  
-    from subscription_handler import show_instruments as sub_show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
-    from ai_technical import show_technical_menu, show_timeframe_menu, handle_technical_selection
 
     app = Application.builder().token(BOT_TOKEN).build()
 
-    # ✅ Initialize job queue
-    job_queue = app.job_queue
-    job_queue.run_repeating(verify_active_membership, interval=3600, first=10)
-
-    # ✅ Command Handlers
+    # Handlers
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("admin", admin_panel))
-
-    # ✅ Callback Query Handlers (Buttons)
     app.add_handler(CallbackQueryHandler(register_user, pattern="register"))
-    app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))  
+    app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))  # ✅ FIXED
     app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))  
     app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))  
+    app.add_handler(CommandHandler("admin", admin_panel))
     app.add_handler(CallbackQueryHandler(add_user_prompt, pattern="admin_add_user"))
     app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
     app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
-
-    # ✅ AI Agent Instant Signal
-    app.add_handler(CallbackQueryHandler(ai_agent_signal, pattern="ai_agent_signal"))  
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))  
+    app.add_handler(CallbackQueryHandler(ai_agent_signal, pattern="ai_agent_signal"))  # ✅ New AI button handler
     app.add_handler(CallbackQueryHandler(ai_signal_handler.fetch_ai_signal, pattern="^ai_signal_"))
-
-    # ✅ News War Room
     app.add_handler(CallbackQueryHandler(show_vip_room_message, pattern="news_war_room"))
     app.add_handler(CallbackQueryHandler(delete_vip_message, pattern="delete_vip_message"))
-
-    # ✅ Registration Steps
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))  
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="confirm_phone"))
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="reenter_phone"))
     app.add_handler(CallbackQueryHandler(confirm_email, pattern="confirm_email"))
     app.add_handler(CallbackQueryHandler(confirm_email, pattern="reenter_email"))
-    app.add_handler(CallbackQueryHandler(check_membership_callback, pattern="check_membership"))
 
-    # ✅ Subscription System (VPASS Smart Signal)
-    app.add_handler(CallbackQueryHandler(sub_show_instruments, pattern="vpass_smart_signal"))
+    
+
+    # Connect "VPASS SMART SIGNAL" button to subscription system
+    from subscription_handler import show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
+    from ai_technical import show_technical_menu, show_timeframe_menu, handle_technical_selection
+
+    app.add_handler(CallbackQueryHandler(show_instruments, pattern="vpass_smart_signal"))
     app.add_handler(CallbackQueryHandler(show_subscription_menu, pattern="^select_"))
     app.add_handler(CallbackQueryHandler(subscribe, pattern="^subscribe_"))
     app.add_handler(CallbackQueryHandler(unsubscribe, pattern="^unsubscribe_"))
     app.add_handler(CallbackQueryHandler(back_to_main, pattern="back_to_main"))
     app.add_handler(CallbackQueryHandler(back_to_instruments, pattern="back_to_instruments"))
-
-    # ✅ AI Technical Analysis
     app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^ai_technical$"))
     app.add_handler(CallbackQueryHandler(show_timeframe_menu, pattern="^instrument_.*$"))
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
     app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^back_to_technical_instruments$"))
+    
+   
+
+
 
     print("Bot is running...")
 
-    app.run_polling()  # ✅ Correctly runs the bot
+    app.run_polling()
 
-
+if __name__ == "__main__":
+    main()
