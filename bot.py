@@ -291,15 +291,24 @@ async def check_membership_callback(update: Update, context: ContextTypes.DEFAUL
             if query.message.text != new_text:
                 await query.message.edit_text(new_text, parse_mode="Markdown", reply_markup=reply_markup)
 
-            # ⚠️ After 2 failed attempts, show a warning
+            # ⚠️ After 2 failed attempts, show a **temporary warning message**
             if user_steps[user_id]["failed_attempts"] >= 2:
-                warning_message = (
-                    "⚠️ *Warning: You have clicked '✅ I Have Joined' multiple times without joining the channel.*\n\n"
-                    "❌ You must join the channel before proceeding!\n"
-                    "🔗 [Join Here](https://t.me/vessacommunity)"
+                warning_message = await query.message.reply_text(
+                    "⚠️ You haven't joined the channel yet!\n"
+                    "🚨 Please join first: [Join Here](https://t.me/vessacommunity)",
+                    parse_mode="Markdown"
                 )
-                await query.message.reply_text(warning_message, parse_mode="Markdown")
 
+                # 🕒 **Automatically delete the warning message after 2 seconds**
+                await asyncio.sleep(2)
+                await context.bot.delete_message(chat_id=query.message.chat_id, message_id=warning_message.message_id)
+
+            # ❌ After **5 failed attempts**, force the user to restart
+            if user_steps[user_id]["failed_attempts"] >= 5:
+                del user_steps[user_id]  # ✅ Reset user data
+                await query.message.reply_text(
+                    "🚨 Too many failed attempts! Restart the process by typing /start."
+                )
     else:
         await query.message.reply_text("❌ Registration process not found. Please restart by typing /start.")
 
