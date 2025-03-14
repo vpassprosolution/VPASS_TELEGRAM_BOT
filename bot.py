@@ -219,11 +219,11 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if is_user_in_channel(user_id):
                     update_channel_status(user_id, True)  # ✅ Mark user as joined
 
-                    # ✅ NOW show "Registration Complete" after channel verification
+                    # ✅ Ask the user to proceed manually by clicking "Start VPASS PRO"
                     keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
                     reply_markup = InlineKeyboardMarkup(keyboard)
 
-                    sent_message = await update.message.reply_text("✅ Registration complete! VPASS PRO is now activated.", reply_markup=reply_markup)
+                    sent_message = await update.message.reply_text("✅ You have successfully verified your email and joined the channel! Click below to start VPASS PRO.", reply_markup=reply_markup)
 
                 else:
                     update_channel_status(user_id, False)  # ❌ Mark user as NOT joined
@@ -241,8 +241,6 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                     return  # ⛔️ Stops registration here!
 
-
-
         # ✅ Store last bot message ID for deletion
         user_steps[user_id]["prompt_message_id"] = sent_message.message_id
 
@@ -252,18 +250,28 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = query.from_user.id
 
     from channel_verification import is_user_in_channel
-    from db import update_channel_status
+    from db import update_channel_status, get_user_status
+
+    # Debugging: Print user status before checking
+    current_status = get_user_status(user_id)
+    print(f"DEBUG: User {user_id} - Current DB Status: {current_status}")
 
     if is_user_in_channel(user_id):
         update_channel_status(user_id, True)  # ✅ Mark user as joined
+        print(f"DEBUG: User {user_id} - Updated to JOINED in DB")
 
-        # ✅ Show "Registration Complete"
+        # ✅ Tell the user they are verified, but DO NOT send "Registration Complete" here
         keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await query.message.edit_text("✅ Registration complete! VPASS PRO is now activated.", reply_markup=reply_markup)
+        await query.message.edit_text(
+            "✅ You have successfully joined the channel!\n\n"
+            "Click below to start VPASS PRO.",
+            reply_markup=reply_markup
+        )
 
     else:
+        print(f"DEBUG: User {user_id} - Still NOT in channel")
         await query.message.edit_text(
             "🚫 You are still not in the channel!\n\n"
             "🔹 **Please join [Vessa Community](https://t.me/vessacommunity) and click the button again.**",
