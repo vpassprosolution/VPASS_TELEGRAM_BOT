@@ -1,12 +1,14 @@
 import requests
 import asyncio
 from db import connect_db
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
 # Telegram Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
 CHANNEL_USERNAME = "vessacommunity"  # Your channel username without @
+
+bot = Bot(token=BOT_TOKEN)
 
 async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, user_steps):
     """Checks if the user has joined the Telegram channel before saving registration"""
@@ -68,6 +70,9 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, u
 
                     except Exception as e:
                         await query.message.reply_text(f"❌ Database error: {e}")
+                        conn.rollback()
+                    finally:
+                        conn.close()
 
             else:
                 # ❌ User is not a member - Show temporary warning and delete after 5 seconds
@@ -80,7 +85,10 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, u
 
                 # ✅ Delete the warning message after 5 seconds
                 await asyncio.sleep(5)
-                await context.bot.delete_message(chat_id=chat_id, message_id=warning_message.message_id)
+                try:
+                    await context.bot.delete_message(chat_id=chat_id, message_id=warning_message.message_id)
+                except Exception:
+                    pass  # Ignore if message already deleted
 
         else:
             await query.message.reply_text("❌ Failed to check membership. Please try again later.")
@@ -89,7 +97,7 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, u
         await query.message.reply_text(f"❌ Error checking Telegram membership: {e}")
 
 async def verify_active_membership(context: ContextTypes.DEFAULT_TYPE):
-    """Periodically checks if users are still in the channel and removes access if they left"""
+    """Checks if users are still in the channel and removes access if they left."""
     conn = connect_db()
     if conn:
         try:
@@ -108,15 +116,17 @@ async def verify_active_membership(context: ContextTypes.DEFAULT_TYPE):
                         # ❌ User left the channel → Remove access
                         cur.execute("UPDATE users SET is_member = FALSE WHERE user_id = %s;", (user_id,))
                         conn.commit()
+
+                        # 🚨 Notify the user that they lost access
                         try:
-                            await context.bot.send_message(
+                            await bot.send_message(
                                 chat_id=user_id,
                                 text="🚨 You left the VIP channel and lost access to VPASS PRO. Please rejoin to continue."
                             )
                         except Exception:
-                            pass  # Ignore if user blocked bot
+                            pass  # Ignore if user blocked the bot
                 else:
-                    pass  # Ignore errors checking Telegram API
+                    print(f"Error checking membership for user {user_id}: {response}")  # Debugging info
 
             cur.close()
             conn.close()

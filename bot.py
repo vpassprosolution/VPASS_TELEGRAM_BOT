@@ -8,6 +8,7 @@ import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
 import re
 from channel_verification import check_membership
+from channel_verification import verify_active_membership
 
 
 
@@ -244,9 +245,12 @@ async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.edit_text("📧 Please enter your email address again:")
 
 
+async def schedule_membership_check(application):
+    """Schedule a periodic job to check if users are still in the channel."""
+    job_queue = application.job_queue
+    job_queue.run_repeating(verify_active_membership, interval=3600, first=10)  # Runs every 1 hour
 
-
-
+    
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the 'START VPASS PRO NOW' button click"""
     query = update.callback_query
@@ -257,13 +261,17 @@ async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def check_membership_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global user_steps  # Ensure it is accessible
     return check_membership(update, context, user_steps)
+
 
 def main():
     """Main function to run the bot"""
     from ai_sentiment import show_instruments, handle_instrument_selection  
 
     app = Application.builder().token(BOT_TOKEN).build()
+
+    asyncio.create_task(schedule_membership_check(app))
 
     # Handlers
     app.add_handler(CommandHandler("start", start))
