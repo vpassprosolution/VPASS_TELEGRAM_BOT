@@ -18,10 +18,22 @@ BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
 user_steps = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles the /start command and starts user registration."""
+    """Handles the /start command and starts user registration with cleanup."""
     from ai_sentiment import show_instruments  
 
     user_id = update.message.from_user.id
+    chat_id = update.message.chat_id
+
+    # ✅ Delete all previous registration messages
+    if user_id in user_steps and "messages" in user_steps[user_id]:
+        for msg_id in user_steps[user_id]["messages"]:
+            try:
+                await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
+            except Exception:
+                pass  # Ignore if message already deleted
+
+    # ✅ Reset user registration steps
+    user_steps[user_id] = {"messages": []}  
 
     # ✅ Check if the user is already registered
     conn = connect_db()
@@ -36,27 +48,29 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             username = user[0]
             keyboard = [[InlineKeyboardButton("Go to Main Menu", callback_data="main_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await update.message.reply_text(f"🌑 Welcome back to world of AI {username}🌑", reply_markup=reply_markup)
+            sent_message = await update.message.reply_text(
+                f"🌑 Welcome back to the world of AI, {username}! 🌑",
+                reply_markup=reply_markup
+            )
+            user_steps[user_id]["messages"].append(sent_message.message_id)
             return
 
-    # ✅ Do NOT check membership here! We allow users to register first.
-
-    # Send welcome image
+    # ✅ Send welcome image
     welcome_image = "welcome.png"
     with open(welcome_image, "rb") as photo:
-        await update.message.reply_photo(photo=photo)
+        sent_photo = await update.message.reply_photo(photo=photo)
+        user_steps[user_id]["messages"].append(sent_photo.message_id)
 
-    # Send welcome text with registration button
+    # ✅ Send welcome text with registration button
     keyboard = [[InlineKeyboardButton("COMPLETE YOUR REGISTRATION", callback_data="register")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    sent_message = await update.message.reply_text("WELCOME TO VPASS PRO VERSION 2.0", reply_markup=reply_markup)
+    sent_message = await update.message.reply_text(
+        "WELCOME TO VPASS PRO VERSION 2.0",
+        reply_markup=reply_markup
+    )
 
-    # Store message ID so we can delete it later
-    context.user_data["button_message"] = sent_message.message_id
-
-
-
-
+    # ✅ Store message IDs for cleanup next time
+    user_steps[user_id]["messages"].append(sent_message.message_id)
 
 
 async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
