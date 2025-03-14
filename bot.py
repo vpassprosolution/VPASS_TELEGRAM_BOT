@@ -133,7 +133,7 @@ async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_steps[user_id]["prompt_message_id"] = sent_message.message_id  
 
 async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Collects user registration details step by step and saves to the database"""
+    """Collects user registration details step by step and saves to database"""
     user_id = update.message.from_user.id
     chat_id = update.message.chat_id
     user_input = update.message.text
@@ -141,12 +141,12 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id in user_steps:
         step = user_steps[user_id]["step"]
 
-        # ✅ Delete user's input message and previous bot message
+        # ✅ Delete the user's input message and previous bot message
         try:
             await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)
             await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["prompt_message_id"])
         except Exception:
-            pass  
+            pass  # Ignore if message was already deleted
 
         if step == "name":
             user_steps[user_id]["name"] = user_input
@@ -176,7 +176,8 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     "📌 Please confirm your phone number before proceeding.",
                     reply_markup=reply_markup
                 )
-                return  # ⛔ Stop here until user confirms
+                user_steps[user_id]["prompt_message_id"] = sent_message.message_id
+                return  # ⛔ Stop here until user confirms phone number
 
         elif step == "email":
             if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", user_input):
@@ -196,11 +197,8 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     "📌 Please confirm your email before proceeding.",
                     reply_markup=reply_markup
                 )
-                return  # ⛔ Stop here until user confirms
-
-        # ✅ Store last bot message ID for deletion
-        user_steps[user_id]["prompt_message_id"] = sent_message.message_id
-
+                user_steps[user_id]["prompt_message_id"] = sent_message.message_id
+                return  # ⛔ Stop here until user confirms email
 
 async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles confirmation of the phone number"""
@@ -273,8 +271,6 @@ async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # ✅ Ask user to enter email again
         user_steps[user_id]["step"] = "email"
         await query.message.edit_text("📧 Please enter your email address again:")
-
-
 
 
 
