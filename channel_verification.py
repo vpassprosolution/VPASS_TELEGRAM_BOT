@@ -96,3 +96,45 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, u
 
     except Exception as e:
         await update.message.reply_text(f"❌ Error checking Telegram membership: {e}")
+
+
+async def verify_active_membership(context: ContextTypes.DEFAULT_TYPE):
+    """Checks if users are still in the channel and removes access if they left."""
+    conn = connect_db()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT user_id FROM users WHERE is_member = TRUE;")
+            users = cur.fetchall()
+
+            for user in users:
+                user_id = user[0]
+                url = f"https://api.telegram.org/bot{BOT_TOKEN}/getChatMember?chat_id=@{CHANNEL_USERNAME}&user_id={user_id}"
+                response = requests.get(url).json()
+
+                if response.get("ok"):
+                    status = response["result"]["status"]
+                    if status not in ["member", "administrator", "creator"]:
+                        # ❌ User left the channel → Remove access
+                        cur.execute("UPDATE users SET is_member = FALSE WHERE user_id = %s;", (user_id,))
+                        conn.commit()
+
+                        # 🚨 Notify the user that they lost access
+                        try:
+                            await bot.send_message(
+                                chat_id=user_id,
+                                text="🚨 You left the VIP channel and lost access to VPASS PRO. Please rejoin to continue."
+                            )
+                        except Exception:
+                            pass  # Ignore if user blocked the bot
+                
+                else:
+                    print(f"Error checking membership for user {user_id}: {response}")  # Debugging info
+
+                time.sleep(1)  # ✅ Add a 1-second delay to prevent API rate limits
+
+            cur.close()
+        except Exception as e:
+            print(f"Error verifying membership: {e}")
+        finally:
+            conn.close()  # ✅ Ensure the connection is closed even if an error occurs
