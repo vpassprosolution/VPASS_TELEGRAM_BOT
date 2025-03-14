@@ -7,7 +7,8 @@ import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
 import re
-
+from telegram.ext import ContextTypes
+from channel_verification import check_membership
 
 # Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
@@ -132,8 +133,9 @@ async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sent_message = await query.message.reply_text("Please enter your name:")
     user_steps[user_id]["prompt_message_id"] = sent_message.message_id  
 
+
 async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Collects user registration details step by step and saves to database"""
+    """Collects user registration details step by step and forwards them to channel verification"""
     user_id = update.message.from_user.id
     chat_id = update.message.chat_id
     user_input = update.message.text
@@ -146,7 +148,7 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)  # Delete user's message
             await context.bot.delete_message(chat_id=chat_id, message_id=user_steps[user_id]["prompt_message_id"])  # Delete bot's prompt
         except Exception:
-            pass  # Ignore errors if message was already deleted
+            pass  # Ignore errors if already deleted
 
         if step == "name":
             user_steps[user_id]["name"] = user_input
@@ -191,7 +193,6 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # ✅ Store last bot message ID for deletion
         user_steps[user_id]["prompt_message_id"] = sent_message.message_id
 
-
 async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles confirmation of the phone number"""
     query = update.callback_query
@@ -209,9 +210,8 @@ async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYP
         user_steps[user_id]["step"] = "contact"
         await query.message.edit_text("📞 Please enter your phone number again (e.g., +601123020037):")
 
-
 async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles email confirmation & saves data to DB"""
+    """Handles email confirmation & asks user to verify Telegram channel membership"""
     query = update.callback_query
     user_id = query.from_user.id
     chat_id = query.message.chat_id
@@ -220,42 +220,30 @@ async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     if query.data == "confirm_email":
-        # ✅ Save user data to the database
-        conn = connect_db()
-        if conn:
-            try:
-                cur = conn.cursor()
-                cur.execute(
-                    """
-                    INSERT INTO users (user_id, chat_id, name, username, contact, email)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (user_id) 
-                    DO UPDATE SET chat_id = EXCLUDED.chat_id, 
-                                  name = EXCLUDED.name, 
-                                  username = EXCLUDED.username, 
-                                  contact = EXCLUDED.contact, 
-                                  email = EXCLUDED.email;
-                    """,
-                    (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"],
-                     user_steps[user_id]["contact"], user_steps[user_id]["email"])
-                )
-                conn.commit()
-                cur.close()
-                conn.close()
-            except Exception as e:
-                await query.message.reply_text(f"❌ Error saving your data: {e}")
+        # ✅ Now the user must join the Telegram channel
+        user_steps[user_id]["step"] = "check_membership"
 
-        keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
+        keyboard = [[InlineKeyboardButton("✅ I Have Joined", callback_data="check_membership")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.message.edit_text("✅ Registration complete! Click below to start VPASS PRO.", reply_markup=reply_markup)
 
-        # ✅ Remove user from tracking
-        del user_steps[user_id]
+        await query.message.edit_text(
+            "✅ Email confirmed!\n\n"
+            "🚨 Before you can continue, you **must** join our Telegram channel:\n"
+            "🔗 [Join Here](https://t.me/vessacommunity)\n\n"
+            "Once you've joined, click the button below:",
+            parse_mode="Markdown",
+            reply_markup=reply_markup
+        )
 
     elif query.data == "reenter_email":
         # ✅ Ask user to enter email again
         user_steps[user_id]["step"] = "email"
         await query.message.edit_text("📧 Please enter your email address again:")
+
+async def check_membership_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """✅ Calls `channel_verification.py` to check Telegram channel membership"""
+    global user_steps
+    return await check_membership(update, context, user_steps)
 
 
 
@@ -293,6 +281,7 @@ def main():
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="reenter_phone"))
     app.add_handler(CallbackQueryHandler(confirm_email, pattern="confirm_email"))
     app.add_handler(CallbackQueryHandler(confirm_email, pattern="reenter_email"))
+    app.add_handler(CallbackQueryHandler(check_membership_callback, pattern="check_membership"))  # ✅ Membership Verification
 
     
 

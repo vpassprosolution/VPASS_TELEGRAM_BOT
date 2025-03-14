@@ -3,6 +3,7 @@ import asyncio
 from db import connect_db
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
+import time  # ✅ Add this at the top
 
 # Telegram Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
@@ -96,6 +97,8 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, u
     except Exception as e:
         await query.message.reply_text(f"❌ Error checking Telegram membership: {e}")
 
+
+
 async def verify_active_membership(context: ContextTypes.DEFAULT_TYPE):
     """Checks if users are still in the channel and removes access if they left."""
     conn = connect_db()
@@ -125,10 +128,14 @@ async def verify_active_membership(context: ContextTypes.DEFAULT_TYPE):
                             )
                         except Exception:
                             pass  # Ignore if user blocked the bot
+                
                 else:
                     print(f"Error checking membership for user {user_id}: {response}")  # Debugging info
 
+                time.sleep(1)  # ✅ Add a 1-second delay to prevent API rate limits
+
             cur.close()
-            conn.close()
         except Exception as e:
             print(f"Error verifying membership: {e}")
+        finally:
+            conn.close()  # ✅ Ensure the connection is closed even if an error occurs
