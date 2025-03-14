@@ -1,24 +1,30 @@
 import requests
 import asyncio
 from db import connect_db
-from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Bot, Update
 from telegram.ext import ContextTypes
-import time  # ✅ Add this at the top
+import time  
 
 # Telegram Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
-CHANNEL_USERNAME = "vessacommunity"  # Your channel username without @
+CHANNEL_USERNAME = "vessacommunity"  
 
 bot = Bot(token=BOT_TOKEN)
 
 async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, user_steps):
     """Checks if the user has joined the Telegram channel AFTER email confirmation."""
-    user_id = update.message.from_user.id if update.message else update.callback_query.from_user.id
-    chat_id = update.message.chat_id if update.message else update.callback_query.message.chat_id
+    user_id = update.callback_query.from_user.id if update.callback_query else update.message.from_user.id
+    chat_id = update.callback_query.message.chat_id if update.callback_query else update.message.chat_id
 
-    # ✅ Acknowledge button press only if it's a callback query
-    if update.callback_query:
-        await update.callback_query.answer()
+    # ✅ Initialize failed attempts counter
+    if user_id not in user_steps:
+        user_steps[user_id] = {"failed_attempts": 0}
+
+    # ✅ If user has already failed 5 times, force restart registration
+    if user_steps[user_id]["failed_attempts"] >= 5:
+        del user_steps[user_id]  # ❌ Reset registration
+        await update.callback_query.message.reply_text("🚨 Too many failed attempts! Restart by typing /start.")
+        return False  
 
     # ✅ Check membership using Telegram API
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/getChatMember?chat_id=@{CHANNEL_USERNAME}&user_id={user_id}"
@@ -29,12 +35,12 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, u
         if response.get("ok"):
             status = response["result"]["status"]
             if status in ["member", "administrator", "creator"]:
-                # ✅ User is a member → Proceed to next step
-                conn = connect_db()
-                if conn:
-                    try:
-                        cur = conn.cursor()
-                        if user_id in user_steps:  # Ensure user data exists
+                # ✅ User is a member → Proceed to save their details
+                if "name" in user_steps[user_id]:  # Prevent saving empty user data
+                    conn = connect_db()
+                    if conn:
+                        try:
+                            cur = conn.cursor()
                             cur.execute(
                                 """
                                 INSERT INTO users (user_id, chat_id, name, username, contact, email, is_member)
@@ -54,26 +60,50 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, u
                             cur.close()
                             conn.close()
 
-                            # ✅ Now the bot confirms registration is complete
-                            return True  # ✅ User is a member, return True
+                            # ✅ Reset failed attempts and confirm success
+                            user_steps[user_id]["failed_attempts"] = 0  
+                            return True  
 
-                    except Exception as e:
-                        print(f"❌ Database error: {e}")
-                        conn.rollback()
-                    finally:
-                        conn.close()
+                        except Exception as e:
+                            print(f"❌ Database error while saving user {user_id}: {e}")
+                            conn.rollback()
+                        finally:
+                            conn.close()
+                else:
+                    print(f"❌ Missing user details for {user_id}. Skipping database save.")
+                    return False
+            else:
+                # ❌ User is NOT a member → Increase failed attempts
+                user_steps[user_id]["failed_attempts"] += 1
 
-            # ❌ User is NOT a member
-            return False  
+                # ⚠️ Show a warning after **2 failed attempts**
+                if user_steps[user_id]["failed_attempts"] >= 2:
+                    warning_message = await update.callback_query.message.reply_text(
+                        "⚠️ You haven't joined the channel yet!\n"
+                        "🚨 Please join first: [Join Here](https://t.me/vessacommunity)",
+                        parse_mode="Markdown"
+                    )
+
+                    # 🕒 **Automatically delete the warning message after 2 seconds**
+                    await asyncio.sleep(2)
+                    try:
+                        await context.bot.delete_message(chat_id=chat_id, message_id=warning_message.message_id)
+                    except Exception:
+                        pass  # ✅ Ignore errors if message is already deleted
+
+                return False  
 
         else:
-            print("❌ Failed to check membership. API Error.")
-            return False  # ❌ Return False in case of an API failure
+            print(f"❌ API error while checking membership for user {user_id}: {response}")
+            return False  
+
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Network error checking Telegram membership: {e}")
+        return False  
 
     except Exception as e:
-        print(f"❌ Error checking Telegram membership: {e}")
-        return False  # ❌ Return False in case of an exception
-
+        print(f"❌ Unexpected error in check_membership: {e}")
+        return False  
 
 
 async def verify_active_membership(context: ContextTypes.DEFAULT_TYPE):
@@ -103,16 +133,16 @@ async def verify_active_membership(context: ContextTypes.DEFAULT_TYPE):
                                 chat_id=user_id,
                                 text="🚨 You left the VIP channel and lost access to VPASS PRO. Please rejoin to continue."
                             )
-                        except Exception:
-                            pass  # Ignore if user blocked the bot
+                        except Exception as e:
+                            print(f"❌ Error sending message to user {user_id}: {e}")  
                 
                 else:
-                    print(f"Error checking membership for user {user_id}: {response}")  # Debugging info
+                    print(f"Error checking membership for user {user_id}: {response}")  
 
-                time.sleep(1)  # ✅ Add a 1-second delay to prevent API rate limits
+                time.sleep(1)  # ✅ Prevent API rate limits
 
             cur.close()
         except Exception as e:
             print(f"Error verifying membership: {e}")
         finally:
-            conn.close()  # ✅ Ensure the connection is closed even if an error occurs
+            conn.close()  
