@@ -7,8 +7,7 @@ import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
 import re
-from channel_verification import is_user_in_channel
-from db import update_channel_status, get_user_status
+
 
 # Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
@@ -117,17 +116,25 @@ async def delete_vip_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
     except Exception:
         pass  # Ignore errors if already deleted
 
-user_steps = {}
+async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles user registration when they click the button"""
+    query = update.callback_query
+    user_id = query.from_user.id
 
-async def start_registration(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Starts the registration process by asking for the user's name."""
-    user_id = update.message.from_user.id
+    # Delete the button after clicking
+    try:
+        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=context.user_data["button_message"])
+    except Exception:
+        pass  
+
+    # Start registration process
     user_steps[user_id] = {"step": "name"}
+    sent_message = await query.message.reply_text("Please enter your name:")
+    user_steps[user_id]["prompt_message_id"] = sent_message.message_id  
 
-    await update.message.reply_text("📛 Please enter your full name:")
 
 async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Collects user registration details step by step."""
+    """Collects user registration details step by step"""
     user_id = update.message.from_user.id
     chat_id = update.message.chat_id
     user_input = update.message.text
@@ -147,7 +154,7 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         elif step == "contact":
             if not re.match(r"^\+\d{7,15}$", user_input):
-                await update.message.reply_text("❌ Invalid phone number. Please enter in international format (e.g., +601123020037):")
+                await update.message.reply_text("❌ Invalid phone number format. Please enter in international format (e.g., +601123020037):")
             else:
                 user_steps[user_id]["contact"] = user_input
                 user_steps[user_id]["step"] = "email"
@@ -159,88 +166,16 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 user_steps[user_id]["email"] = user_input
 
-                # ✅ Save user data to the database
-                conn = connect_db()
-                if conn:
-                    try:
-                        cur = conn.cursor()
-                        cur.execute(
-                            """
-                            INSERT INTO users (user_id, chat_id, name, username, contact, email, joined_channel)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s)
-                            ON CONFLICT (user_id) 
-                            DO UPDATE SET chat_id = EXCLUDED.chat_id, 
-                                          name = EXCLUDED.name, 
-                                          username = EXCLUDED.username, 
-                                          contact = EXCLUDED.contact, 
-                                          email = EXCLUDED.email,
-                                          joined_channel = EXCLUDED.joined_channel;
-                            """,
-                            (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"],
-                            user_steps[user_id]["contact"], user_steps[user_id]["email"], False)
-                        )
-                        conn.commit()
-                        cur.close()
-                        conn.close()
-                    except Exception as e:
-                        await update.message.reply_text(f"❌ Error saving your data: {e}")
-                
-                # ✅ Force the user to join the Telegram community
-                keyboard = [[InlineKeyboardButton("✅ I Have Joined", callback_data="check_membership")]]
+                # ✅ Ask the user to proceed manually by clicking "Start VPASS PRO"
+                keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
 
-                await update.message.reply_text(
-                    "🚫 You must join [Vessa Community](https://t.me/vessacommunity) before accessing the bot.\n\n"
-                    "🔹 **After joining, click the button below.**",
-                    parse_mode="Markdown",
-                    reply_markup=reply_markup
-                )
+                await update.message.reply_text("✅ Registration complete! Click below to start VPASS PRO.", reply_markup=reply_markup)
 
-                return  # ⛔ Stops registration here!
+        # Store last bot message ID for deletion
+        user_steps[user_id]["prompt_message_id"] = update.message.message_id
 
-async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Checks if the user has joined the channel after clicking 'I Have Joined'."""
-    query = update.callback_query
-    user_id = query.from_user.id
 
-    if is_user_in_channel(user_id):
-        update_channel_status(user_id, True)  # ✅ Mark user as joined
-
-        # ✅ Show "Registration Complete" after user verifies membership
-        keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-
-        await query.message.edit_text(
-            "✅ You have successfully joined the channel!\n\n"
-            "Click below to start VPASS PRO.",
-            reply_markup=reply_markup
-        )
-
-    else:
-        await query.message.edit_text(
-            "🚫 You are still not in the channel!\n\n"
-            "🔹 **Please join [Vessa Community](https://t.me/vessacommunity) and click the button again.**",
-            parse_mode="Markdown"
-        )
-
-async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles the 'START VPASS PRO NOW' button click"""
-    query = update.callback_query
-    user_id = query.from_user.id
-
-    email_verified, joined_channel = get_user_status(user_id)
-
-    if not joined_channel:
-        await query.message.edit_text(
-            "🚫 You are still not in the channel!\n\n"
-            "🔹 **Please join [Vessa Community](https://t.me/vessacommunity) and click '✅ I Have Joined' before starting.**",
-            parse_mode="Markdown"
-        )
-        return
-
-    await query.message.edit_text("✅ Registration complete! VPASS PRO is now activated.")
-
-    # Redirect to the main menu (You can add your main menu function here)
 
 async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles confirmation of the phone number"""
@@ -273,7 +208,7 @@ def main():
 
     # Handlers
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(start_registration, pattern="register"))
+    app.add_handler(CallbackQueryHandler(register_user, pattern="register"))
     app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))  # ✅ FIXED
     app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))  
@@ -289,7 +224,6 @@ def main():
     app.add_handler(CallbackQueryHandler(delete_vip_message, pattern="delete_vip_message"))
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="confirm_phone"))
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="reenter_phone"))
-    app.add_handler(CallbackQueryHandler(check_membership, pattern="check_membership"))
 
     
 
