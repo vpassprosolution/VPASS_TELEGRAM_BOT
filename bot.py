@@ -7,6 +7,7 @@ import asyncio
 import ai_signal_handler  # Import the AI Signal Handler
 from telegram.ext import CallbackQueryHandler
 import re
+from channel_verification import check_membership
 
 
 # Bot Token
@@ -211,7 +212,7 @@ async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYP
 
 
 async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles email confirmation & saves data to DB"""
+    """Handles email confirmation & asks user to join Telegram channel BEFORE saving to DB"""
     query = update.callback_query
     user_id = query.from_user.id
     chat_id = query.message.chat_id
@@ -220,42 +221,27 @@ async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     if query.data == "confirm_email":
-        # ✅ Save user data to the database
-        conn = connect_db()
-        if conn:
-            try:
-                cur = conn.cursor()
-                cur.execute(
-                    """
-                    INSERT INTO users (user_id, chat_id, name, username, contact, email)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (user_id) 
-                    DO UPDATE SET chat_id = EXCLUDED.chat_id, 
-                                  name = EXCLUDED.name, 
-                                  username = EXCLUDED.username, 
-                                  contact = EXCLUDED.contact, 
-                                  email = EXCLUDED.email;
-                    """,
-                    (user_id, chat_id, user_steps[user_id]["name"], user_steps[user_id]["username"],
-                     user_steps[user_id]["contact"], user_steps[user_id]["email"])
-                )
-                conn.commit()
-                cur.close()
-                conn.close()
-            except Exception as e:
-                await query.message.reply_text(f"❌ Error saving your data: {e}")
+        # ✅ Update step to "check_membership"
+        user_steps[user_id]["step"] = "check_membership"
 
-        keyboard = [[InlineKeyboardButton("START VPASS PRO NOW", callback_data="start_vpass_pro")]]
+        # ✅ Ask the user to join the Telegram channel before completing registration
+        keyboard = [[InlineKeyboardButton("✅ I Have Joined", callback_data="check_membership")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.message.edit_text("✅ Registration complete! Click below to start VPASS PRO.", reply_markup=reply_markup)
 
-        # ✅ Remove user from tracking
-        del user_steps[user_id]
+        await query.message.edit_text(
+            "✅ Email confirmed!\n\n"
+            "🚨 Before you can continue, you **must** join our Telegram channel:\n"
+            "🔗 [Join Here](https://t.me/vessacommunity)\n\n"
+            "Once you've joined, click the button below:",
+            parse_mode="Markdown",
+            reply_markup=reply_markup
+        )
 
     elif query.data == "reenter_email":
         # ✅ Ask user to enter email again
         user_steps[user_id]["step"] = "email"
         await query.message.edit_text("📧 Please enter your email address again:")
+
 
 
 
@@ -293,6 +279,7 @@ def main():
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="reenter_phone"))
     app.add_handler(CallbackQueryHandler(confirm_email, pattern="confirm_email"))
     app.add_handler(CallbackQueryHandler(confirm_email, pattern="reenter_email"))
+    app.add_handler(CallbackQueryHandler(check_membership, pattern="check_membership"))
 
     
 
