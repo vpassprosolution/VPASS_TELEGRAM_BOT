@@ -271,8 +271,14 @@ async def check_membership_callback(update: Update, context: ContextTypes.DEFAUL
             new_text = "✅ Membership verified! Welcome to VPASS PRO.\nClick below to continue:"
 
             # ✅ Check if the message text is already the same before updating
-            if query.message.text != new_text:
-                await query.message.edit_text(new_text, reply_markup=reply_markup)
+            try:
+                if query.message.text != new_text:
+                    await query.message.edit_text(new_text, reply_markup=reply_markup)
+            except Exception as e:
+                if "Message is not modified" in str(e):
+                    pass  # ✅ Ignore this specific error
+                else:
+                    print(f"❌ Unexpected error updating message: {e}")  # Log other unexpected errors
 
         else:
             # ❌ User is still NOT a member → Increase failed attempts
@@ -288,8 +294,14 @@ async def check_membership_callback(update: Update, context: ContextTypes.DEFAUL
             )
 
             # ✅ Check if the message text is already the same before updating
-            if query.message.text != new_text:
-                await query.message.edit_text(new_text, parse_mode="Markdown", reply_markup=reply_markup)
+            try:
+                if query.message.text != new_text:
+                    await query.message.edit_text(new_text, parse_mode="Markdown", reply_markup=reply_markup)
+            except Exception as e:
+                if "Message is not modified" in str(e):
+                    pass  # ✅ Ignore this specific error
+                else:
+                    print(f"❌ Unexpected error updating message: {e}")  # Log other unexpected errors
 
             # ⚠️ After 2 failed attempts, show a **temporary warning message**
             if user_steps[user_id]["failed_attempts"] >= 2:
@@ -301,7 +313,10 @@ async def check_membership_callback(update: Update, context: ContextTypes.DEFAUL
 
                 # 🕒 **Automatically delete the warning message after 2 seconds**
                 await asyncio.sleep(2)
-                await context.bot.delete_message(chat_id=query.message.chat_id, message_id=warning_message.message_id)
+                try:
+                    await context.bot.delete_message(chat_id=query.message.chat_id, message_id=warning_message.message_id)
+                except Exception:
+                    pass  # ✅ Ignore errors if message is already deleted
 
             # ❌ After **5 failed attempts**, force the user to restart
             if user_steps[user_id]["failed_attempts"] >= 5:
