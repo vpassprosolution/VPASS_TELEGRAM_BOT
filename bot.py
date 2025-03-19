@@ -380,7 +380,7 @@ def main():
     app.add_handler(CallbackQueryHandler(unsubscribe, pattern="^unsubscribe_"))
     app.add_handler(CallbackQueryHandler(back_to_main, pattern="back_to_main"))
     app.add_handler(CallbackQueryHandler(back_to_instruments, pattern="back_to_instruments"))
-    app.add_handler(CallbackQueryHandler(show_category_menu, pattern="^ai_technical$"))
+    app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^ai_technical$"))
     app.add_handler(CallbackQueryHandler(show_instrument_menu, pattern="^category_.*$"))
     app.add_handler(CallbackQueryHandler(show_timeframe_menu, pattern="^instrument_.*$"))
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
