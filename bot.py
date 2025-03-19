@@ -10,7 +10,8 @@ import re
 from telegram.ext import ContextTypes
 from channel_verification import check_membership
 from telegram.ext import JobQueue
-from ai_technical import show_technical_menu, show_instrument_menu, show_timeframe_menu, handle_technical_selection
+from ai_technical import show_technical_menu, show_instrument_menu, show_timeframe_menu, handle_technical_selection, back_to_technical_menu
+
 
 # Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
