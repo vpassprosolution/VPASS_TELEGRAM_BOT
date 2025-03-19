@@ -149,16 +149,27 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
         await query.message.reply_text("❌ Invalid selection. Please try again.")
         return
 
-    response = requests.get(API_URL, params={"instrument": instrument, "timeframe": timeframe_map[timeframe_key]})
+    timeframe = timeframe_map[timeframe_key]
+
+    # ✅ Debugging logs to check what is being sent
+    print(f"DEBUG: Requesting chart for Instrument: {instrument}, Timeframe: {timeframe}")
+
+    response = requests.get(API_URL, params={"instrument": instrument, "timeframe": timeframe})
+
+    # ✅ Debugging logs to check API response
+    print(f"DEBUG: API Response Status Code: {response.status_code}")
+    print(f"DEBUG: API Response Text: {response.text}")
 
     if response.status_code == 200:
         chart_url = response.json().get("chart_url")
+
         if chart_url:
-            await query.message.reply_photo(photo=chart_url, caption=f"📊 {instrument} {timeframe_map[timeframe_key].upper()} Chart")
+            await query.message.reply_photo(photo=chart_url, caption=f"📊 {instrument} {timeframe.upper()} Chart")
         else:
             await query.message.reply_text("❌ Chart not available. Please try again later.")
     else:
-        await query.message.reply_text("❌ Error retrieving chart. Please try again.")
+        await query.message.reply_text(f"❌ Error retrieving chart. Please try again.\n\n**API Error:** {response.text}")
+
 
 # Back to Categories Menu
 async def back_to_technical_menu(update: Update, context: CallbackContext) -> None:
