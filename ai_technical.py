@@ -72,12 +72,28 @@ async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
 
     instrument_map = {
-        "instrument_eurusd": "EUR/USD", "instrument_gbpusd": "GBP/USD", "instrument_usdjpy": "USD/JPY",
-        "instrument_usdchf": "USD/CHF", "instrument_usdcad": "USD/CAD", "instrument_audusd": "AUD/USD",
-        "instrument_nzdusd": "NZD/USD", "instrument_eurjpy": "EUR/JPY", "instrument_gbpjpy": "GBP/JPY",
-        "instrument_eurgbp": "EUR/GBP", "instrument_xauusd": "Gold", "instrument_xagusd": "Silver",
-        "instrument_xptusd": "Platinum", "instrument_xpdusd": "Palladium", "instrument_xcuusd": "Copper"
-    }
+    # ✅ Forex
+    "instrument_eurusd": "EUR/USD", "instrument_gbpusd": "GBP/USD", "instrument_usdjpy": "USD/JPY",
+    "instrument_usdchf": "USD/CHF", "instrument_usdcad": "USD/CAD", "instrument_audusd": "AUD/USD",
+    "instrument_nzdusd": "NZD/USD", "instrument_eurjpy": "EUR/JPY", "instrument_gbpjpy": "GBP/JPY",
+    "instrument_eurgbp": "EUR/GBP",
+    
+    # ✅ Metals
+    "instrument_xauusd": "Gold", "instrument_xagusd": "Silver", "instrument_xptusd": "Platinum",
+    "instrument_xpdusd": "Palladium", "instrument_xcuusd": "Copper",
+
+    # ✅ Index (MISSING BEFORE)
+    "instrument_dji": "Dow Jones", "instrument_ixic": "NASDAQ", "instrument_spx": "S&P 500",
+    "instrument_uk100": "FTSE 100", "instrument_de30": "DAX", "instrument_jp225": "Nikkei 225",
+    "instrument_hk50": "Hang Seng", "instrument_fra40": "CAC 40", "instrument_aus200": "ASX 200",
+    "instrument_rut": "Russell 2000",
+
+    # ✅ Crypto (MISSING BEFORE)
+    "instrument_btcusd": "Bitcoin", "instrument_ethusd": "Ethereum", "instrument_xrpusd": "XRP",
+    "instrument_ltcusd": "Litecoin", "instrument_adausd": "Cardano", "instrument_solusd": "Solana",
+    "instrument_bnbusd": "Binance", "instrument_dogeusd": "Dogecoin", "instrument_dotusd": "Polkadot",
+    "instrument_avaxusd": "Avalanche"
+}
 
     # Validate instrument selection
     if query.data not in instrument_map:
