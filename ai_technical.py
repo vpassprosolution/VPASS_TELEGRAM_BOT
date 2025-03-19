@@ -98,7 +98,12 @@ async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.edit_text(f"📊 **Selected: {context.user_data['selected_instrument']}**\n\nNow choose a timeframe:", reply_markup=reply_markup, parse_mode="Markdown")
 
-# Handle Timeframe Selection
+# ✅ **Back to Category Menu (Fixed)**
+async def back_to_technical_menu(update: Update, context: CallbackContext) -> None:
+    """Handles the back button from instrument selection to category selection."""
+    await show_technical_menu(update, context)
+
+# ✅ **Handle Timeframe Selection**
 async def handle_technical_selection(update: Update, context: CallbackContext) -> None:
     """Handles timeframe selection and sends the TradingView chart from the API."""
     query = update.callback_query
@@ -135,12 +140,7 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
     else:
         await query.message.reply_text("❌ Error retrieving chart. Please try again.")
 
-# Back to Instrument Menu (100% Fixed)
+# ✅ **Back to Instrument Menu**
 async def back_to_technical_instruments(update: Update, context: CallbackContext) -> None:
     """Handles the back button from timeframe selection to instrument selection."""
-    query = update.callback_query
-
-    if "selected_category" in context.user_data:
-        await show_instrument_menu(update, context)
-    else:
-        await show_technical_menu(update, context)  # ✅ Fallback if category is missing
+    await show_instrument_menu(update, context)
