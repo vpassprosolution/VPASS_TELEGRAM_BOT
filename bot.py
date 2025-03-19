@@ -15,7 +15,7 @@ from ai_technical import (
     show_instrument_menu,
     show_timeframe_menu,
     handle_technical_selection,
-    back_to_technical_instruments  # ✅ Make sure this is included
+    back_to_technical_menu  # ✅ Only use back_to_technical_menu
 )
 
 
@@ -394,7 +394,6 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
     # ✅ Registering Correct Callback Handlers for Back Buttons
     app.add_handler(CallbackQueryHandler(back_to_technical_menu, pattern="^back_to_technical_menu$"))
-    app.add_handler(CallbackQueryHandler(back_to_technical_instruments, pattern="^back_to_technical_instruments$"))
 
    
 
