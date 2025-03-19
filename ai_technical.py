@@ -110,7 +110,7 @@ async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
          InlineKeyboardButton("⏳ H4", callback_data="timeframe_4h")],
         [InlineKeyboardButton("⏳ Weekly", callback_data="timeframe_1w"),
          InlineKeyboardButton("⏳ Monthly", callback_data="timeframe_1mo")],
-        [InlineKeyboardButton("🔙 Back", callback_data="back_to_instruments")]
+        [InlineKeyboardButton("🔙 Back", callback_data="back_to_ai_technical_instruments")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.edit_text(f"📊 **Selected: {context.user_data['selected_instrument']}**\n\nNow choose a timeframe:", reply_markup=reply_markup, parse_mode="Markdown")
@@ -158,3 +158,7 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
             await query.message.reply_text("❌ Chart not available. Please try again later.")
     else:
         await query.message.reply_text("❌ Error retrieving chart. Please try again.")
+
+async def back_to_ai_technical_instruments(update: Update, context: CallbackContext) -> None:
+    """Handles the back button from timeframe selection to AI Technical instrument selection."""
+    await show_instrument_menu(update, context)

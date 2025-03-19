@@ -10,8 +10,7 @@ import re
 from telegram.ext import ContextTypes
 from channel_verification import check_membership
 from telegram.ext import JobQueue
-from ai_technical import show_technical_menu, show_instrument_menu, show_timeframe_menu, handle_technical_selection, back_to_technical_menu
-
+from ai_technical import show_technical_menu, show_instrument_menu, show_timeframe_menu, handle_technical_selection, back_to_technical_menu, back_to_ai_technical_instruments
 
 # Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
@@ -386,6 +385,7 @@ def main():
     app.add_handler(CallbackQueryHandler(show_timeframe_menu, pattern="^instrument_.*$"))
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
     app.add_handler(CallbackQueryHandler(back_to_technical_menu, pattern="^back_to_technical_menu$"))
+    app.add_handler(CallbackQueryHandler(back_to_ai_technical_instruments, pattern="^back_to_ai_technical_instruments$"))
 
    
 
