@@ -10,6 +10,7 @@ import re
 from telegram.ext import ContextTypes
 from channel_verification import check_membership
 from telegram.ext import JobQueue
+from ai_technical import show_category_menu, show_instrument_menu, show_timeframe_menu, handle_technical_selection
 
 # Bot Token
 BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
@@ -379,11 +380,11 @@ def main():
     app.add_handler(CallbackQueryHandler(unsubscribe, pattern="^unsubscribe_"))
     app.add_handler(CallbackQueryHandler(back_to_main, pattern="back_to_main"))
     app.add_handler(CallbackQueryHandler(back_to_instruments, pattern="back_to_instruments"))
-    app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^ai_technical$"))
+    app.add_handler(CallbackQueryHandler(show_category_menu, pattern="^ai_technical$"))
+    app.add_handler(CallbackQueryHandler(show_instrument_menu, pattern="^category_.*$"))
     app.add_handler(CallbackQueryHandler(show_timeframe_menu, pattern="^instrument_.*$"))
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
-    app.add_handler(CallbackQueryHandler(show_technical_menu, pattern="^back_to_technical_instruments$"))
-    
+
    
 
 
