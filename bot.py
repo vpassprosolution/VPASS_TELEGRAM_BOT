@@ -377,8 +377,6 @@ def main():
     app.add_handler(CallbackQueryHandler(confirm_email, pattern="reenter_email"))
     app.add_handler(CallbackQueryHandler(check_membership_callback, pattern="check_membership"))  # ✅ Membership Verification
 
-    
-
     # Connect "VPASS SMART SIGNAL" button to subscription system
     from subscription_handler import show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
 
