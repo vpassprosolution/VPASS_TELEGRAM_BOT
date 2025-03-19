@@ -393,10 +393,9 @@ def main():
     app.add_handler(CallbackQueryHandler(show_instrument_menu, pattern="^category_.*$"))
     app.add_handler(CallbackQueryHandler(show_timeframe_menu, pattern="^instrument_.*$"))
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
+    # ✅ Registering Correct Callback Handlers for Back Buttons
     app.add_handler(CallbackQueryHandler(back_to_technical_menu, pattern="^back_to_technical_menu$"))
     app.add_handler(CallbackQueryHandler(back_to_technical_instruments, pattern="^back_to_technical_instruments$"))
-
-
 
    
 
