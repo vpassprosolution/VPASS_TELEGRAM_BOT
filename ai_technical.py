@@ -110,7 +110,7 @@ async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
          InlineKeyboardButton("⏳ H4", callback_data="timeframe_4h")],
         [InlineKeyboardButton("⏳ Weekly", callback_data="timeframe_1w"),
          InlineKeyboardButton("⏳ Monthly", callback_data="timeframe_1mo")],
-        [InlineKeyboardButton("🔙 Back", callback_data="back_to_technical_instruments")]
+        [InlineKeyboardButton("🔙 Back", callback_data="back_to_ai_technical_instruments")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.edit_text(f"📊 **Selected: {context.user_data['selected_instrument']}**\n\nNow choose a timeframe:", reply_markup=reply_markup, parse_mode="Markdown")
@@ -159,11 +159,12 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
     else:
         await query.message.reply_text("❌ Error retrieving chart. Please try again.")
 
-async def back_to_technical_instruments(update: Update, context: CallbackContext) -> None:
+async def back_to_ai_technical_instruments(update: Update, context: CallbackContext) -> None:
     """Handles the back button from timeframe selection to AI Technical instrument selection."""
+    query = update.callback_query
+
     if "selected_category" in context.user_data:
         category_key = context.user_data["selected_category"]
-        query = update.callback_query
-        await show_instrument_menu(query, context)
+        await show_instrument_menu(update, context)  # Correctly navigates back to the instrument selection menu
     else:
-        await show_technical_menu(update, context)  # Fallback to category selection if no category found
+        await show_technical_menu(update, context)  # If category is missing, go back to main AI Technical menu
