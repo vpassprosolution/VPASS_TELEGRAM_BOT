@@ -71,35 +71,30 @@ async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
     """Show the timeframe selection menu after choosing an instrument."""
     query = update.callback_query
     instrument_map = {
-        # Forex
         "instrument_eurusd": "EUR/USD", "instrument_gbpusd": "GBP/USD", "instrument_usdjpy": "USD/JPY",
         "instrument_usdchf": "USD/CHF", "instrument_usdcad": "USD/CAD", "instrument_audusd": "AUD/USD",
         "instrument_nzdusd": "NZD/USD", "instrument_eurjpy": "EUR/JPY", "instrument_gbpjpy": "GBP/JPY",
-        "instrument_eurgbp": "EUR/GBP",
-
-        # Metals
-        "instrument_xauusd": "Gold", "instrument_xagusd": "Silver", "instrument_xptusd": "Platinum",
-        "instrument_xpdusd": "Palladium", "instrument_xcuusd": "Copper",
-
-        # Index
+        "instrument_eurgbp": "EUR/GBP", "instrument_xauusd": "Gold", "instrument_xagusd": "Silver",
+        "instrument_xptusd": "Platinum", "instrument_xpdusd": "Palladium", "instrument_xcuusd": "Copper",
         "instrument_dji": "Dow Jones", "instrument_ixic": "NASDAQ", "instrument_spx": "S&P 500",
         "instrument_uk100": "FTSE 100", "instrument_de30": "DAX", "instrument_jp225": "Nikkei 225",
         "instrument_hk50": "Hang Seng", "instrument_fra40": "CAC 40", "instrument_aus200": "ASX 200",
-        "instrument_rut": "Russell 2000",
-
-        # Crypto
-        "instrument_btcusd": "Bitcoin", "instrument_ethusd": "Ethereum", "instrument_xrpusd": "XRP",
-        "instrument_ltcusd": "Litecoin", "instrument_adausd": "Cardano", "instrument_solusd": "Solana",
-        "instrument_bnbusd": "Binance", "instrument_dogeusd": "Dogecoin", "instrument_dotusd": "Polkadot",
-        "instrument_avaxusd": "Avalanche"
+        "instrument_rut": "Russell 2000", "instrument_btcusd": "Bitcoin", "instrument_ethusd": "Ethereum",
+        "instrument_xrpusd": "XRP", "instrument_ltcusd": "Litecoin", "instrument_adausd": "Cardano",
+        "instrument_solusd": "Solana", "instrument_bnbusd": "Binance", "instrument_dogeusd": "Dogecoin",
+        "instrument_dotusd": "Polkadot", "instrument_avaxusd": "Avalanche"
     }
 
+    print(f"DEBUG: User selected instrument: {query.data}")  # ✅ Debug log
+
     if query.data not in instrument_map:
+        print(f"ERROR: Invalid instrument selection: {query.data}")  # ✅ Error log
         await query.message.reply_text("❌ Invalid selection. Please try again.")
         return
 
     # Store selected instrument in user context
     context.user_data["selected_instrument"] = instrument_map[query.data]
+    print(f"DEBUG: Storing selected instrument: {context.user_data['selected_instrument']}")  # ✅ Debug log
 
     keyboard = [
         [InlineKeyboardButton("⏳ M1", callback_data="timeframe_1m"),
@@ -114,6 +109,7 @@ async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.edit_text(f"📊 **Selected: {context.user_data['selected_instrument']}**\n\nNow choose a timeframe:", reply_markup=reply_markup, parse_mode="Markdown")
+
 
 async def back_to_technical_menu(update: Update, context: CallbackContext) -> None:
     """Handles the back button from instrument selection to category selection."""
@@ -165,6 +161,8 @@ async def back_to_ai_technical_instruments(update: Update, context: CallbackCont
 
     if "selected_category" in context.user_data:
         category_key = context.user_data["selected_category"]
-        await show_instrument_menu(update, context)  # Correctly navigates back to the instrument selection menu
+        print(f"DEBUG: Returning to instruments for category: {category_key}")  # ✅ Debug log
+        await show_instrument_menu(update, context)  # ✅ Correctly navigates back to instrument selection
     else:
-        await show_technical_menu(update, context)  # If category is missing, go back to main AI Technical menu
+        print("ERROR: No selected category found, returning to main menu.")  # ✅ Error log
+        await show_technical_menu(update, context)  # ✅ Fallback if category is missing
