@@ -66,15 +66,10 @@ async def show_instrument_menu(update: Update, context: CallbackContext) -> None
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.edit_text("📊 **Select an Instrument**:", reply_markup=reply_markup, parse_mode="Markdown")
 
-# Timeframe Menu (Fixed Back Button)
+# Timeframe Menu (Back Button Goes to 4 Categories)
 async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
     """Show the timeframe selection menu after choosing an instrument."""
     query = update.callback_query
-
-    # ✅ Handle "Back" button correctly
-    if query.data == "back_to_technical_instruments":
-        await back_to_technical_instruments(update, context)
-        return  # ✅ Stop execution to prevent "Invalid Selection"
 
     instrument_map = {
         "instrument_eurusd": "EUR/USD", "instrument_gbpusd": "GBP/USD", "instrument_usdjpy": "USD/JPY",
@@ -100,11 +95,10 @@ async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
          InlineKeyboardButton("⏳ H4", callback_data="timeframe_4h")],
         [InlineKeyboardButton("⏳ Weekly", callback_data="timeframe_1w"),
          InlineKeyboardButton("⏳ Monthly", callback_data="timeframe_1mo")],
-        [InlineKeyboardButton("🔙 Back", callback_data="back_to_technical_instruments")]
+        [InlineKeyboardButton("🔙 Back to Categories", callback_data="back_to_technical_menu")]  # ✅ Now goes back to 4 categories
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.edit_text(f"📊 **Selected: {context.user_data['selected_instrument']}**\n\nNow choose a timeframe:", reply_markup=reply_markup, parse_mode="Markdown")
-
 
 
 
@@ -152,15 +146,8 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
 
 
 
-# Back to Instrument Menu (100% Fixed "Invalid Selection" on Back Button)
-async def back_to_technical_instruments(update: Update, context: CallbackContext) -> None:
-    """Handles the back button from timeframe selection to instrument selection."""
-    query = update.callback_query
-
-    # Ensure the bot goes back to the correct category
-    if "selected_category" in context.user_data:
-        category_key = context.user_data["selected_category"]
-        await show_instrument_menu(update, context)  # ✅ Directly go to instrument selection
-    else:
-        await show_technical_menu(update, context)  # ✅ Fallback if category is missing
+# Back to 4 Categories Menu
+async def back_to_technical_menu(update: Update, context: CallbackContext) -> None:
+    """Handles the back button from timeframe selection to the 4 categories menu."""
+    await show_technical_menu(update, context)  # ✅ Now correctly sends user back to category selection
 
