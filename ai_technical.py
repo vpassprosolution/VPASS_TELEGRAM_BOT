@@ -152,22 +152,26 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
     timeframe = timeframe_map[timeframe_key]
 
     # ✅ Debugging logs to check what is being sent
-    print(f"DEBUG: Requesting chart for Instrument: {instrument}, Timeframe: {timeframe}")
+    print(f"✅ DEBUG: Requesting chart for Instrument: {instrument}, Timeframe: {timeframe}")
 
     response = requests.get(API_URL, params={"instrument": instrument, "timeframe": timeframe})
 
     # ✅ Debugging logs to check API response
-    print(f"DEBUG: API Response Status Code: {response.status_code}")
-    print(f"DEBUG: API Response Text: {response.text}")
+    print(f"✅ DEBUG: API Response Status Code: {response.status_code}")
+    print(f"✅ DEBUG: API Response Text: {response.text}")
 
     if response.status_code == 200:
-        chart_url = response.json().get("chart_url")
+        response_data = response.json()
+        chart_url = response_data.get("chart_image")  # ✅ Correct JSON key
 
         if chart_url:
+            print(f"✅ DEBUG: Sending Chart - {chart_url}")
             await query.message.reply_photo(photo=chart_url, caption=f"📊 {instrument} {timeframe.upper()} Chart")
         else:
+            print("❌ DEBUG: Chart not found in API response")
             await query.message.reply_text("❌ Chart not available. Please try again later.")
     else:
+        print(f"❌ DEBUG: API Error - {response.text}")
         await query.message.reply_text(f"❌ Error retrieving chart. Please try again.\n\n**API Error:** {response.text}")
 
 
