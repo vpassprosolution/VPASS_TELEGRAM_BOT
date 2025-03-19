@@ -388,6 +388,7 @@ def main():
     app.add_handler(CallbackQueryHandler(back_to_ai_technical_instruments, pattern="^back_to_ai_technical_instruments$"))
 
 
+
    
 
 
