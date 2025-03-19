@@ -105,3 +105,43 @@ async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.edit_text(f"📊 **Selected: {context.user_data['selected_instrument']}**\n\nNow choose a timeframe:", reply_markup=reply_markup, parse_mode="Markdown")
+
+async def handle_technical_selection(update: Update, context: CallbackContext) -> None:
+    """Handles timeframe selection and sends the TradingView chart from the API."""
+    query = update.callback_query
+
+    if "selected_instrument" not in context.user_data:
+        await query.message.reply_text("❌ No instrument selected. Please go back and choose one.")
+        return
+
+    instrument = context.user_data["selected_instrument"]
+    timeframe_map = {
+        "timeframe_1m": "1m",
+        "timeframe_5m": "5m",
+        "timeframe_15m": "15m",
+        "timeframe_30m": "30m",
+        "timeframe_1h": "1h",
+        "timeframe_4h": "4h",
+        "timeframe_1w": "1w",
+        "timeframe_1mo": "1mo"
+    }
+
+    timeframe_key = query.data
+    if timeframe_key not in timeframe_map:
+        await query.message.reply_text("❌ Invalid selection. Please try again.")
+        return
+
+    timeframe = timeframe_map[timeframe_key]
+
+    # Fetch TradingView chart from the API
+    response = requests.get(API_URL, params={"instrument": instrument, "timeframe": timeframe})
+
+    if response.status_code == 200:
+        chart_url = response.json().get("chart_url")
+
+        if chart_url:
+            await query.message.reply_photo(photo=chart_url, caption=f"📊 {instrument} {timeframe.upper()} Chart")
+        else:
+            await query.message.reply_text("❌ Chart not available. Please try again later.")
+    else:
+        await query.message.reply_text("❌ Error retrieving chart. Please try again.")
