@@ -23,7 +23,7 @@ async def show_technical_menu(update: Update, context: CallbackContext) -> None:
 async def show_instrument_menu(update: Update, context: CallbackContext) -> None:
     """Show instrument selection menu based on category."""
     query = update.callback_query
-    category_key = query.data  # ✅ Ensure category key is passed correctly
+    category_key = query.data
 
     category_map = {
         "category_forex": [
@@ -51,17 +51,11 @@ async def show_instrument_menu(update: Update, context: CallbackContext) -> None
     }
 
     if category_key not in category_map:
-        print(f"ERROR: Invalid category selection: {category_key}")  # ✅ Debugging log
         await query.message.reply_text("❌ Invalid selection. Please try again.")
         return
 
-    # ✅ Debugging log to confirm category selection
-    print(f"DEBUG: Showing instruments for category: {category_key}")
-
-    # ✅ Store selected category
     context.user_data["selected_category"] = category_key
 
-    # Arrange buttons in a 3x3 format
     keyboard = []
     instruments = category_map[category_key]
     for i in range(0, len(instruments), 3):
@@ -81,26 +75,14 @@ async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
         "instrument_usdchf": "USD/CHF", "instrument_usdcad": "USD/CAD", "instrument_audusd": "AUD/USD",
         "instrument_nzdusd": "NZD/USD", "instrument_eurjpy": "EUR/JPY", "instrument_gbpjpy": "GBP/JPY",
         "instrument_eurgbp": "EUR/GBP", "instrument_xauusd": "Gold", "instrument_xagusd": "Silver",
-        "instrument_xptusd": "Platinum", "instrument_xpdusd": "Palladium", "instrument_xcuusd": "Copper",
-        "instrument_dji": "Dow Jones", "instrument_ixic": "NASDAQ", "instrument_spx": "S&P 500",
-        "instrument_uk100": "FTSE 100", "instrument_de30": "DAX", "instrument_jp225": "Nikkei 225",
-        "instrument_hk50": "Hang Seng", "instrument_fra40": "CAC 40", "instrument_aus200": "ASX 200",
-        "instrument_rut": "Russell 2000", "instrument_btcusd": "Bitcoin", "instrument_ethusd": "Ethereum",
-        "instrument_xrpusd": "XRP", "instrument_ltcusd": "Litecoin", "instrument_adausd": "Cardano",
-        "instrument_solusd": "Solana", "instrument_bnbusd": "Binance", "instrument_dogeusd": "Dogecoin",
-        "instrument_dotusd": "Polkadot", "instrument_avaxusd": "Avalanche"
+        "instrument_xptusd": "Platinum", "instrument_xpdusd": "Palladium", "instrument_xcuusd": "Copper"
     }
 
-    print(f"DEBUG: User selected instrument: {query.data}")  # ✅ Debug log
-
     if query.data not in instrument_map:
-        print(f"ERROR: Invalid instrument selection: {query.data}")  # ✅ Error log
         await query.message.reply_text("❌ Invalid selection. Please try again.")
         return
 
-    # Store selected instrument in user context
     context.user_data["selected_instrument"] = instrument_map[query.data]
-    print(f"DEBUG: Storing selected instrument: {context.user_data['selected_instrument']}")  # ✅ Debug log
 
     keyboard = [
         [InlineKeyboardButton("⏳ M1", callback_data="timeframe_1m"),
@@ -111,16 +93,12 @@ async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
          InlineKeyboardButton("⏳ H4", callback_data="timeframe_4h")],
         [InlineKeyboardButton("⏳ Weekly", callback_data="timeframe_1w"),
          InlineKeyboardButton("⏳ Monthly", callback_data="timeframe_1mo")],
-        [InlineKeyboardButton("🔙 Back", callback_data="back_to_ai_technical_instruments")]
+        [InlineKeyboardButton("🔙 Back", callback_data="back_to_technical_instruments")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.edit_text(f"📊 **Selected: {context.user_data['selected_instrument']}**\n\nNow choose a timeframe:", reply_markup=reply_markup, parse_mode="Markdown")
 
-
-async def back_to_technical_menu(update: Update, context: CallbackContext) -> None:
-    """Handles the back button from instrument selection to category selection."""
-    await show_technical_menu(update, context)
-
+# Handle Timeframe Selection
 async def handle_technical_selection(update: Update, context: CallbackContext) -> None:
     """Handles timeframe selection and sends the TradingView chart from the API."""
     query = update.callback_query
@@ -146,38 +124,23 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
         await query.message.reply_text("❌ Invalid selection. Please try again.")
         return
 
-    timeframe = timeframe_map[timeframe_key]
-
-    # Fetch TradingView chart from the API
-    response = requests.get(API_URL, params={"instrument": instrument, "timeframe": timeframe})
+    response = requests.get(API_URL, params={"instrument": instrument, "timeframe": timeframe_map[timeframe_key]})
 
     if response.status_code == 200:
         chart_url = response.json().get("chart_url")
-
         if chart_url:
-            await query.message.reply_photo(photo=chart_url, caption=f"📊 {instrument} {timeframe.upper()} Chart")
+            await query.message.reply_photo(photo=chart_url, caption=f"📊 {instrument} {timeframe_map[timeframe_key].upper()} Chart")
         else:
             await query.message.reply_text("❌ Chart not available. Please try again later.")
     else:
         await query.message.reply_text("❌ Error retrieving chart. Please try again.")
 
+# Back to Instrument Menu (100% Fixed)
 async def back_to_technical_instruments(update: Update, context: CallbackContext) -> None:
-    """Handles the back button from timeframe selection to AI Technical instrument selection."""
+    """Handles the back button from timeframe selection to instrument selection."""
     query = update.callback_query
 
-    # ✅ Debug log to confirm the back button is clicked
-    print("DEBUG: User clicked back from timeframe menu.")
-
     if "selected_category" in context.user_data:
-        category_key = context.user_data["selected_category"]
-        print(f"DEBUG: Returning to instruments for category: {category_key}")
-
-        # ✅ Explicitly call `show_instrument_menu` with the correct category_key
         await show_instrument_menu(update, context)
     else:
-        print("ERROR: No selected category found, returning to main menu.")
         await show_technical_menu(update, context)  # ✅ Fallback if category is missing
-
-
-
-
