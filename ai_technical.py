@@ -142,14 +142,14 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
 
 
 
-# Back to Instrument Menu (Fix for ImportError)
+# Back to Instrument Menu (100% FIXED)
 async def back_to_technical_instruments(update: Update, context: CallbackContext) -> None:
     """Handles the back button from timeframe selection to instrument selection."""
     query = update.callback_query
 
     if "selected_category" in context.user_data:
         category_key = context.user_data["selected_category"]
-        query.data = category_key  # ✅ Ensures correct category is used
-        await show_instrument_menu(update, context)
+        await show_instrument_menu(update, context)  # ✅ Correctly navigates back
     else:
         await show_technical_menu(update, context)  # ✅ Fallback if category is missing
+
