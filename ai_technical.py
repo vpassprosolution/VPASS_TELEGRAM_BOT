@@ -67,9 +67,16 @@ async def show_instrument_menu(update: Update, context: CallbackContext) -> None
     await query.message.edit_text("📊 **Select an Instrument**:", reply_markup=reply_markup, parse_mode="Markdown")
 
 # Timeframe Menu
+# Timeframe Menu (Fixed "Invalid Selection" on Back Button)
 async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
     """Show the timeframe selection menu after choosing an instrument."""
     query = update.callback_query
+
+    # ✅ Handle the "Back" button properly to avoid "Invalid selection"
+    if query.data == "back_to_technical_instruments":
+        await back_to_technical_instruments(update, context)
+        return  # Stop further execution
+
     instrument_map = {
         "instrument_eurusd": "EUR/USD", "instrument_gbpusd": "GBP/USD", "instrument_usdjpy": "USD/JPY",
         "instrument_usdchf": "USD/CHF", "instrument_usdcad": "USD/CAD", "instrument_audusd": "AUD/USD",
@@ -97,6 +104,7 @@ async def show_timeframe_menu(update: Update, context: CallbackContext) -> None:
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.edit_text(f"📊 **Selected: {context.user_data['selected_instrument']}**\n\nNow choose a timeframe:", reply_markup=reply_markup, parse_mode="Markdown")
+
 
 # Back to Category Menu
 async def back_to_technical_menu(update: Update, context: CallbackContext) -> None:
@@ -142,14 +150,13 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
 
 
 
-# Back to Instrument Menu (100% FIXED)
+# Back to Instrument Menu (Fixed "Invalid Selection" on Back Button)
 async def back_to_technical_instruments(update: Update, context: CallbackContext) -> None:
     """Handles the back button from timeframe selection to instrument selection."""
     query = update.callback_query
 
     if "selected_category" in context.user_data:
-        category_key = context.user_data["selected_category"]
-        await show_instrument_menu(update, context)  # ✅ Correctly navigates back
+        await show_instrument_menu(update, context)
     else:
         await show_technical_menu(update, context)  # ✅ Fallback if category is missing
 
