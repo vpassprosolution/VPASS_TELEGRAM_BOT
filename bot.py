@@ -384,6 +384,7 @@ def main():
     app.add_handler(CallbackQueryHandler(show_instrument_menu, pattern="^category_.*$"))
     app.add_handler(CallbackQueryHandler(show_timeframe_menu, pattern="^instrument_.*$"))
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
+    app.add_handler(CallbackQueryHandler(back_to_technical_menu, pattern="^back_to_technical_menu$"))
 
    
 
