@@ -7,7 +7,7 @@ import asyncio
 API_URL = "https://vpassaitechnical-production.up.railway.app/chart/"
 
 # Categories Menu
-async def show_category_menu(update: Update, context: CallbackContext) -> None:
+async def show_technical_menu(update: Update, context: CallbackContext) -> None:
     """Show category selection menu for AI Technical Analysis."""
     keyboard = [
         [InlineKeyboardButton("📌 Forex", callback_data="category_forex")],
