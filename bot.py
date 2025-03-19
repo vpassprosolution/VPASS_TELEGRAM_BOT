@@ -15,8 +15,7 @@ from ai_technical import (
     show_instrument_menu,
     show_timeframe_menu,
     handle_technical_selection,
-    back_to_technical_menu,
-    back_to_technical_instruments  # ✅ Ensure this exists
+    back_to_technical_instruments  # ✅ Make sure this is included
 )
 
 

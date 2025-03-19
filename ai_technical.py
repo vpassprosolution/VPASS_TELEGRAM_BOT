@@ -144,6 +144,10 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
     else:
         await query.message.reply_text("❌ Error retrieving chart. Please try again.")
 
+# Back to Categories Menu (Fix for ImportError)
+async def back_to_technical_instruments(update: Update, context: CallbackContext) -> None:
+    """Handles the back button from timeframe selection to the categories menu."""
+    await show_technical_menu(update, context)  # ✅ Now correctly sends user back to categories
 
 
 # Back to 4 Categories Menu
