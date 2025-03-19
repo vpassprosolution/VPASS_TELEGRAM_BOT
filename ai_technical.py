@@ -172,9 +172,12 @@ async def back_to_technical_instruments(update: Update, context: CallbackContext
         category_key = context.user_data["selected_category"]
         print(f"DEBUG: Returning to instruments for category: {category_key}")
 
-        # ✅ Force the bot to use the correct category when going back
-        query.data = category_key  
+        # ✅ Explicitly call `show_instrument_menu` with the correct category_key
         await show_instrument_menu(update, context)
     else:
         print("ERROR: No selected category found, returning to main menu.")
         await show_technical_menu(update, context)  # ✅ Fallback if category is missing
+
+
+
+
