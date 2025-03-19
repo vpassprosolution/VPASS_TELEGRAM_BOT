@@ -373,7 +373,6 @@ def main():
 
     # Connect "VPASS SMART SIGNAL" button to subscription system
     from subscription_handler import show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
-    from ai_technical import show_technical_menu, show_timeframe_menu, handle_technical_selection
 
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="vpass_smart_signal"))
     app.add_handler(CallbackQueryHandler(show_subscription_menu, pattern="^select_"))
@@ -387,6 +386,7 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_technical_selection, pattern="^timeframe_.*$"))
     app.add_handler(CallbackQueryHandler(back_to_technical_menu, pattern="^back_to_technical_menu$"))
     app.add_handler(CallbackQueryHandler(back_to_ai_technical_instruments, pattern="^back_to_ai_technical_instruments$"))
+ 
 
    
 
