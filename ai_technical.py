@@ -139,3 +139,17 @@ async def handle_technical_selection(update: Update, context: CallbackContext) -
             await query.message.reply_text("❌ Chart not available. Please try again later.")
     else:
         await query.message.reply_text("❌ Error retrieving chart. Please try again.")
+
+
+
+# Back to Instrument Menu (Fix for ImportError)
+async def back_to_technical_instruments(update: Update, context: CallbackContext) -> None:
+    """Handles the back button from timeframe selection to instrument selection."""
+    query = update.callback_query
+
+    if "selected_category" in context.user_data:
+        category_key = context.user_data["selected_category"]
+        query.data = category_key  # ✅ Ensures correct category is used
+        await show_instrument_menu(update, context)
+    else:
+        await show_technical_menu(update, context)  # ✅ Fallback if category is missing
