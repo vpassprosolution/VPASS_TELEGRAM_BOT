@@ -1,16 +1,15 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 import psycopg2
-from db import connect_db
-from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_prompt, handle_admin_input
 import asyncio
-import ai_signal_handler  # Import the AI Signal Handler
-from telegram.ext import CallbackQueryHandler
+import ai_signal_handler
 import re
 from telegram.ext import ContextTypes
 from channel_verification import check_membership
 from telegram.ext import JobQueue
-
+from telegram.ext import CallbackQueryHandler
+from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_prompt, handle_admin_input
+from db import connect_db
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
 
 
@@ -56,9 +55,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Store message ID so we can delete it later
     context.user_data["button_message"] = sent_message.message_id
-
-
-
 
 
 
