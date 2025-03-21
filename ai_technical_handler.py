@@ -41,8 +41,8 @@ async def show_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
         row = [InlineKeyboardButton(cat, callback_data=f"tech2_cat_{cat}") for cat in categories[i:i+2]]
         rows.append(row)
 
-    rows.append([InlineKeyboardButton("\ud83d\udd19 Back", callback_data="main_menu")])
-    await query.message.edit_text("\ud83d\udcc8 *Select a Market Category:*", reply_markup=InlineKeyboardMarkup(rows), parse_mode="Markdown")
+    rows.append([InlineKeyboardButton("🔙 Back", callback_data="main_menu")])
+    await query.message.edit_text("📊 *Select a Market Category:*", reply_markup=InlineKeyboardMarkup(rows), parse_mode="Markdown")
 
 # Step 2: Show Instruments
 async def show_technical_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -65,8 +65,8 @@ async def show_technical_instruments(update: Update, context: ContextTypes.DEFAU
             row = [InlineKeyboardButton(inst, callback_data=f"tech2_symbol_{category}_{inst}") for inst in instruments[i:i+5]]
             keyboard.append(row)
 
-    keyboard.append([InlineKeyboardButton("\ud83d\udd19 Back", callback_data="ai_technical")])
-    await query.message.edit_text(f"\ud83d\udcb9 *Select an Instrument from {category}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
+    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="ai_technical")])
+    await query.message.edit_text(f"💹 *Select an Instrument from {category}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
 # Step 3: Show Timeframes
 async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -80,8 +80,8 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
         row = [InlineKeyboardButton(tf, callback_data=f"tech2_chart_{category}_{symbol}_{tf}") for tf in TIMEFRAMES[i:i+3]]
         keyboard.append(row)
 
-    keyboard.append([InlineKeyboardButton("\ud83d\udd19 Back", callback_data=f"tech2_cat_{category}")])
-    await query.message.edit_text(f"\ud83d\udd52 *Select Timeframe for {symbol}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
+    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data=f"tech2_cat_{category}")])
+    await query.message.edit_text(f"🕒 *Select Timeframe for {symbol}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
 # Step 4: Fetch Chart from API
 async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
