@@ -85,6 +85,43 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
+
+# AI Technical Analysis Button Handler
+async def ai_technical_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles AI Technical Analysis button press and calls the AI Technical API."""
+    query = update.callback_query
+    await query.answer()
+
+    keyboard = [
+        [InlineKeyboardButton("Select Instrument", callback_data="ai_technical_instrument")],
+        [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.message.edit_text("🔍 Select an option for AI Technical Analysis:", reply_markup=reply_markup)
+
+async def ai_technical_fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Fetches the chart from AI Technical Analysis API."""
+    query = update.callback_query
+    _, symbol, interval = query.data.split("_")
+
+    API_URL = "https://ai-technical.up.railway.app/get_chart_image"  # Railway API URL
+
+    payload = {
+        "symbol": f"BINANCE:{symbol}" if "USDT" in symbol else f"OANDA:{symbol}",
+        "interval": interval
+    }
+    
+    response = requests.post(API_URL, json=payload)
+
+    if response.status_code == 200:
+        chart_image = response.json().get("chart_image")
+        await query.message.reply_photo(photo=open(chart_image, "rb"), caption=f"{symbol} ({interval}) Chart")
+    else:
+        await query.message.reply_text("⚠️ Error fetching chart. Please try again.")
+
+
+
 # Function to trigger AI signal menu from ai_signal_handler.py
 async def ai_agent_signal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await ai_signal_handler.show_instruments(update, context)
@@ -375,7 +412,9 @@ def main():
     app.add_handler(CallbackQueryHandler(unsubscribe, pattern="^unsubscribe_"))
     app.add_handler(CallbackQueryHandler(back_to_main, pattern="back_to_main"))
     app.add_handler(CallbackQueryHandler(back_to_instruments, pattern="back_to_instruments"))
-  
+    app.add_handler(CallbackQueryHandler(ai_technical_callback, pattern="ai_technical"))
+    app.add_handler(CallbackQueryHandler(ai_technical_fetch_chart, pattern="^ai_technical_"))
+
    
 
 
