@@ -98,17 +98,25 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     _, symbol, tf = query.data.split("_", 2)
     full_symbol = f"BINANCE:{symbol}" if "USDT" in symbol else f"OANDA:{symbol}"
-
     payload = {"symbol": full_symbol, "interval": tf}
 
     try:
+        print(f"🔍 Sending request to API with payload: {payload}")
         response = requests.post(API_URL, json=payload)
+        print(f"📥 API response status: {response.status_code}")
 
         if response.status_code == 200:
-            # Get image as bytes and send it
-            image_bytes = BytesIO(response.content)
-            await query.message.reply_photo(photo=image_bytes, caption=f"{symbol} ({tf}) Chart")
+            # Check if the response is an image
+            content_type = response.headers.get("Content-Type", "")
+            if "image" in content_type:
+                image_bytes = BytesIO(response.content)
+                await query.message.reply_photo(photo=image_bytes, caption=f"{symbol} ({tf}) Chart")
+            else:
+                print(f"❌ API returned non-image content: {response.text}")
+                await query.message.reply_text("⚠️ Failed to fetch chart. Invalid response.")
         else:
+            print(f"❌ API error response: {response.text}")
             await query.message.reply_text("⚠️ Failed to fetch chart. Please try again.")
-    except Exception:
+    except Exception as e:
+        print("❌ Exception while calling chart API:", e)
         await query.message.reply_text("❌ Server error. Try again later.")
