@@ -88,7 +88,6 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.edit_text(f"🕒 *Select Timeframe for {symbol}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
 
-# Step 4: Fetch Chart
 from io import BytesIO
 import requests
 
@@ -96,17 +95,19 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    _, symbol, tf = query.data.split("_", 2)
-    full_symbol = f"BINANCE:{symbol}" if "USDT" in symbol else f"OANDA:{symbol}"
-    payload = {"symbol": full_symbol, "interval": tf}
-
     try:
+        parts = query.data.split("_")
+        symbol = parts[-2]  # XRPUSDT
+        tf = parts[-1]      # 5m
+
+        full_symbol = f"BINANCE:{symbol}" if "USDT" in symbol else f"OANDA:{symbol}"
+        payload = {"symbol": full_symbol, "interval": tf}
+
         print(f"🔍 Sending request to API with payload: {payload}")
         response = requests.post(API_URL, json=payload)
         print(f"📥 API response status: {response.status_code}")
 
         if response.status_code == 200:
-            # Check if the response is an image
             content_type = response.headers.get("Content-Type", "")
             if "image" in content_type:
                 image_bytes = BytesIO(response.content)
