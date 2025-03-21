@@ -2,10 +2,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 import requests
 
-# ✅ Your deployed Railway API endpoint
 API_URL = "https://ai-technical.up.railway.app/get_chart_image"
 
-# ✅ Instruments grouped by category
 INSTRUMENTS = {
     "Forex": [
         "EURUSD", "GBPUSD", "USDJPY", "USDCHF", "AUDUSD", "NZDUSD", "EURJPY", "GBPJPY", "USDCAD", "EURGBP",
@@ -22,6 +20,7 @@ INSTRUMENTS = {
     "MetalsOil": ["XAUUSD", "XAGUSD", "XPTUSD", "XPDUSD", "WTI"]
 }
 
+
 TIMEFRAMES = ["1m", "5m", "15m", "30m", "1h", "4h", "1D", "1W", "1M"]
 
 # ✅ Step 1: Show Categories
@@ -29,7 +28,7 @@ async def show_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    keyboard = [[InlineKeyboardButton(cat, callback_data=f"ai_cat_{cat}")] for cat in INSTRUMENTS]
+    keyboard = [[InlineKeyboardButton(cat, callback_data=f"tech_cat_{cat}")] for cat in INSTRUMENTS]
     keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="main_menu")])
 
     await query.message.edit_text("📊 *Select a Market Category:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
@@ -39,10 +38,10 @@ async def show_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    category = query.data.replace("ai_cat_", "")
+    category = query.data.replace("tech_cat_", "")
     instruments = INSTRUMENTS.get(category, [])
 
-    keyboard = [[InlineKeyboardButton(symbol, callback_data=f"ai_symbol_{category}_{symbol}")] for symbol in instruments]
+    keyboard = [[InlineKeyboardButton(symbol, callback_data=f"tech_symbol_{category}_{symbol}")] for symbol in instruments]
     keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="ai_technical")])
 
     await query.message.edit_text(f"💹 *Select an Instrument from {category}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
@@ -53,12 +52,12 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     _, category, symbol = query.data.split("_", 2)
-    keyboard = [[InlineKeyboardButton(tf, callback_data=f"ai_chart_{symbol}_{tf}")] for tf in TIMEFRAMES]
-    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data=f"ai_cat_{category}")])
+    keyboard = [[InlineKeyboardButton(tf, callback_data=f"tech_chart_{symbol}_{tf}")] for tf in TIMEFRAMES]
+    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data=f"tech_cat_{category}")])
 
     await query.message.edit_text(f"🕒 *Select Timeframe for {symbol}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
-# ✅ Step 4: Call API and Send Chart
+# ✅ Step 4: Fetch Chart
 async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
