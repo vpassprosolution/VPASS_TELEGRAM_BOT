@@ -42,7 +42,14 @@ async def show_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
         rows.append(row)
 
     rows.append([InlineKeyboardButton("🔙 Back", callback_data="main_menu")])
-    await query.message.edit_text("📊 *Select a Market Category:*", reply_markup=InlineKeyboardMarkup(rows), parse_mode="Markdown")
+
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="📊 *Select a Market Category:*",
+        reply_markup=InlineKeyboardMarkup(rows),
+        parse_mode="Markdown"
+    )
+
 
 # Step 2: Show Instruments
 async def show_technical_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -81,7 +88,13 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard.append(row)
 
     keyboard.append([InlineKeyboardButton("🔙 Back", callback_data=f"tech2_cat_{category}")])
-    await query.message.edit_text(f"🕒 *Select Timeframe for {symbol}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
+
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=f"🕒 *Select Timeframe for {symbol}:*",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode="Markdown"
+    )
 
 # Step 4: Fetch Chart from API
 async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -105,10 +118,7 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif category == "Index":
             full_symbol = f"TVC:{symbol}"
         elif category == "MetalsOil":
-            if symbol == "WTI":
-                full_symbol = "TVC:USOIL"
-            else:
-                full_symbol = f"TVC:{symbol}"
+            full_symbol = "TVC:USOIL" if symbol == "WTI" else f"TVC:{symbol}"
         else:
             full_symbol = f"OANDA:{symbol}"
 
@@ -122,7 +132,10 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
             data = response.json()
 
             if "image_base64" in data and "caption" in data:
-                await context.bot.delete_message(chat_id=query.message.chat_id, message_id=loading_message.message_id)
+                await context.bot.delete_message(
+                    chat_id=query.message.chat.id,
+                    message_id=loading_message.message_id
+                )
 
                 image_data = base64.b64decode(data["image_base64"])
                 image_stream = BytesIO(image_data)
@@ -132,12 +145,12 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 footer_buttons = InlineKeyboardMarkup([
                     [
                         InlineKeyboardButton("🔁 Back to Timeframe", callback_data=f"tech2_symbol_{category}_{symbol}"),
-                        InlineKeyboardButton("🏠 Main Menu", callback_data="ai_technical")
+                        InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")
                     ]
                 ])
 
                 await context.bot.send_photo(
-                    chat_id=query.message.chat_id,
+                    chat_id=query.message.chat.id,
                     photo=image_stream,
                     caption=data["caption"],
                     reply_markup=footer_buttons
