@@ -390,6 +390,14 @@ def main():
     app.add_handler(CallbackQueryHandler(show_categories, pattern="^tech2_back_menu$"))
     app.add_handler(CallbackQueryHandler(show_categories, pattern="^tech2_back_categories$"))
 
+async def debug_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    print(f"🧪 DEBUG CALLBACK RECEIVED: {query.data}")
+    await query.message.reply_text(f"DEBUG: `{query.data}`", parse_mode="Markdown")
+
+# MUST BE LAST — catch unhandled patterns
+app.add_handler(CallbackQueryHandler(debug_callback))
 
 
 
