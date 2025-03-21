@@ -89,14 +89,30 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Step 4: Fetch Chart from API
 async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()
+    try:
+        await query.answer()
+    except Exception as e:
+        print("⚠️ Skipped query.answer():", e)
 
     try:
         parts = query.data.split("_")
+        category = parts[-3]  # 🧠 Extract category from callback data
         symbol = parts[-2]
         tf = parts[-1]
 
-        full_symbol = f"BINANCE:{symbol}" if "USDT" in symbol else f"OANDA:{symbol}"
+        # ✅ Symbol prefix logic by category
+        if category == "Crypto":
+            full_symbol = f"BINANCE:{symbol}"
+        elif category == "Index":
+            full_symbol = f"TVC:{symbol}"
+        elif category == "MetalsOil":
+            if symbol == "WTI":
+                full_symbol = "TVC:USOIL"
+            else:
+                full_symbol = f"TVC:{symbol}"
+        else:
+            full_symbol = f"OANDA:{symbol}"  # Forex fallback
+
         payload = {"symbol": full_symbol, "interval": tf}
 
         print(f"🔍 Sending request to API with payload: {payload}")
