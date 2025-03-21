@@ -87,16 +87,29 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = []
     for i in range(0, len(TIMEFRAMES), 3):
-        row = [InlineKeyboardButton(tf, callback_data=f"tech2_chart_{category}_{symbol}_{tf}") for tf in TIMEFRAMES[i:i+3]]
+        row = [
+            InlineKeyboardButton(tf, callback_data=f"tech2_chart_{category}_{symbol}_{tf}")
+            for tf in TIMEFRAMES[i:i+3]
+        ]
         keyboard.append(row)
 
     keyboard.append([InlineKeyboardButton("🔙 Back", callback_data=f"tech2_cat_{category}")])
 
-    await query.edit_message_text(
-        text=f"🕒 *Select Timeframe for {symbol}:*",
-        reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode="Markdown"
-    )
+    try:
+        await query.edit_message_text(
+            text=f"🕒 *Select Timeframe for {symbol}:*",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="Markdown"
+        )
+    except Exception:
+        # If previous message is a photo → fallback
+        await context.bot.send_message(
+            chat_id=query.message.chat.id,
+            text=f"🕒 *Select Timeframe for {symbol}:*",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="Markdown"
+        )
+
 
 # Step 4: Fetch Chart from API
 async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):

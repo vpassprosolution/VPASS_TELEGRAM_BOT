@@ -66,31 +66,32 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Returns to the main menu"""
     query = update.callback_query
+    await query.answer()
 
     keyboard = [
         [InlineKeyboardButton("VPASS SMART SIGNAL", callback_data="vpass_smart_signal")],
         [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="ai_sentiment")],
-        [InlineKeyboardButton("VPASS AI TECHNICAL ANALYSIS", callback_data="ai_technical")],  # New button
+        [InlineKeyboardButton("VPASS AI TECHNICAL ANALYSIS", callback_data="ai_technical")],
         [InlineKeyboardButton("AI AGENT INSTANT SIGNAL", callback_data="ai_agent_signal")],
-        [InlineKeyboardButton("🔥 NEWS WAR ROOM 🔥", callback_data="news_war_room")],  # Updated button
+        [InlineKeyboardButton("🔥 NEWS WAR ROOM 🔥", callback_data="news_war_room")],
         [
             InlineKeyboardButton("F.Factory", url="https://www.forexfactory.com"),
-            InlineKeyboardButton("Discord", url="https://discordapp.com/channels/1347220972519952497/1347220976689086577"),
+            InlineKeyboardButton("Discord", url="https://discord.gg/yourchannel"),
             InlineKeyboardButton("ChatGPT", url="https://chat.openai.com"),
             InlineKeyboardButton("DeepSeek", url="https://www.deepseek.com")
         ]
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
 
-    await query.message.edit_text(
-        "*WELCOME TO VPASS PRO VERSION V2*\n"
-        "   The Future of Intelligent Starts Here\n"
-        "          *CHOOSE YOUR STRATEGY*",
-        parse_mode="MarkdownV2",
-        reply_markup=reply_markup
+    await context.bot.send_message(
+        chat_id=query.message.chat.id,
+        text="*WELCOME TO VPASS PRO VERSION V2*\n"
+             "   The Future of Intelligence Starts Here\n"
+             "          *CHOOSE YOUR STRATEGY*",
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
+
 
 
 
