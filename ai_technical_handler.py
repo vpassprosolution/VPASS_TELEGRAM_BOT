@@ -41,9 +41,8 @@ async def show_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
         row = [InlineKeyboardButton(cat, callback_data=f"tech2_cat_{cat}") for cat in categories[i:i+2]]
         rows.append(row)
 
-    rows.append([InlineKeyboardButton("🔙 Back", callback_data="main_menu")])
-    await query.message.edit_text("📊 *Select a Market Category:*", reply_markup=InlineKeyboardMarkup(rows), parse_mode="Markdown")
-
+    rows.append([InlineKeyboardButton("\ud83d\udd19 Back", callback_data="main_menu")])
+    await query.message.edit_text("\ud83d\udcc8 *Select a Market Category:*", reply_markup=InlineKeyboardMarkup(rows), parse_mode="Markdown")
 
 # Step 2: Show Instruments
 async def show_technical_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -66,9 +65,8 @@ async def show_technical_instruments(update: Update, context: ContextTypes.DEFAU
             row = [InlineKeyboardButton(inst, callback_data=f"tech2_symbol_{category}_{inst}") for inst in instruments[i:i+5]]
             keyboard.append(row)
 
-    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="ai_technical")])
-    await query.message.edit_text(f"💹 *Select an Instrument from {category}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
-
+    keyboard.append([InlineKeyboardButton("\ud83d\udd19 Back", callback_data="ai_technical")])
+    await query.message.edit_text(f"\ud83d\udcb9 *Select an Instrument from {category}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
 # Step 3: Show Timeframes
 async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -79,12 +77,11 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = []
     for i in range(0, len(TIMEFRAMES), 3):
-        row = [InlineKeyboardButton(tf, callback_data=f"tech2_chart_{symbol}_{tf}") for tf in TIMEFRAMES[i:i+3]]
+        row = [InlineKeyboardButton(tf, callback_data=f"tech2_chart_{category}_{symbol}_{tf}") for tf in TIMEFRAMES[i:i+3]]
         keyboard.append(row)
 
-    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data=f"tech2_cat_{category}")])
-    await query.message.edit_text(f"🕒 *Select Timeframe for {symbol}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
-
+    keyboard.append([InlineKeyboardButton("\ud83d\udd19 Back", callback_data=f"tech2_cat_{category}")])
+    await query.message.edit_text(f"\ud83d\udd52 *Select Timeframe for {symbol}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
 # Step 4: Fetch Chart from API
 async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -96,11 +93,13 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         parts = query.data.split("_")
-        category = parts[-3]  # 🧠 Extract category from callback data
+        category = parts[-3]
         symbol = parts[-2]
         tf = parts[-1]
 
-        # ✅ Symbol prefix logic by category
+        # Show loading message and remove timeframe menu
+        loading_message = await query.message.edit_text("⏳ *Analyzing chart... Please wait...*", parse_mode="Markdown")
+
         if category == "Crypto":
             full_symbol = f"BINANCE:{symbol}"
         elif category == "Index":
@@ -111,7 +110,7 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 full_symbol = f"TVC:{symbol}"
         else:
-            full_symbol = f"OANDA:{symbol}"  # Forex fallback
+            full_symbol = f"OANDA:{symbol}"
 
         payload = {"symbol": full_symbol, "interval": tf}
 
@@ -123,12 +122,26 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
             data = response.json()
 
             if "image_base64" in data and "caption" in data:
+                await context.bot.delete_message(chat_id=query.message.chat_id, message_id=loading_message.message_id)
+
                 image_data = base64.b64decode(data["image_base64"])
                 image_stream = BytesIO(image_data)
                 image_stream.name = "chart.png"
                 image_stream.seek(0)
 
-                await query.message.reply_photo(photo=image_stream, caption=data["caption"])
+                footer_buttons = InlineKeyboardMarkup([
+                    [
+                        InlineKeyboardButton("🔁 Back to Timeframe", callback_data=f"tech2_symbol_{category}_{symbol}"),
+                        InlineKeyboardButton("🏠 Main Menu", callback_data="ai_technical")
+                    ]
+                ])
+
+                await context.bot.send_photo(
+                    chat_id=query.message.chat_id,
+                    photo=image_stream,
+                    caption=data["caption"],
+                    reply_markup=footer_buttons
+                )
             else:
                 print(f"❌ API missing keys: {data}")
                 await query.message.reply_text("⚠️ Incomplete chart data. Please try again.")
