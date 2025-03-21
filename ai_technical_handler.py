@@ -32,7 +32,7 @@ async def show_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.edit_text("📊 *Select a Market Category:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
 # Step 2: Show Instruments
-async def show_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def show_technical_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
