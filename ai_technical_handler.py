@@ -2,7 +2,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 import requests
 
-API_URL = "https://ai-technical.up.railway.app/get_chart_image"
+API_URL = "https://aitechnical-production.up.railway.app/get_chart_image"
 
 INSTRUMENTS = {
     "Forex": [
