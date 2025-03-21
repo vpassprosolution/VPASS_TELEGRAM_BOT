@@ -83,12 +83,13 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
         row = [InlineKeyboardButton(tf, callback_data=f"tech2_chart_{symbol}_{tf}") for tf in TIMEFRAMES[i:i+3]]
         keyboard.append(row)
 
-    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data=f"tech2_cat_{category}")])
+    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data=f"tech2_symbol_{category}_{symbol}")])
     await query.message.edit_text(f"🕒 *Select Timeframe for {symbol}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
 
 # Step 4: Fetch Chart
 from io import BytesIO
+import requests
 
 async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -103,6 +104,7 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         response = requests.post(API_URL, json=payload)
 
         if response.status_code == 200:
+            # Get image as bytes and send it
             image_bytes = BytesIO(response.content)
             await query.message.reply_photo(photo=image_bytes, caption=f"{symbol} ({tf}) Chart")
         else:
