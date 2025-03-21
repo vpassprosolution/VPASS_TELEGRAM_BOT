@@ -23,17 +23,17 @@ INSTRUMENTS = {
 
 TIMEFRAMES = ["1m", "5m", "15m", "30m", "1h", "4h", "1D", "1W", "1M"]
 
-# ✅ Step 1: Show Categories
+# Step 1: Show Categories
 async def show_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
     keyboard = [[InlineKeyboardButton(cat, callback_data=f"tech_cat_{cat}")] for cat in INSTRUMENTS]
-    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="main_menu")])
-
+    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="tech_back_to_menu")])
     await query.message.edit_text("📊 *Select a Market Category:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
-# ✅ Step 2: Show Instruments
+
+# Step 2: Show Instruments
 async def show_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -42,11 +42,11 @@ async def show_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
     instruments = INSTRUMENTS.get(category, [])
 
     keyboard = [[InlineKeyboardButton(symbol, callback_data=f"tech_symbol_{category}_{symbol}")] for symbol in instruments]
-    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="ai_technical")])
-
+    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="tech_back_to_categories")])
     await query.message.edit_text(f"💹 *Select an Instrument from {category}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
-# ✅ Step 3: Show Timeframes
+
+# Step 3: Show Timeframes
 async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -54,10 +54,10 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     _, category, symbol = query.data.split("_", 2)
     keyboard = [[InlineKeyboardButton(tf, callback_data=f"tech_chart_{symbol}_{tf}")] for tf in TIMEFRAMES]
     keyboard.append([InlineKeyboardButton("🔙 Back", callback_data=f"tech_cat_{category}")])
-
     await query.message.edit_text(f"🕒 *Select Timeframe for {symbol}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
-# ✅ Step 4: Fetch Chart
+
+# Step 4: Fetch Chart
 async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()

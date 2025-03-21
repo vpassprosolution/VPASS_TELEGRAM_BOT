@@ -387,9 +387,10 @@ def main():
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="^tech_cat_"))
     app.add_handler(CallbackQueryHandler(show_timeframes, pattern="^tech_symbol_"))
     app.add_handler(CallbackQueryHandler(fetch_chart, pattern="^tech_chart_"))
+    app.add_handler(CallbackQueryHandler(show_categories, pattern="^tech_back_to_menu$"))
+    app.add_handler(CallbackQueryHandler(show_categories, pattern="^tech_back_to_categories$"))
 
 
-   
 
 
 
