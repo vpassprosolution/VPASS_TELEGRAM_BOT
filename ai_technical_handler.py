@@ -88,19 +88,23 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # Step 4: Fetch Chart
+from io import BytesIO
+
 async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
     _, symbol, tf = query.data.split("_", 2)
     full_symbol = f"BINANCE:{symbol}" if "USDT" in symbol else f"OANDA:{symbol}"
+
     payload = {"symbol": full_symbol, "interval": tf}
 
     try:
         response = requests.post(API_URL, json=payload)
+
         if response.status_code == 200:
-            image_path = response.json().get("chart_image")
-            await query.message.reply_photo(photo=open(image_path, "rb"), caption=f"{symbol} ({tf}) Chart")
+            image_bytes = BytesIO(response.content)
+            await query.message.reply_photo(photo=image_bytes, caption=f"{symbol} ({tf}) Chart")
         else:
             await query.message.reply_text("⚠️ Failed to fetch chart. Please try again.")
     except Exception:
