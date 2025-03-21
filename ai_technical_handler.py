@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 import requests
 from io import BytesIO
 import base64
+from bot import safe_replace_message  # ✅ Import from bot.py
 
 API_URL = "https://aitechnical-production.up.railway.app/get_chart_image"
 

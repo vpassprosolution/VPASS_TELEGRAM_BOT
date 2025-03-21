@@ -2,6 +2,7 @@ import requests
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler
 
+
 # AI API URL (Replace with your actual Railway URL)
 AI_API_URL = "https://aiagentinstantsignal-production.up.railway.app"
 
