@@ -12,10 +12,11 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 from ai_technical_handler import (
     show_categories,
-    show_instruments,
+    show_technical_instruments,
     show_timeframes,
     fetch_chart,
 )
+
 
 
 
@@ -384,7 +385,7 @@ def main():
     app.add_handler(CallbackQueryHandler(back_to_main, pattern="back_to_main"))
     app.add_handler(CallbackQueryHandler(back_to_instruments, pattern="back_to_instruments"))
     app.add_handler(CallbackQueryHandler(show_categories, pattern="^ai_technical$"))  # Entry button
-    app.add_handler(CallbackQueryHandler(show_instruments, pattern="^tech2_cat_"))
+    app.add_handler(CallbackQueryHandler(show_technical_instruments, pattern="^tech2_cat_"))
     app.add_handler(CallbackQueryHandler(show_timeframes, pattern="^tech2_symbol_"))
     app.add_handler(CallbackQueryHandler(fetch_chart, pattern="^tech2_chart_"))
     app.add_handler(CallbackQueryHandler(show_categories, pattern="^tech2_back_menu$"))
