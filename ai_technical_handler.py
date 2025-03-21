@@ -1,6 +1,8 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 import requests
+from io import BytesIO
+import base64
 
 API_URL = "https://aitechnical-production.up.railway.app/get_chart_image"
 
@@ -54,15 +56,12 @@ async def show_technical_instruments(update: Update, context: ContextTypes.DEFAU
     keyboard = []
 
     if category == "MetalsOil":
-        # First row = XAUUSD
         keyboard.append([InlineKeyboardButton("XAUUSD", callback_data="tech2_symbol_MetalsOil_XAUUSD")])
-        # The rest: 2 per row
         remaining = instruments[1:]
         for i in range(0, len(remaining), 2):
             row = [InlineKeyboardButton(inst, callback_data=f"tech2_symbol_MetalsOil_{inst}") for inst in remaining[i:i+2]]
             keyboard.append(row)
     else:
-        # 5 per row for Forex, Crypto, Index
         for i in range(0, len(instruments), 5):
             row = [InlineKeyboardButton(inst, callback_data=f"tech2_symbol_{category}_{inst}") for inst in instruments[i:i+5]]
             keyboard.append(row)
@@ -83,22 +82,19 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
         row = [InlineKeyboardButton(tf, callback_data=f"tech2_chart_{symbol}_{tf}") for tf in TIMEFRAMES[i:i+3]]
         keyboard.append(row)
 
-    # ✅ Back to instrument selection
     keyboard.append([InlineKeyboardButton("🔙 Back", callback_data=f"tech2_cat_{category}")])
     await query.message.edit_text(f"🕒 *Select Timeframe for {symbol}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
 
-from io import BytesIO
-import requests
-
+# Step 4: Fetch Chart from API
 async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
     try:
         parts = query.data.split("_")
-        symbol = parts[-2]  # XRPUSDT
-        tf = parts[-1]      # 5m
+        symbol = parts[-2]
+        tf = parts[-1]
 
         full_symbol = f"BINANCE:{symbol}" if "USDT" in symbol else f"OANDA:{symbol}"
         payload = {"symbol": full_symbol, "interval": tf}
@@ -108,16 +104,21 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print(f"📥 API response status: {response.status_code}")
 
         if response.status_code == 200:
-            content_type = response.headers.get("Content-Type", "")
-            if "image" in content_type:
-                image_bytes = BytesIO(response.content)
-                await query.message.reply_photo(photo=image_bytes, caption=f"{symbol} ({tf}) Chart")
+            data = response.json()
+
+            if "image_base64" in data and "caption" in data:
+                image_data = base64.b64decode(data["image_base64"])
+                image_stream = BytesIO(image_data)
+                image_stream.name = "chart.png"
+                image_stream.seek(0)
+
+                await query.message.reply_photo(photo=image_stream, caption=data["caption"])
             else:
-                print(f"❌ API returned non-image content: {response.text}")
-                await query.message.reply_text("⚠️ Failed to fetch chart. Invalid response.")
+                print(f"❌ API missing keys: {data}")
+                await query.message.reply_text("⚠️ Incomplete chart data. Please try again.")
         else:
-            print(f"❌ API error response: {response.text}")
-            await query.message.reply_text("⚠️ Failed to fetch chart. Please try again.")
+            print(f"❌ API error: {response.text}")
+            await query.message.reply_text("⚠️ Chart fetch failed. Try again.")
     except Exception as e:
-        print("❌ Exception while calling chart API:", e)
-        await query.message.reply_text("❌ Server error. Try again later.")
+        print(f"❌ Exception: {e}")
+        await query.message.reply_text("❌ Server error. Please try again.")
