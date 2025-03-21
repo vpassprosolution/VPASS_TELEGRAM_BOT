@@ -43,11 +43,13 @@ async def show_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     rows.append([InlineKeyboardButton("🔙 Back", callback_data="main_menu")])
 
-    await query.edit_message_text(
+    await safe_replace_message(
+        query,
+        context,
         text="📊 *Select a Market Category:*",
-        reply_markup=InlineKeyboardMarkup(rows),
-        parse_mode="Markdown"
+        reply_markup=InlineKeyboardMarkup(rows)
     )
+
 
 # Step 2: Show Instruments
 async def show_technical_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -72,11 +74,13 @@ async def show_technical_instruments(update: Update, context: ContextTypes.DEFAU
 
     keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="ai_technical")])
 
-    await query.edit_message_text(
+    await safe_replace_message(
+        query,
+        context,
         text=f"💹 *Select an Instrument from {category}:*",
-        reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode="Markdown"
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
+
 
 # Step 3: Show Timeframes
 async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
