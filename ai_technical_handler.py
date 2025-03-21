@@ -28,7 +28,7 @@ async def show_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     keyboard = [[InlineKeyboardButton(cat, callback_data=f"tech2_cat_{cat}")] for cat in INSTRUMENTS]
-    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="tech2_back_menu")])
+    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="main_menu")])
     await query.message.edit_text("📊 *Select a Market Category:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
 # Step 2: Show Instruments

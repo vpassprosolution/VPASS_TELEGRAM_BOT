@@ -388,7 +388,6 @@ def main():
     app.add_handler(CallbackQueryHandler(show_technical_instruments, pattern="^tech2_cat_"))
     app.add_handler(CallbackQueryHandler(show_timeframes, pattern="^tech2_symbol_"))
     app.add_handler(CallbackQueryHandler(fetch_chart, pattern="^tech2_chart_"))
-    app.add_handler(CallbackQueryHandler(show_categories, pattern="^tech2_back_menu$"))
     app.add_handler(CallbackQueryHandler(show_categories, pattern="^tech2_back_categories$"))
 
 
