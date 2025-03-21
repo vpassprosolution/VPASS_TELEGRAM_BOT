@@ -83,9 +83,9 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
         row = [InlineKeyboardButton(tf, callback_data=f"tech2_chart_{symbol}_{tf}") for tf in TIMEFRAMES[i:i+3]]
         keyboard.append(row)
 
+    # Back button now goes back to the instrument selection
     keyboard.append([InlineKeyboardButton("🔙 Back", callback_data=f"tech2_symbol_{category}_{symbol}")])
     await query.message.edit_text(f"🕒 *Select Timeframe for {symbol}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
-
 
 # Step 4: Fetch Chart
 from io import BytesIO
