@@ -43,13 +43,11 @@ async def show_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     rows.append([InlineKeyboardButton("🔙 Back", callback_data="main_menu")])
 
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
+    await query.edit_message_text(
         text="📊 *Select a Market Category:*",
         reply_markup=InlineKeyboardMarkup(rows),
         parse_mode="Markdown"
     )
-
 
 # Step 2: Show Instruments
 async def show_technical_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -73,7 +71,12 @@ async def show_technical_instruments(update: Update, context: ContextTypes.DEFAU
             keyboard.append(row)
 
     keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="ai_technical")])
-    await query.message.edit_text(f"💹 *Select an Instrument from {category}:*", reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
+
+    await query.edit_message_text(
+        text=f"💹 *Select an Instrument from {category}:*",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode="Markdown"
+    )
 
 # Step 3: Show Timeframes
 async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -89,8 +92,7 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard.append([InlineKeyboardButton("🔙 Back", callback_data=f"tech2_cat_{category}")])
 
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
+    await query.edit_message_text(
         text=f"🕒 *Select Timeframe for {symbol}:*",
         reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode="Markdown"
@@ -110,15 +112,22 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         symbol = parts[-2]
         tf = parts[-1]
 
-        # Show loading message and remove timeframe menu
-        loading_message = await query.message.edit_text("⏳ *Analyzing chart... Please wait...*", parse_mode="Markdown")
+        # Show loading message
+        loading_message = await query.edit_message_text(
+            "⏳ *Analyzing chart... Please wait...*",
+            parse_mode="Markdown"
+        )
 
+        # ✅ Symbol prefix logic
         if category == "Crypto":
             full_symbol = f"BINANCE:{symbol}"
         elif category == "Index":
             full_symbol = f"TVC:{symbol}"
         elif category == "MetalsOil":
-            full_symbol = "TVC:USOIL" if symbol == "WTI" else f"TVC:{symbol}"
+            if symbol == "WTI":
+                full_symbol = "TVC:USOIL"
+            else:
+                full_symbol = f"OANDA:{symbol}"  # ✅ Use OANDA for XAUUSD, XAGUSD, etc.
         else:
             full_symbol = f"OANDA:{symbol}"
 
