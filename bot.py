@@ -86,19 +86,15 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
     ]
 
-    # ✅ Delete the previous message (clean UI)
-    try:
-        await query.message.delete()
-    except:
-        pass
+    await safe_replace_message(
+        query,
+        context,
+        text="*WELCOME TO VESSA PRO VERSION V2*\n"
+             "   The Future of Intelligence Starts Here\n"
+             "          *CHOOSE YOUR STRATEGY*",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
 
-    # ✅ Send welcome image with buttons (no caption)
-    with open("testing_compressed.jpg", "rb") as photo:
-        await context.bot.send_photo(
-            chat_id=query.message.chat_id,
-            photo=photo,
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
 
 
 
