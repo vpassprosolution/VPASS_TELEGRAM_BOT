@@ -73,9 +73,9 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     keyboard = [
-        [InlineKeyboardButton("VPASS SMART SIGNAL", callback_data="vpass_smart_signal")],
-        [InlineKeyboardButton("VPASS AI SENTIMENT", callback_data="ai_sentiment")],
-        [InlineKeyboardButton("VPASS AI TECHNICAL ANALYSIS", callback_data="ai_technical")],
+        [InlineKeyboardButton("VESSA AI SMART SIGNAL", callback_data="vpass_smart_signal")],
+        [InlineKeyboardButton("VESSA AI SENTIMENT", callback_data="ai_sentiment")],
+        [InlineKeyboardButton("VESSA AI TECHNICAL ANALYSIS", callback_data="ai_technical")],
         [InlineKeyboardButton("AI AGENT INSTANT SIGNAL", callback_data="ai_agent_signal")],
         [InlineKeyboardButton("🔥 NEWS WAR ROOM 🔥", callback_data="news_war_room")],
         [
