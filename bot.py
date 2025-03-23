@@ -300,10 +300,10 @@ async def check_membership_callback(update: Update, context: ContextTypes.DEFAUL
 
         if is_member:  # ✅ If user has joined the channel
             del user_steps[user_id]  # ✅ Remove user from pending registration list
-            keyboard = [[InlineKeyboardButton("start now", callback_data="main_menu")]]
+            keyboard = [[InlineKeyboardButton("START VESSA PRO NOW", callback_data="main_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
 
-            new_text = "✅ ✅ ✅Membership verified!✅ ✅ ✅.\nClick below to continue:"
+            new_text = "✅ ✅ ✅Membership verified!✅ ✅ ✅"
 
             # ✅ Check if the message text is already the same before updating
             try:
