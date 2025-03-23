@@ -48,7 +48,7 @@ async def show_instruments(update, context):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.callback_query.message.edit_text(
-        "Select Your Exclusive Instrument for Elite AI Insights 💎📈",
+        "*Select Your Elite AI Insights*",
         reply_markup=reply_markup
     )
 

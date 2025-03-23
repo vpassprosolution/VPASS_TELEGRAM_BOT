@@ -38,7 +38,7 @@ async def show_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await safe_replace_message(
             query,
             context,
-            text="🧠 *Select an instrument to analyze market sentiment:*",
+            text="*Select Your Exclusive Instrument :*",
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode="Markdown"
         )
@@ -46,7 +46,7 @@ async def show_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # ✅ If coming from inside AI Sentiment → just send new message
         await context.bot.send_message(
             chat_id=query.message.chat.id,
-            text="🧠 *Select Your Exclusive Instrument :*",
+            text="*Select Your Exclusive Instrument :*",
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode="Markdown"
         )
