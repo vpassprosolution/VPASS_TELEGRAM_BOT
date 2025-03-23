@@ -21,7 +21,7 @@ async def show_instruments(update: Update, context: CallbackContext) -> None:
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.callback_query.message.edit_text(
-        "*Select Your Exclusive Instrument & Receive Solid Daily Signals – No Noise, Just Precision!* 🎯💎",
+        "*Select Your Exclusive Instrument*",
         reply_markup=reply_markup,
         parse_mode="Markdown"
     )
