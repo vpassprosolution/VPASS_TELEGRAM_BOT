@@ -48,7 +48,7 @@ async def handle_instrument_selection(update: Update, context: ContextTypes.DEFA
 
     selected_instrument = query.data.replace("sentiment_", "")
 
-    # Show loading
+    # Show loading message
     try:
         await query.edit_message_text(
             "🧠 *Fetching AI Sentiment... Please wait...*",
@@ -85,9 +85,11 @@ async def handle_instrument_selection(update: Update, context: ContextTypes.DEFA
             ]
         ]
 
-        await context.bot.send_message(
-            chat_id=query.message.chat.id,
+        # ✅ Replace the same message (overwrite "Fetching..." cleanly)
+        await safe_replace_message(
+            query,
+            context,
             text=final_text,
-            parse_mode="MarkdownV2",
-            reply_markup=InlineKeyboardMarkup(buttons)
+            reply_markup=InlineKeyboardMarkup(buttons),
+            parse_mode="MarkdownV2"
         )
