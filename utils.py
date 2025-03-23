@@ -1,4 +1,4 @@
-async def safe_replace_message(query, context, text, reply_markup=None, parse_mode=None):
+async def safe_replace_message(query, context, text, reply_markup=None, parse_mode="Markdown"):
     try:
         await query.edit_message_text(
             text=text,
@@ -8,7 +8,7 @@ async def safe_replace_message(query, context, text, reply_markup=None, parse_mo
     except Exception as e:
         try:
             await context.bot.send_message(
-                chat_id=query.message.chat_id,  # ✅ safer than .chat.id
+                chat_id=query.message.chat_id,
                 text=text,
                 reply_markup=reply_markup,
                 parse_mode=parse_mode
