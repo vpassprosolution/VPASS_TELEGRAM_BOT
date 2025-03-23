@@ -147,7 +147,7 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
             full_symbol = f"OANDA:{symbol}"
 
         payload = {"symbol": full_symbol, "interval": tf}
-        async with httpx.AsyncClient(timeout=10) as client:
+        async with httpx.AsyncClient(timeout=60) as client:
             response = await client.post(API_URL, json=payload)
             if response.status_code == 200:
                 data = response.json()
