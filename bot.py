@@ -77,7 +77,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = [[InlineKeyboardButton("COMPLETE YOUR REGISTRATION", callback_data="register")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    sent_message = await update.message.reply_text("WELCOME TO VPASS PRO VERSION 2.0", reply_markup=reply_markup)
+    sent_message = await update.message.reply_text("WELCOME TO VESSA PRO VERSION 2.0", reply_markup=reply_markup)
     context.user_data["button_message"] = sent_message.message_id
 
 
@@ -187,12 +187,12 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if step == "name":
             user_steps[user_id]["name"] = user_input
             user_steps[user_id]["step"] = "username"
-            sent_message = await update.message.reply_text("📛 Enter your Telegram username (@username):")
+            sent_message = await update.message.reply_text("Enter your Telegram username (@username):")
 
         elif step == "username":
             user_steps[user_id]["username"] = user_input
             user_steps[user_id]["step"] = "contact"
-            sent_message = await update.message.reply_text("📞 Enter your phone number (e.g., +601123020037):")
+            sent_message = await update.message.reply_text("📞 Enter your phone number (e.g., +601234567890):")
 
         elif step == "contact":
             if not re.match(r"^\+\d{7,15}$", user_input):
@@ -201,13 +201,16 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 user_steps[user_id]["contact"] = user_input
                 user_steps[user_id]["step"] = "confirm_contact"
 
-                # ✅ Ask for confirmation with buttons
+                # ✅ Side-by-side buttons for phone
                 keyboard = [
-                    [InlineKeyboardButton("✅ Confirm", callback_data="confirm_phone")],
-                    [InlineKeyboardButton("🔄 Retake", callback_data="reenter_phone")]
+                    [
+                        InlineKeyboardButton("🔄 Retake", callback_data="reenter_phone"),
+                        InlineKeyboardButton("✅ Confirm", callback_data="confirm_phone")
+                    ]
                 ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
-                sent_message = await update.message.reply_text(f"📞 You entered: {user_input}\n\nIs this correct?", reply_markup=reply_markup)
+                sent_message = await update.message.reply_text(
+                    f"📞 You entered: {user_input}\n\nIs this correct?", reply_markup=reply_markup)
 
         elif step == "email":
             if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", user_input):
@@ -216,13 +219,16 @@ async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 user_steps[user_id]["email"] = user_input
                 user_steps[user_id]["step"] = "confirm_email"
 
-                # ✅ Ask for confirmation with buttons
+                # ✅ Side-by-side buttons for email
                 keyboard = [
-                    [InlineKeyboardButton("✅ Confirm", callback_data="confirm_email")],
-                    [InlineKeyboardButton("🔄 Retake", callback_data="reenter_email")]
+                    [
+                        InlineKeyboardButton("🔄 Retake", callback_data="reenter_email"),
+                        InlineKeyboardButton("✅ Confirm", callback_data="confirm_email")
+                    ]
                 ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
-                sent_message = await update.message.reply_text(f"📧 You entered: {user_input}\n\nIs this correct?", reply_markup=reply_markup)
+                sent_message = await update.message.reply_text(
+                    f"📧 You entered: {user_input}\n\nIs this correct?", reply_markup=reply_markup)
 
         # ✅ Store last bot message ID for deletion
         user_steps[user_id]["prompt_message_id"] = sent_message.message_id
@@ -242,7 +248,7 @@ async def confirm_phone_number(update: Update, context: ContextTypes.DEFAULT_TYP
     elif query.data == "reenter_phone":
         # ✅ Ask user to enter phone number again
         user_steps[user_id]["step"] = "contact"
-        await query.message.edit_text("📞 Please enter your phone number again (e.g., +601123020037):")
+        await query.message.edit_text("📞 Please enter your phone number again (e.g., +601234567890):")
 
 async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles email confirmation & asks user to verify Telegram channel membership"""
@@ -294,10 +300,10 @@ async def check_membership_callback(update: Update, context: ContextTypes.DEFAUL
 
         if is_member:  # ✅ If user has joined the channel
             del user_steps[user_id]  # ✅ Remove user from pending registration list
-            keyboard = [[InlineKeyboardButton("Go to Main Menu", callback_data="main_menu")]]
+            keyboard = [[InlineKeyboardButton("start now", callback_data="main_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
 
-            new_text = "✅ Membership verified! Welcome to VPASS PRO.\nClick below to continue:"
+            new_text = "✅ ✅ ✅Membership verified!✅ ✅ ✅.\nClick below to continue:"
 
             # ✅ Check if the message text is already the same before updating
             try:
