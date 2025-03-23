@@ -29,13 +29,20 @@ BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
 # Step tracking for user registration
 user_steps = {}
 
+async def reset_cooldown(context):
+    await asyncio.sleep(1.5)
+    context.user_data["cooldown"] = False
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles the /start command and starts user registration."""
-    from ai_sentiment import show_instruments  
+    from ai_sentiment import show_instruments
+
+    if context.user_data.get("cooldown"):
+        return
+    context.user_data["cooldown"] = True
+    asyncio.create_task(reset_cooldown(context))
 
     user_id = update.message.from_user.id
 
-    # ✅ Check if the user is already registered
     conn = connect_db()
     if conn:
         cur = conn.cursor()
@@ -46,13 +53,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if user:
             username = user[0]
+            try:
+                welcome_image = "welcomeback.jpg"
+                with open(welcome_image, "rb") as photo:
+                    await update.message.reply_photo(photo=photo)
+            except Exception as e:
+                print(f"❌ Failed to send image: {e}")
 
-            # ✅ Send welcome image again
-            welcome_image = "welcomeback.jpg"
-            with open(welcome_image, "rb") as photo:
-                await update.message.reply_photo(photo=photo)
-
-            # ✅ Then send the welcome-back message
             keyboard = [[InlineKeyboardButton("Go to Main Menu", callback_data="main_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await update.message.reply_text(
@@ -61,21 +68,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
 
+    try:
+        welcome_image = "welcome.png"
+        with open(welcome_image, "rb") as photo:
+            await update.message.reply_photo(photo=photo)
+    except Exception as e:
+        print(f"❌ Failed to send image: {e}")
 
-
-    # ✅ Do NOT check membership here! We allow users to register first.
-
-    # Send welcome image
-    welcome_image = "welcome.png"
-    with open(welcome_image, "rb") as photo:
-        await update.message.reply_photo(photo=photo)
-
-    # Send welcome text with registration button
     keyboard = [[InlineKeyboardButton("COMPLETE YOUR REGISTRATION", callback_data="register")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     sent_message = await update.message.reply_text("WELCOME TO VPASS PRO VERSION 2.0", reply_markup=reply_markup)
-
-    # Store message ID so we can delete it later
     context.user_data["button_message"] = sent_message.message_id
 
 
