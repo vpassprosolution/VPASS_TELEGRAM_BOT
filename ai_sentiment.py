@@ -33,12 +33,14 @@ async def show_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("⬅️ Back to Menu", callback_data="main_menu")]
     ]
 
-    await safe_replace_message(
-        query,
-        context,
+    # ✅ Send a brand new message (DO NOT replace)
+    await context.bot.send_message(
+        chat_id=query.message.chat.id,
         text="🧠 *Select an instrument to analyze market sentiment:*",
-        reply_markup=InlineKeyboardMarkup(keyboard)
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode="Markdown"
     )
+
 
 
 # Step 2: Handle Instrument Selection
