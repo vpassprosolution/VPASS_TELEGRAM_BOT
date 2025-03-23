@@ -46,10 +46,22 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if user:
             username = user[0]
+
+            # ✅ Send welcome image again
+            welcome_image = "welcomeback.jpg"
+            with open(welcome_image, "rb") as photo:
+                await update.message.reply_photo(photo=photo)
+
+            # ✅ Then send the welcome-back message
             keyboard = [[InlineKeyboardButton("Go to Main Menu", callback_data="main_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await update.message.reply_text(f"🌑 Welcome back to world of AI {username}🌑", reply_markup=reply_markup)
+            await update.message.reply_text(
+                f"🌑 Welcome back to world of AI {username} 🌑",
+                reply_markup=reply_markup
+            )
             return
+
+
 
     # ✅ Do NOT check membership here! We allow users to register first.
 
