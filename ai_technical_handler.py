@@ -118,12 +118,15 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # Step 4: Fetch Chart from API
+# Step 4: Fetch Chart from API
 async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
+
+    # ✅ Always answer immediately (outside try block) to avoid Telegram timeout
     try:
         await query.answer()
-    except Exception as e:
-        print("⚠️ Skipped query.answer():", e)
+    except:
+        pass  # Ignore if already expired
 
     try:
         parts = query.data.split("_")
@@ -131,7 +134,7 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         symbol = parts[-2]
         tf = parts[-1]
 
-        # Show loading message
+        # ✅ Show loading message to prevent double clicks
         loading_message = await query.edit_message_text(
             "⏳ *Analyzing chart... Please wait...*",
             parse_mode="Markdown"
@@ -143,15 +146,11 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif category == "Index":
             full_symbol = f"TVC:{symbol}"
         elif category == "MetalsOil":
-            if symbol == "WTI":
-                full_symbol = "TVC:USOIL"
-            else:
-                full_symbol = f"OANDA:{symbol}"  # ✅ Use OANDA for XAUUSD, XAGUSD, etc.
+            full_symbol = "TVC:USOIL" if symbol == "WTI" else f"OANDA:{symbol}"
         else:
             full_symbol = f"OANDA:{symbol}"
 
         payload = {"symbol": full_symbol, "interval": tf}
-
         print(f"🔍 Sending request to API with payload: {payload}")
         response = requests.post(API_URL, json=payload)
         print(f"📥 API response status: {response.status_code}")

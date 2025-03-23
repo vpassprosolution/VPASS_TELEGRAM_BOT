@@ -153,7 +153,9 @@ async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def collect_user_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Collects user registration details step by step and forwards them to channel verification"""
+    if not update.message:
+        return  # ✅ Skip this function if it's not a user text message
+
     user_id = update.message.from_user.id
     chat_id = update.message.chat_id
     user_input = update.message.text
