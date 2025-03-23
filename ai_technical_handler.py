@@ -1,10 +1,10 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
-import requests
+import httpx
 from io import BytesIO
 import base64
 from utils import safe_replace_message
-
+import asyncio
 
 API_URL = "https://aitechnical-production.up.railway.app/get_chart_image"
 
@@ -32,10 +32,18 @@ INSTRUMENTS = {
 
 TIMEFRAMES = ["1m", "5m", "15m", "30m", "1h", "4h", "1D", "1W", "1M"]
 
-# Step 1: Show Categories
+async def reset_cooldown(context):
+    await asyncio.sleep(1.5)
+    context.user_data["cooldown"] = False
+
 async def show_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+
+    if context.user_data.get("cooldown"):
+        return
+    context.user_data["cooldown"] = True
+    asyncio.create_task(reset_cooldown(context))
 
     rows = []
     categories = list(INSTRUMENTS.keys())
@@ -52,8 +60,6 @@ async def show_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup(rows)
     )
 
-
-# Step 2: Show Instruments
 async def show_technical_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -79,12 +85,10 @@ async def show_technical_instruments(update: Update, context: ContextTypes.DEFAU
     await safe_replace_message(
         query,
         context,
-        text=f"💹 *Select an Instrument from {category}:*",
+        text=f"📉 *Select an Instrument from {category}:*",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
-
-# Step 3: Show Timeframes
 async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -108,7 +112,6 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode="Markdown"
         )
     except Exception:
-        # If previous message is a photo → fallback
         await context.bot.send_message(
             chat_id=query.message.chat.id,
             text=f"🕒 *Select Timeframe for {symbol}:*",
@@ -116,17 +119,12 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode="Markdown"
         )
 
-
-# Step 4: Fetch Chart from API
-# Step 4: Fetch Chart from API
 async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-
-    # ✅ Always answer immediately (outside try block) to avoid Telegram timeout
     try:
         await query.answer()
     except:
-        pass  # Ignore if already expired
+        pass
 
     try:
         parts = query.data.split("_")
@@ -134,13 +132,11 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         symbol = parts[-2]
         tf = parts[-1]
 
-        # ✅ Show loading message to prevent double clicks
         loading_message = await query.edit_message_text(
             "⏳ *Analyzing chart... Please wait...*",
             parse_mode="Markdown"
         )
 
-        # ✅ Symbol prefix logic
         if category == "Crypto":
             full_symbol = f"BINANCE:{symbol}"
         elif category == "Index":
@@ -151,43 +147,38 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
             full_symbol = f"OANDA:{symbol}"
 
         payload = {"symbol": full_symbol, "interval": tf}
-        print(f"🔍 Sending request to API with payload: {payload}")
-        response = requests.post(API_URL, json=payload)
-        print(f"📥 API response status: {response.status_code}")
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.post(API_URL, json=payload)
+            if response.status_code == 200:
+                data = response.json()
+                if "image_base64" in data and "caption" in data:
+                    await context.bot.delete_message(
+                        chat_id=query.message.chat.id,
+                        message_id=loading_message.message_id
+                    )
 
-        if response.status_code == 200:
-            data = response.json()
+                    image_data = base64.b64decode(data["image_base64"])
+                    image_stream = BytesIO(image_data)
+                    image_stream.name = "chart.png"
+                    image_stream.seek(0)
 
-            if "image_base64" in data and "caption" in data:
-                await context.bot.delete_message(
-                    chat_id=query.message.chat.id,
-                    message_id=loading_message.message_id
-                )
+                    footer_buttons = InlineKeyboardMarkup([
+                        [
+                            InlineKeyboardButton("🔁 Back to Timeframe", callback_data=f"tech2_symbol_{category}_{symbol}"),
+                            InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")
+                        ]
+                    ])
 
-                image_data = base64.b64decode(data["image_base64"])
-                image_stream = BytesIO(image_data)
-                image_stream.name = "chart.png"
-                image_stream.seek(0)
-
-                footer_buttons = InlineKeyboardMarkup([
-                    [
-                        InlineKeyboardButton("🔁 Back to Timeframe", callback_data=f"tech2_symbol_{category}_{symbol}"),
-                        InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")
-                    ]
-                ])
-
-                await context.bot.send_photo(
-                    chat_id=query.message.chat.id,
-                    photo=image_stream,
-                    caption=data["caption"],
-                    reply_markup=footer_buttons
-                )
+                    await context.bot.send_photo(
+                        chat_id=query.message.chat.id,
+                        photo=image_stream,
+                        caption=data["caption"],
+                        reply_markup=footer_buttons
+                    )
+                else:
+                    await query.message.reply_text("⚠️ Incomplete chart data. Please try again.")
             else:
-                print(f"❌ API missing keys: {data}")
-                await query.message.reply_text("⚠️ Incomplete chart data. Please try again.")
-        else:
-            print(f"❌ API error: {response.text}")
-            await query.message.reply_text("⚠️ Chart fetch failed. Try again.")
+                await query.message.reply_text("⚠️ Chart fetch failed. Try again.")
     except Exception as e:
         print(f"❌ Exception: {e}")
         await query.message.reply_text("❌ Server error. Please try again.")

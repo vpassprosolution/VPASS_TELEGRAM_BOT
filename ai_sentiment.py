@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 from telegram.helpers import escape_markdown
 from utils import safe_replace_message
 import httpx
+import asyncio
 
 # VPASS AI SENTIMENT API URL
 VPASS_AI_SENTIMENT_URL = "https://vpassaisentiment-production.up.railway.app/storyline/?instrument="
