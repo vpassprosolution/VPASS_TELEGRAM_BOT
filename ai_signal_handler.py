@@ -36,7 +36,7 @@ async def fetch_ai_signal(update: Update, context: CallbackContext):
         print(f"❌ AI Signal Error: {e}")
         trade_signal = "❌ Unable to fetch signal at this time. Please try again later."
 
-    formatted_message = f"Vessa Have *{selected_instrument}* Dicision\n{trade_signal}"
+    formatted_message = f"Naomi Have *{selected_instrument}* Dicision\n{trade_signal}"
     keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="ai_agent_signal")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
