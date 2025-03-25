@@ -5,6 +5,7 @@ from io import BytesIO
 import base64
 from utils import safe_replace_message
 import asyncio
+from language_handler import get_text
 
 API_URL = "https://aitechnical-production.up.railway.app/get_chart_image"
 
@@ -45,13 +46,16 @@ async def show_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["cooldown"] = True
     asyncio.create_task(reset_cooldown(context))
 
+    user_id = query.from_user.id
+    get = lambda key: get_text(user_id, key, context)
+
     rows = []
     categories = list(INSTRUMENTS.keys())
     for i in range(0, len(categories), 2):
-        row = [InlineKeyboardButton(cat, callback_data=f"tech2_cat_{cat}") for cat in categories[i:i+2]]
+        row = [InlineKeyboardButton(get(f"category_{cat.lower()}"), callback_data=f"tech2_cat_{cat}") for cat in categories[i:i+2]]
         rows.append(row)
 
-    rows.append([InlineKeyboardButton("🔙 Back", callback_data="main_menu")])
+    rows.append([InlineKeyboardButton(get("btn_back"), callback_data="main_menu")])
 
     await safe_replace_message(
         query,
@@ -63,6 +67,9 @@ async def show_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def show_technical_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+
+    user_id = query.from_user.id
+    get = lambda key: get_text(user_id, key, context)
 
     category = query.data.replace("tech2_cat_", "")
     instruments = INSTRUMENTS.get(category, [])
@@ -80,7 +87,7 @@ async def show_technical_instruments(update: Update, context: ContextTypes.DEFAU
             row = [InlineKeyboardButton(inst, callback_data=f"tech2_symbol_{category}_{inst}") for inst in instruments[i:i+5]]
             keyboard.append(row)
 
-    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data="ai_technical")])
+    keyboard.append([InlineKeyboardButton(get("btn_back"), callback_data="ai_technical")])
 
     await safe_replace_message(
         query,
@@ -93,17 +100,24 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
+    user_id = query.from_user.id
+    get = lambda key: get_text(user_id, key, context)
+
     _, category, symbol = query.data.split("_", 2)
+
+    # ✅ Load translated labels from your dict
+    lang = context.user_data.get("user_lang", "en")
+    labels = get_text(user_id, "timeframe_labels", context)
 
     keyboard = []
     for i in range(0, len(TIMEFRAMES), 3):
         row = [
-            InlineKeyboardButton(tf, callback_data=f"tech2_chart_{category}_{symbol}_{tf}")
+            InlineKeyboardButton(labels.get(tf, tf), callback_data=f"tech2_chart_{category}_{symbol}_{tf}")
             for tf in TIMEFRAMES[i:i+3]
         ]
         keyboard.append(row)
 
-    keyboard.append([InlineKeyboardButton("🔙 Back", callback_data=f"tech2_cat_{category}")])
+    keyboard.append([InlineKeyboardButton(get("btn_back"), callback_data=f"tech2_cat_{category}")])
 
     try:
         await query.edit_message_text(
@@ -118,6 +132,7 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode="Markdown"
         )
+
 
 async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -162,10 +177,14 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     image_stream.name = "chart.png"
                     image_stream.seek(0)
 
+                    # ✅ TRANSLATION
+                    user_id = query.from_user.id
+                    get = lambda key: get_text(user_id, key, context)
+
                     footer_buttons = InlineKeyboardMarkup([
                         [
-                            InlineKeyboardButton("🔁 Back to Timeframe", callback_data=f"tech2_symbol_{category}_{symbol}"),
-                            InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")
+                            InlineKeyboardButton(get("chart_back_timeframe"), callback_data=f"tech2_symbol_{category}_{symbol}"),
+                            InlineKeyboardButton(get("chart_back_menu"), callback_data="main_menu")
                         ]
                     ])
 
