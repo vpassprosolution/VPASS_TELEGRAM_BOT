@@ -20,6 +20,7 @@ from ai_technical_handler import (
 from utils import safe_replace_message
 from news_today_handler import handle_news_today
 from language_handler import set_language
+from language_handler import show_language_menu, set_language
 
 
 
