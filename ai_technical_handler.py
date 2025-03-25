@@ -60,7 +60,7 @@ async def show_categories(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await safe_replace_message(
         query,
         context,
-        text="📊 *Select a Market Category:*",
+        text=get("technical_category_title"),
         reply_markup=InlineKeyboardMarkup(rows)
     )
 
@@ -92,7 +92,7 @@ async def show_technical_instruments(update: Update, context: ContextTypes.DEFAU
     await safe_replace_message(
         query,
         context,
-        text=f"📉 *Select an Instrument from {category}:*",
+        text=get("technical_instrument_title").replace("{category}", category),
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
@@ -121,7 +121,7 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         await query.edit_message_text(
-            text=f"🕒 *Select Timeframe for {symbol}:*",
+            text=get("technical_timeframe_title").replace("{symbol}", symbol),
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode="Markdown"
         )

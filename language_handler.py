@@ -389,6 +389,30 @@ translations = {
     "zh": "🏠 主菜单",
     "hi": "🏠 मुख्य मेनू"
 },
+"technical_category_title": {
+    "en": "📊 *Select a Market Category:*",
+    "ms": "📊 *Pilih Kategori Pasaran:*",
+    "id": "📊 *Pilih Kategori Pasar:*",
+    "th": "📊 *เลือกหมวดหมู่ตลาด:*",
+    "zh": "📊 *选择市场类别：*",
+    "hi": "📊 *बाजार श्रेणी चुनें:*"
+},
+"technical_instrument_title": {
+    "en": "📉 *Select an Instrument from {category}:*",
+    "ms": "📉 *Pilih Instrumen dari {category}:*",
+    "id": "📉 *Pilih Instrumen dari {category}:*",
+    "th": "📉 *เลือกสินทรัพย์จาก {category}:*",
+    "zh": "📉 *从 {category} 中选择品种：*",
+    "hi": "📉 *{category} से इंस्ट्रूमेंट चुनें:*"
+},
+"technical_timeframe_title": {
+    "en": "🕒 *Select Timeframe for {symbol}:*",
+    "ms": "🕒 *Pilih Timeframe untuk {symbol}:*",
+    "id": "🕒 *Pilih Timeframe untuk {symbol}:*",
+    "th": "🕒 *เลือกกรอบเวลา {symbol}:*",
+    "zh": "🕒 *选择 {symbol} 的时间周期：*",
+    "hi": "🕒 *{symbol} के लिए टाइमफ़्रेम चुनें:*"
+},
 "timeframe_labels": {
     "en": {
         "1m": "1 Minute",
@@ -456,8 +480,9 @@ translations = {
         "1W": "1 सप्ताह",
         "1M": "1 महीना"
     }
-
 }
+
+
 
 }
 
