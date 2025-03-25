@@ -19,6 +19,7 @@ from ai_technical_handler import (
 
 from utils import safe_replace_message
 from news_today_handler import handle_news_today
+from language_handler import set_language
 
 
 
@@ -95,7 +96,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🔥 NEWS WAR ROOM 🔥", callback_data="news_war_room")],
         [
             InlineKeyboardButton("📰 NEWS", callback_data="news_today"),
-            InlineKeyboardButton("Discord", url="https://discord.gg/yourchannel"),
+            InlineKeyboardButton("🌍 Language", callback_data="language_menu"),
             InlineKeyboardButton("ChatGPT", url="https://chat.openai.com"),
             InlineKeyboardButton("DeepSeek", url="https://www.deepseek.com")
         ]
@@ -418,7 +419,7 @@ def main():
     app.add_handler(CallbackQueryHandler(fetch_chart, pattern="^tech2_chart_"))
     app.add_handler(CallbackQueryHandler(show_categories, pattern="^tech2_back_categories$"))
     app.add_handler(CallbackQueryHandler(handle_news_today, pattern="^news_today$"))
-
+    app.add_handler(CallbackQueryHandler(set_language, pattern="^set_lang_"))
 
 
 
