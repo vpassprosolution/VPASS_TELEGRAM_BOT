@@ -20,6 +20,7 @@ INSTRUMENTS = {
 }
 
 # Step 1: Show Instruments
+# Step 1: Show Instruments
 async def show_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -31,27 +32,27 @@ async def show_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = [
         [InlineKeyboardButton("🏆 GOLD (XAUUSD)", callback_data="sentiment_gold")],
-        [InlineKeyboardButton("₿ BITCOIN (BTC)", callback_data="sentiment_bitcoin"), InlineKeyboardButton("🔣 ETHEREUM (ETH)", callback_data="sentiment_ethereum")],
-        [InlineKeyboardButton("📈 DOW JONES (DJI)", callback_data="sentiment_dowjones"), InlineKeyboardButton("📊 NASDAQ (IXIC)", callback_data="sentiment_nasdaq")],
-        [InlineKeyboardButton("💶 EUR/USD (EURUSD)", callback_data="sentiment_eur/usd"), InlineKeyboardButton("💷 GBP/USD (GBPUSD)", callback_data="sentiment_gbp/usd")],
+        [
+            InlineKeyboardButton("₿ BITCOIN (BTC)", callback_data="sentiment_bitcoin"),
+            InlineKeyboardButton("🔣 ETHEREUM (ETH)", callback_data="sentiment_ethereum")
+        ],
+        [
+            InlineKeyboardButton("📈 DOW JONES (DJI)", callback_data="sentiment_dowjones"),
+            InlineKeyboardButton("📊 NASDAQ (IXIC)", callback_data="sentiment_nasdaq")
+        ],
+        [
+            InlineKeyboardButton("💶 EUR/USD (EURUSD)", callback_data="sentiment_eur/usd"),
+            InlineKeyboardButton("💷 GBP/USD (GBPUSD)", callback_data="sentiment_gbp/usd")
+        ],
         [InlineKeyboardButton("⬅️ Back to Menu", callback_data="main_menu")]
     ]
 
-    if query.message.text and "CHOOSE YOUR STRATEGY" in query.message.text:
-        await safe_replace_message(
-            query,
-            context,
-            text="*Select Your Exclusive Instrument :*",
-            reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode="Markdown"
-        )
-    else:
-        await context.bot.send_message(
-            chat_id=query.message.chat.id,
-            text="*Select Your Exclusive Instrument :*",
-            reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode="Markdown"
-        )
+    # ✅ Always edit the message (never send new)
+    await query.message.edit_text(
+        "*Select Your Exclusive Instrument :*",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode="Markdown"
+    )
 
 # Step 2: Handle Instrument Selection
 async def handle_instrument_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
