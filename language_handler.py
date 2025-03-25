@@ -198,6 +198,22 @@ translations = {
 }
 
 # Get translated text for current user
-def get_text(user_id, key):
-    lang = get_user_language(user_id)
+def get_text(user_id, key, context=None):
+    """
+    Fetches the translated string for the given user and key.
+    It caches the language in context.user_data for performance.
+    """
+    # ✅ Check if cached
+    if context and "user_lang" in context.user_data:
+        lang = context.user_data["user_lang"]
+    else:
+        # ✅ If not cached, get from DB
+        lang = get_user_language(user_id)
+
+        # ✅ Store in cache for future use
+        if context:
+            context.user_data["user_lang"] = lang
+
+    # ✅ Return translation or fallback
     return translations.get(key, {}).get(lang, translations.get(key, {}).get("en", key))
+
