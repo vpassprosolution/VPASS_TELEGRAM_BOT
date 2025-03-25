@@ -1,6 +1,6 @@
 import json
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes, CallbackContext
+from telegram.ext import ContextTypes
 
 LANGUAGE_FILE = "user_languages.json"
 
@@ -26,7 +26,7 @@ def get_user_language(user_id):
     except FileNotFoundError:
         return "en"
 
-# Language Selection Menu
+# Show Language Selection Menu
 async def show_language_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -39,7 +39,7 @@ async def show_language_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
     ])
     await query.message.edit_text("🌍 Please select your language:", reply_markup=keyboard)
 
-# Handle Language Selection
+# Handle Language Selection & Confirmation
 async def set_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
@@ -48,9 +48,15 @@ async def set_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_user_language(user_id, lang_code)
 
     await query.answer("✅ Language updated!")
-    await query.message.edit_text("✅ Your language preference has been saved.")
 
-# Dictionary with translations
+    # Show translated confirmation + back to menu
+    message = get_text(user_id, "language_saved")
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🏠 Back to Menu", callback_data="main_menu")]
+    ])
+    await query.message.edit_text(message, reply_markup=keyboard)
+
+# Translations Dictionary
 translations = {
     "main_menu_title": {
         "en": "WELCOME TO VESSA PRO VERSION V2\n   The Future of Intelligence Starts Here\n          CHOOSE YOUR STRATEGY",
@@ -70,7 +76,7 @@ translations = {
     }
 }
 
-# Get translated text
+# Get translated text for current user
 def get_text(user_id, key):
     lang = get_user_language(user_id)
     return translations.get(key, {}).get(lang, translations.get(key, {}).get("en", key))
