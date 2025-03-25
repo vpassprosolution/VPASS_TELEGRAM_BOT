@@ -61,10 +61,11 @@ async def show_subscription_menu(update: Update, context: CallbackContext) -> No
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.edit_text(
-        f"🔍 *{instrument} Subscription Menu:*",
-        reply_markup=reply_markup,
-        parse_mode="Markdown"
-    )
+    get_text(user_id, "subscription_menu_title", context).replace("{instrument}", instrument),
+    reply_markup=reply_markup,
+    parse_mode="Markdown"
+)
+
 
 # ✅ Subscribe user
 async def subscribe(update: Update, context: CallbackContext) -> None:

@@ -256,6 +256,14 @@ translations = {
     "th": "💷 ปอนด์/ดอลลาร์ (GBPUSD)",
     "zh": "💷 英镑/美元 (GBPUSD)",
     "hi": "💷 जीबीपी/यूएसडी (GBPUSD)"
+},
+"subscription_menu_title": {
+    "en": "🔍 *{instrument} Subscription Menu:*",
+    "ms": "🔍 *Menu Langganan {instrument}:*",
+    "id": "🔍 *Menu Langganan {instrument}:*",
+    "th": "🔍 *เมนูการสมัครสมาชิก {instrument}:*",
+    "zh": "🔍 *{instrument} 订阅菜单：*",
+    "hi": "🔍 *{instrument} सदस्यता मेनू:*"
 }
 
 }
