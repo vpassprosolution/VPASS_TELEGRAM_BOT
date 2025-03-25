@@ -2,6 +2,7 @@ import httpx
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler
 import asyncio
+from language_handler import get_text
 
 # AI API URL (Replace with your actual Railway URL)
 AI_API_URL = "https://aiagentinstantsignal-production.up.railway.app"
@@ -21,6 +22,9 @@ async def fetch_ai_signal(update: Update, context: CallbackContext):
     context.user_data["cooldown"] = True
     asyncio.create_task(reset_cooldown(context))
 
+    user_id = query.from_user.id
+    get = lambda key: get_text(user_id, key, context)
+
     selected_instrument = query.data.replace("ai_signal_", "")
     if selected_instrument == "XAU":
         selected_instrument = "XAUUSD"
@@ -34,10 +38,10 @@ async def fetch_ai_signal(update: Update, context: CallbackContext):
                 trade_signal = "⚠️ Error fetching signal"
     except Exception as e:
         print(f"❌ AI Signal Error: {e}")
-        trade_signal = "❌ Unable to fetch signal at this time. Please try again later."
+        trade_signal = get("signal_error", context)
 
     formatted_message = f"Naomi Have *{selected_instrument}* Dicision\n{trade_signal}"
-    keyboard = [[InlineKeyboardButton("🔙 Back", callback_data="ai_agent_signal")]]
+    keyboard = [[InlineKeyboardButton(get("btn_back", context), callback_data="ai_agent_signal")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await query.message.edit_text(
@@ -56,17 +60,29 @@ async def show_instruments(update, context):
     context.user_data["cooldown"] = True
     asyncio.create_task(reset_cooldown(context))
 
+    user_id = query.from_user.id
+    get = lambda key: get_text(user_id, key, context)
+
     keyboard = [
-        [InlineKeyboardButton("🏆 Gold", callback_data="ai_signal_XAUUSD")],
-        [InlineKeyboardButton("₿ Bitcoin (BTC)", callback_data="ai_signal_BTC"), InlineKeyboardButton("🪙 ETHEREUM (ETH)", callback_data="ai_signal_ETH")],
-        [InlineKeyboardButton("📊 Dow Jones (DJI)", callback_data="ai_signal_DJI"), InlineKeyboardButton("📊 NASDAQ (IXIC)", callback_data="ai_signal_IXIC")],
-        [InlineKeyboardButton("💶 EUR/USD (EURUSD)", callback_data="ai_signal_EURUSD"), InlineKeyboardButton("💷 GBP/USD (GBPUSD)", callback_data="ai_signal_GBPUSD")],
-        [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]
+        [InlineKeyboardButton(get("instrument_gold", context), callback_data="ai_signal_XAUUSD")],
+        [
+            InlineKeyboardButton(get("instrument_bitcoin", context), callback_data="ai_signal_BTC"),
+            InlineKeyboardButton(get("instrument_ethereum", context), callback_data="ai_signal_ETH")
+        ],
+        [
+            InlineKeyboardButton(get("instrument_dowjones", context), callback_data="ai_signal_DJI"),
+            InlineKeyboardButton(get("instrument_nasdaq", context), callback_data="ai_signal_IXIC")
+        ],
+        [
+            InlineKeyboardButton(get("instrument_eurusd", context), callback_data="ai_signal_EURUSD"),
+            InlineKeyboardButton(get("instrument_gbpusd", context), callback_data="ai_signal_GBPUSD")
+        ],
+        [InlineKeyboardButton(get("btn_back", context), callback_data="main_menu")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await query.message.edit_text(
-        "*Select Your Elite AI Insights*",
+        get("smart_signal_title", context),
         reply_markup=reply_markup,
         parse_mode="Markdown"
     )

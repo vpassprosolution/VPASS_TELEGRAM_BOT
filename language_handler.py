@@ -413,6 +413,86 @@ translations = {
     "zh": "🕒 *选择 {symbol} 的时间周期：*",
     "hi": "🕒 *{symbol} के लिए टाइमफ़्रेम चुनें:*"
 },
+"smart_signal_title": {
+    "en": "*Select Your Elite AI Insights*",
+    "ms": "*Pilih Isyarat AI Elit Anda*",
+    "id": "*Pilih Wawasan AI Elit Anda*",
+    "th": "*เลือกสัญญาณ AI อัจฉริยะของคุณ*",
+    "zh": "*选择您的 AI 精准信号*",
+    "hi": "*अपने एलीट AI सिग्नल चुनें*"
+},
+"btn_back": {
+    "en": "🔙 Back",
+    "ms": "🔙 Kembali",
+    "id": "🔙 Kembali",
+    "th": "🔙 ย้อนกลับ",
+    "zh": "🔙 返回",
+    "hi": "🔙 वापस"
+},
+"signal_error": {
+    "en": "❌ Unable to fetch signal at this time. Please try again later.",
+    "ms": "❌ Tidak dapat mengambil isyarat buat masa ini. Sila cuba lagi nanti.",
+    "id": "❌ Tidak dapat mengambil sinyal saat ini. Silakan coba lagi nanti.",
+    "th": "❌ ไม่สามารถดึงสัญญาณได้ในขณะนี้ โปรดลองอีกครั้งในภายหลัง",
+    "zh": "❌ 当前无法获取信号，请稍后再试。",
+    "hi": "❌ इस समय सिग्नल प्राप्त नहीं हो सका। कृपया बाद में पुनः प्रयास करें।"
+},
+"instrument_gold": {
+    "en": "🏆 GOLD (XAUUSD)",
+    "ms": "🏆 EMAS (XAUUSD)",
+    "id": "🏆 EMAS (XAUUSD)",
+    "th": "🏆 ทองคำ (XAUUSD)",
+    "zh": "🏆 黄金 (XAUUSD)",
+    "hi": "🏆 सोना (XAUUSD)"
+},
+"instrument_bitcoin": {
+    "en": "₿ BITCOIN (BTC)",
+    "ms": "₿ BITCOIN (BTC)",
+    "id": "₿ BITCOIN (BTC)",
+    "th": "₿ บิทคอยน์ (BTC)",
+    "zh": "₿ 比特币 (BTC)",
+    "hi": "₿ बिटकॉइन (BTC)"
+},
+"instrument_ethereum": {
+    "en": "🔣 ETHEREUM (ETH)",
+    "ms": "🔣 ETHEREUM (ETH)",
+    "id": "🔣 ETHEREUM (ETH)",
+    "th": "🔣 อีเธอเรียม (ETH)",
+    "zh": "🔣 以太坊 (ETH)",
+    "hi": "🔣 एथेरियम (ETH)"
+},
+"instrument_dowjones": {
+    "en": "📈 DOW JONES (DJI)",
+    "ms": "📈 DOW JONES (DJI)",
+    "id": "📈 DOW JONES (DJI)",
+    "th": "📈 ดาวโจนส์ (DJI)",
+    "zh": "📈 道琼斯 (DJI)",
+    "hi": "📈 डॉव जोन्स (DJI)"
+},
+"instrument_nasdaq": {
+    "en": "📊 NASDAQ (IXIC)",
+    "ms": "📊 NASDAQ (IXIC)",
+    "id": "📊 NASDAQ (IXIC)",
+    "th": "📊 แนสแด็ก (IXIC)",
+    "zh": "📊 纳斯达克 (IXIC)",
+    "hi": "📊 नैस्डैक (IXIC)"
+},
+"instrument_eurusd": {
+    "en": "💶 EUR/USD (EURUSD)",
+    "ms": "💶 EUR/USD (EURUSD)",
+    "id": "💶 EUR/USD (EURUSD)",
+    "th": "💶 ยูโร/ดอลลาร์ (EURUSD)",
+    "zh": "💶 欧元/美元 (EURUSD)",
+    "hi": "💶 यूरो/यूएसडी (EURUSD)"
+},
+"instrument_gbpusd": {
+    "en": "💷 GBP/USD (GBPUSD)",
+    "ms": "💷 GBP/USD (GBPUSD)",
+    "id": "💷 GBP/USD (GBPUSD)",
+    "th": "💷 ปอนด์/ดอลลาร์ (GBPUSD)",
+    "zh": "💷 英镑/美元 (GBPUSD)",
+    "hi": "💷 जीबीपी/यूएसडी (GBPUSD)"
+},
 "timeframe_labels": {
     "en": {
         "1m": "1 Minute",
