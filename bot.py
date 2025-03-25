@@ -420,6 +420,7 @@ def main():
     app.add_handler(CallbackQueryHandler(show_categories, pattern="^tech2_back_categories$"))
     app.add_handler(CallbackQueryHandler(handle_news_today, pattern="^news_today$"))
     app.add_handler(CallbackQueryHandler(set_language, pattern="^set_lang_"))
+    app.add_handler(CallbackQueryHandler(show_language_menu, pattern="^language_menu$"))
 
 
 
