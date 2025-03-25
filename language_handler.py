@@ -199,6 +199,63 @@ translations = {
     "th": "❌ ยกเลิกการสมัคร {instrument} ล้มเหลว กรุณาลองใหม่",
     "zh": "❌ 取消订阅 {instrument} 失败。请再试一次。",
     "hi": "❌ {instrument} की सदस्यता रद्द करने में विफल। फिर से प्रयास करें।"
+},
+# Instrument Names
+"instrument_gold": {
+    "en": "🏆 GOLD (XAUUSD)",
+    "ms": "🏆 EMAS (XAUUSD)",
+    "id": "🏆 EMAS (XAUUSD)",
+    "th": "🏆 ทองคำ (XAUUSD)",
+    "zh": "🏆 黄金 (XAUUSD)",
+    "hi": "🏆 सोना (XAUUSD)"
+},
+"instrument_bitcoin": {
+    "en": "₿ BITCOIN (BTC)",
+    "ms": "₿ BITCOIN (BTC)",
+    "id": "₿ BITCOIN (BTC)",
+    "th": "₿ บิทคอยน์ (BTC)",
+    "zh": "₿ 比特币 (BTC)",
+    "hi": "₿ बिटकॉइन (BTC)"
+},
+"instrument_ethereum": {
+    "en": "🪙 ETHEREUM (ETH)",
+    "ms": "🪙 ETHEREUM (ETH)",
+    "id": "🪙 ETHEREUM (ETH)",
+    "th": "🪙 อีเธอเรียม (ETH)",
+    "zh": "🪙 以太坊 (ETH)",
+    "hi": "🪙 एथेरियम (ETH)"
+},
+"instrument_dowjones": {
+    "en": "📈 DOW JONES (DJI)",
+    "ms": "📈 DOW JONES (DJI)",
+    "id": "📈 DOW JONES (DJI)",
+    "th": "📈 ดาวโจนส์ (DJI)",
+    "zh": "📈 道琼斯 (DJI)",
+    "hi": "📈 डॉव जोन्स (DJI)"
+},
+"instrument_nasdaq": {
+    "en": "📊 NASDAQ (IXIC)",
+    "ms": "📊 NASDAQ (IXIC)",
+    "id": "📊 NASDAQ (IXIC)",
+    "th": "📊 แนสแด็ก (IXIC)",
+    "zh": "📊 纳斯达克 (IXIC)",
+    "hi": "📊 नैस्डैक (IXIC)"
+},
+"instrument_eurusd": {
+    "en": "💶 EUR/USD (EURUSD)",
+    "ms": "💶 EUR/USD (EURUSD)",
+    "id": "💶 EUR/USD (EURUSD)",
+    "th": "💶 ยูโร/ดอลลาร์ (EURUSD)",
+    "zh": "💶 欧元/美元 (EURUSD)",
+    "hi": "💶 यूरो/यूएसडी (EURUSD)"
+},
+"instrument_gbpusd": {
+    "en": "💷 GBP/USD (GBPUSD)",
+    "ms": "💷 GBP/USD (GBPUSD)",
+    "id": "💷 GBP/USD (GBPUSD)",
+    "th": "💷 ปอนด์/ดอลลาร์ (GBPUSD)",
+    "zh": "💷 英镑/美元 (GBPUSD)",
+    "hi": "💷 जीबीपी/यूएसडी (GBPUSD)"
 }
 
 }

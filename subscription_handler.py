@@ -21,18 +21,18 @@ async def show_instruments(update: Update, context: CallbackContext) -> None:
     user_id = update.effective_user.id
 
     keyboard = [
-        [InlineKeyboardButton("🏆 GOLD (XAUUSD)", callback_data="select_GOLD")],
+        [InlineKeyboardButton(get_text(user_id, "instrument_gold", context), callback_data="select_GOLD")],
         [
-            InlineKeyboardButton("₿ BITCOIN (BTC)", callback_data="select_BITCOIN"),
-            InlineKeyboardButton("🪙 ETHEREUM (ETH)", callback_data="select_ETHEREUM")
+            InlineKeyboardButton(get_text(user_id, "instrument_bitcoin", context), callback_data="select_BITCOIN"),
+            InlineKeyboardButton(get_text(user_id, "instrument_ethereum", context), callback_data="select_ETHEREUM")
         ],
         [
-            InlineKeyboardButton("📈 DOW JONES (DJI)", callback_data="select_DOW JONES"),
-            InlineKeyboardButton("📊 NASDAQ (IXIC)", callback_data="select_NASDAQ")
+            InlineKeyboardButton(get_text(user_id, "instrument_dowjones", context), callback_data="select_DOW JONES"),
+            InlineKeyboardButton(get_text(user_id, "instrument_nasdaq", context), callback_data="select_NASDAQ")
         ],
         [
-            InlineKeyboardButton("💶 EUR/USD (EURUSD)", callback_data="select_EUR/USD"),
-            InlineKeyboardButton("💷 GBP/USD (GBPUSD)", callback_data="select_GBP/USD")
+            InlineKeyboardButton(get_text(user_id, "instrument_eurusd", context), callback_data="select_EUR/USD"),
+            InlineKeyboardButton(get_text(user_id, "instrument_gbpusd", context), callback_data="select_GBP/USD")
         ],
         [InlineKeyboardButton(get_text(user_id, "btn_back", context), callback_data="back_to_main")]
     ]
@@ -43,6 +43,7 @@ async def show_instruments(update: Update, context: CallbackContext) -> None:
         reply_markup=reply_markup,
         parse_mode="Markdown"
     )
+
 
 # ✅ Show subscribe/unsubscribe buttons
 async def show_subscription_menu(update: Update, context: CallbackContext) -> None:
