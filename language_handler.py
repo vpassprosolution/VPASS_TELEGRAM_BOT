@@ -30,13 +30,15 @@ def get_user_language(user_id):
 async def show_language_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton("🇲🇾 Bahasa Melayu", callback_data="set_lang_ms")],
-        [InlineKeyboardButton("🇮🇩 Bahasa Indonesia", callback_data="set_lang_id")],
-        [InlineKeyboardButton("🇹🇭 ภาษาไทย", callback_data="set_lang_th")],
-        [InlineKeyboardButton("🇨🇳 中文", callback_data="set_lang_zh")],
-        [InlineKeyboardButton("🇮🇳 हिंदी", callback_data="set_lang_hi")],
-        [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]
-    ])
+    [InlineKeyboardButton("🇬🇧 English", callback_data="set_lang_en")],
+    [InlineKeyboardButton("🇲🇾 Bahasa Melayu", callback_data="set_lang_ms")],
+    [InlineKeyboardButton("🇮🇩 Bahasa Indonesia", callback_data="set_lang_id")],
+    [InlineKeyboardButton("🇹🇭 ภาษาไทย", callback_data="set_lang_th")],
+    [InlineKeyboardButton("🇨🇳 中文", callback_data="set_lang_zh")],
+    [InlineKeyboardButton("🇮🇳 हिंदी", callback_data="set_lang_hi")],
+    [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]
+])
+
     await query.message.edit_text("🌍 Please select your language:", reply_markup=keyboard)
 
 # Handle Language Selection & Confirmation
