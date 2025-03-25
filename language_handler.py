@@ -46,15 +46,21 @@ async def set_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = query.from_user.id
     lang_code = query.data.replace("set_lang_", "")
 
+    # ✅ Save to DB
     save_user_language(user_id, lang_code)
+
+    # ✅ Cache in memory
+    context.user_data["user_lang"] = lang_code
+
     await query.answer("✅ Language updated!")
 
-    # Show translated confirmation + back to menu
-    message = get_text(user_id, "language_saved")
+    # ✅ Use cached version for fast response
+    message = get_text(user_id, "language_saved", context)
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("🏠 Back to Menu", callback_data="main_menu")]
     ])
     await query.message.edit_text(message, reply_markup=keyboard)
+
 
 # Translations Dictionary
 translations = {

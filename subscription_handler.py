@@ -34,12 +34,12 @@ async def show_instruments(update: Update, context: CallbackContext) -> None:
             InlineKeyboardButton("💶 EUR/USD (EURUSD)", callback_data="select_EUR/USD"),
             InlineKeyboardButton("💷 GBP/USD (GBPUSD)", callback_data="select_GBP/USD")
         ],
-        [InlineKeyboardButton(get_text(user_id, "btn_back"), callback_data="back_to_main")]
+        [InlineKeyboardButton(get_text(user_id, "btn_back", context), callback_data="back_to_main")]
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.callback_query.message.edit_text(
-        get_text(user_id, "smart_signal_title"),
+        get_text(user_id, "smart_signal_title", context),
         reply_markup=reply_markup,
         parse_mode="Markdown"
     )
@@ -52,10 +52,10 @@ async def show_subscription_menu(update: Update, context: CallbackContext) -> No
 
     keyboard = [
         [
-            InlineKeyboardButton(get_text(user_id, "subscribe_to").replace("{instrument}", instrument), callback_data=f"subscribe_{instrument}"),
-            InlineKeyboardButton(get_text(user_id, "unsubscribe_from").replace("{instrument}", instrument), callback_data=f"unsubscribe_{instrument}")
+            InlineKeyboardButton(get_text(user_id, "subscribe_to", context).replace("{instrument}", instrument), callback_data=f"subscribe_{instrument}"),
+            InlineKeyboardButton(get_text(user_id, "unsubscribe_from", context).replace("{instrument}", instrument), callback_data=f"unsubscribe_{instrument}")
         ],
-        [InlineKeyboardButton(get_text(user_id, "btn_back"), callback_data="back_to_instruments")]
+        [InlineKeyboardButton(get_text(user_id, "btn_back", context), callback_data="back_to_instruments")]
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -82,17 +82,17 @@ async def subscribe(update: Update, context: CallbackContext) -> None:
         print(f"❌ Subscribe Error: {e}")
         success = False
 
-    keyboard = [[InlineKeyboardButton(get_text(user_id, "btn_back"), callback_data="back_to_instruments")]]
+    keyboard = [[InlineKeyboardButton(get_text(user_id, "btn_back", context), callback_data="back_to_instruments")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     if success:
         await query.message.edit_text(
-            get_text(user_id, "sub_success").replace("{instrument}", instrument),
+            get_text(user_id, "sub_success", context).replace("{instrument}", instrument),
             reply_markup=reply_markup
         )
     else:
         await query.message.edit_text(
-            get_text(user_id, "sub_failed").replace("{instrument}", instrument),
+            get_text(user_id, "sub_failed", context).replace("{instrument}", instrument),
             reply_markup=reply_markup
         )
 
@@ -113,17 +113,17 @@ async def unsubscribe(update: Update, context: CallbackContext) -> None:
         print(f"❌ Unsubscribe Error: {e}")
         success = False
 
-    keyboard = [[InlineKeyboardButton(get_text(user_id, "btn_back"), callback_data="back_to_instruments")]]
+    keyboard = [[InlineKeyboardButton(get_text(user_id, "btn_back", context), callback_data="back_to_instruments")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     if success:
         await query.message.edit_text(
-            get_text(user_id, "unsub_success").replace("{instrument}", instrument),
+            get_text(user_id, "unsub_success", context).replace("{instrument}", instrument),
             reply_markup=reply_markup
         )
     else:
         await query.message.edit_text(
-            get_text(user_id, "unsub_failed").replace("{instrument}", instrument),
+            get_text(user_id, "unsub_failed", context).replace("{instrument}", instrument),
             reply_markup=reply_markup
         )
 
