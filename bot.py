@@ -89,15 +89,23 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
+    user_id = query.from_user.id
+
+    # ✅ Trigger language cache for this user (if not already)
+    _ = get_text(user_id, "main_menu_title", context)
+
+    # ✅ Use shorthand getter for fast cached access
+    get = lambda key: get_text(user_id, key, context)
+
     keyboard = [
-        [InlineKeyboardButton(get_text(query.from_user.id, "btn_signal"), callback_data="vpass_smart_signal")],
-        [InlineKeyboardButton(get_text(query.from_user.id, "btn_sentiment"), callback_data="ai_sentiment")],
-        [InlineKeyboardButton(get_text(query.from_user.id, "btn_technical"), callback_data="ai_technical")],
-        [InlineKeyboardButton(get_text(query.from_user.id, "btn_instant"), callback_data="ai_agent_signal")],
-        [InlineKeyboardButton(get_text(query.from_user.id, "btn_news_war_room"), callback_data="news_war_room")],
+        [InlineKeyboardButton(get("btn_signal"), callback_data="vpass_smart_signal")],
+        [InlineKeyboardButton(get("btn_sentiment"), callback_data="ai_sentiment")],
+        [InlineKeyboardButton(get("btn_technical"), callback_data="ai_technical")],
+        [InlineKeyboardButton(get("btn_instant"), callback_data="ai_agent_signal")],
+        [InlineKeyboardButton(get("btn_news_war_room"), callback_data="news_war_room")],
         [
-            InlineKeyboardButton(get_text(query.from_user.id, "btn_news"), callback_data="news_today"),
-            InlineKeyboardButton(get_text(query.from_user.id, "btn_language"), callback_data="language_menu"),
+            InlineKeyboardButton(get("btn_news"), callback_data="news_today"),
+            InlineKeyboardButton(get("btn_language"), callback_data="language_menu"),
             InlineKeyboardButton("ChatGPT", url="https://chat.openai.com"),
             InlineKeyboardButton("DeepSeek", url="https://www.deepseek.com")
         ]
@@ -106,9 +114,10 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await safe_replace_message(
         query,
         context,
-        text=get_text(query.from_user.id, "main_menu_title"),
+        text=get("main_menu_title"),
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
+
 
 
 
