@@ -373,6 +373,22 @@ translations = {
 "category_metalsoil": {
   "en": "Metals & Oil", "ms": "Logam & Minyak", "id": "Logam & Minyak", "th": "โลหะและน้ำมัน", "zh": "金属与原油", "hi": "धातु और तेल"
 },
+"chart_back_timeframe": {
+    "en": "🔁 Back to Timeframe",
+    "ms": "🔁 Kembali ke Timeframe",
+    "id": "🔁 Kembali ke Timeframe",
+    "th": "🔁 กลับไปยัง Timeframe",
+    "zh": "🔁 返回时间周期",
+    "hi": "🔁 टाइमफ़्रेम पर वापस जाएं"
+},
+"chart_back_menu": {
+    "en": "🏠 Main Menu",
+    "ms": "🏠 Menu Utama",
+    "id": "🏠 Menu Utama",
+    "th": "🏠 เมนูหลัก",
+    "zh": "🏠 主菜单",
+    "hi": "🏠 मुख्य मेनू"
+},
 "timeframe_labels": {
     "en": {
         "1m": "1 Minute",
@@ -439,23 +455,8 @@ translations = {
         "1D": "1 दिन",
         "1W": "1 सप्ताह",
         "1M": "1 महीना"
-    },
-"chart_back_timeframe": {
-    "en": "🔁 Back to Timeframe",
-    "ms": "🔁 Kembali ke Timeframe",
-    "id": "🔁 Kembali ke Timeframe",
-    "th": "🔁 กลับไปยัง Timeframe",
-    "zh": "🔁 返回时间周期",
-    "hi": "🔁 टाइमफ़्रेम पर वापस जाएं"
-},
-"chart_back_menu": {
-    "en": "🏠 Main Menu",
-    "ms": "🏠 Menu Utama",
-    "id": "🏠 Menu Utama",
-    "th": "🏠 เมนูหลัก",
-    "zh": "🏠 主菜单",
-    "hi": "🏠 मुख्य मेनू"
-}
+    }
+
 }
 
 
