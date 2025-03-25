@@ -46,7 +46,6 @@ async def set_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang_code = query.data.replace("set_lang_", "")
 
     save_user_language(user_id, lang_code)
-
     await query.answer("✅ Language updated!")
 
     # Show translated confirmation + back to menu
@@ -73,6 +72,62 @@ translations = {
         "th": "✅ การตั้งค่าภาษาของคุณถูกบันทึกแล้ว",
         "zh": "✅ 您的语言偏好已保存。",
         "hi": "✅ आपकी भाषा वरीयता सहेज ली गई है।"
+    },
+    "btn_signal": {
+        "en": "VESSA AI SMART SIGNAL",
+        "ms": "ISYARAT PINTAR VESSA AI",
+        "id": "SINYAL PINTAR VESSA AI",
+        "th": "สัญญาณอัจฉริยะ VESSA AI",
+        "zh": "VESSA AI 智能信号",
+        "hi": "VESSA AI स्मार्ट सिग्नल"
+    },
+    "btn_sentiment": {
+        "en": "VESSA AI SENTIMENT",
+        "ms": "SENTIMEN VESSA AI",
+        "id": "SENTIMEN VESSA AI",
+        "th": "ความรู้สึก VESSA AI",
+        "zh": "VESSA AI 情绪分析",
+        "hi": "VESSA AI सेंटीमेंट"
+    },
+    "btn_technical": {
+        "en": "VESSA AI TECHNICAL ANALYSIS",
+        "ms": "ANALISIS TEKNIKAL VESSA AI",
+        "id": "ANALISIS TEKNIKAL VESSA AI",
+        "th": "วิเคราะห์ทางเทคนิค VESSA AI",
+        "zh": "VESSA AI 技术分析",
+        "hi": "VESSA AI तकनीकी विश्लेषण"
+    },
+    "btn_instant": {
+        "en": "AI AGENT INSTANT SIGNAL",
+        "ms": "ISYARAT SEGERA AI",
+        "id": "SINYAL INSTAN AI",
+        "th": "สัญญาณด่วนจาก AI",
+        "zh": "AI 即时信号",
+        "hi": "AI एजेंट इंस्टेंट सिग्नल"
+    },
+    "btn_news": {
+        "en": "📰 NEWS",
+        "ms": "📰 BERITA",
+        "id": "📰 BERITA",
+        "th": "📰 ข่าว",
+        "zh": "📰 新闻",
+        "hi": "📰 समाचार"
+    },
+    "btn_news_war_room": {
+        "en": "🔥 NEWS WAR ROOM 🔥",
+        "ms": "🔥 BILIK PERANG BERITA 🔥",
+        "id": "🔥 RUANG PERANG BERITA 🔥",
+        "th": "🔥 ห้องข่าวร้อน 🔥",
+        "zh": "🔥 新闻作战室 🔥",
+        "hi": "🔥 न्यूज़ वॉर रूम 🔥"
+    },
+    "btn_language": {
+        "en": "🌍 Language",
+        "ms": "🌍 Bahasa",
+        "id": "🌍 Bahasa",
+        "th": "🌍 ภาษา",
+        "zh": "🌍 语言",
+        "hi": "🌍 भाषा"
     }
 }
 

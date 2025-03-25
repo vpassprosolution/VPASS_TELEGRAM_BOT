@@ -19,8 +19,7 @@ from ai_technical_handler import (
 
 from utils import safe_replace_message
 from news_today_handler import handle_news_today
-from language_handler import set_language
-from language_handler import show_language_menu, set_language
+from language_handler import get_text, show_language_menu, set_language
 
 
 
@@ -86,18 +85,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    from language_handler import get_text
     query = update.callback_query
     await query.answer()
 
     keyboard = [
-        [InlineKeyboardButton("VESSA AI SMART SIGNAL", callback_data="vpass_smart_signal")],
-        [InlineKeyboardButton("VESSA AI SENTIMENT", callback_data="ai_sentiment")],
-        [InlineKeyboardButton("VESSA AI TECHNICAL ANALYSIS", callback_data="ai_technical")],
-        [InlineKeyboardButton("AI AGENT INSTANT SIGNAL", callback_data="ai_agent_signal")],
-        [InlineKeyboardButton("🔥 NEWS WAR ROOM 🔥", callback_data="news_war_room")],
+        [InlineKeyboardButton(get_text(query.from_user.id, "btn_signal"), callback_data="vpass_smart_signal")],
+        [InlineKeyboardButton(get_text(query.from_user.id, "btn_sentiment"), callback_data="ai_sentiment")],
+        [InlineKeyboardButton(get_text(query.from_user.id, "btn_technical"), callback_data="ai_technical")],
+        [InlineKeyboardButton(get_text(query.from_user.id, "btn_instant"), callback_data="ai_agent_signal")],
+        [InlineKeyboardButton(get_text(query.from_user.id, "btn_news_war_room"), callback_data="news_war_room")],
         [
-            InlineKeyboardButton("📰 NEWS", callback_data="news_today"),
-            InlineKeyboardButton("🌍 Language", callback_data="language_menu"),
+            InlineKeyboardButton(get_text(query.from_user.id, "btn_news"), callback_data="news_today"),
+            InlineKeyboardButton(get_text(query.from_user.id, "btn_language"), callback_data="language_menu"),
             InlineKeyboardButton("ChatGPT", url="https://chat.openai.com"),
             InlineKeyboardButton("DeepSeek", url="https://www.deepseek.com")
         ]
@@ -106,11 +106,10 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await safe_replace_message(
         query,
         context,
-        text="*WELCOME TO VESSA PRO VERSION V2*\n"
-             "   The Future of Intelligence Starts Here\n"
-             "          *CHOOSE YOUR STRATEGY*",
+        text=get_text(query.from_user.id, "main_menu_title"),
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
+
 
 
 
