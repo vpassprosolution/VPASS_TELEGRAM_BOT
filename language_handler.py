@@ -459,7 +459,7 @@ translations = {
 
 }
 
-
+}
 
 # Get translated text for current user
 def get_text(user_id, key, context=None):
