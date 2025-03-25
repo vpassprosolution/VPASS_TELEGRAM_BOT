@@ -1,4 +1,3 @@
-import json
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from db import connect_db
@@ -130,8 +129,72 @@ translations = {
         "th": "🌍 ภาษา",
         "zh": "🌍 语言",
         "hi": "🌍 भाषा"
-    }
+    },
+"smart_signal_title": {
+    "en": "*Select Your Exclusive Instrument*",
+    "ms": "*Pilih Instrumen Eksklusif Anda*",
+    "id": "*Pilih Instrumen Eksklusif Anda*",
+    "th": "*เลือกสินทรัพย์ที่คุณต้องการ*",
+    "zh": "*选择您的专属交易品种*",
+    "hi": "*अपना एक्सक्लूसिव इंस्ट्रूमेंट चुनें*"
+},
+"btn_back": {
+    "en": "🔙 Back",
+    "ms": "🔙 Kembali",
+    "id": "🔙 Kembali",
+    "th": "🔙 ย้อนกลับ",
+    "zh": "🔙 返回",
+    "hi": "🔙 वापस"
+},
+"subscribe_to": {
+    "en": "✅ Subscribe to {instrument}",
+    "ms": "✅ Langgan {instrument}",
+    "id": "✅ Berlangganan {instrument}",
+    "th": "✅ รับสัญญาณ {instrument}",
+    "zh": "✅ 订阅 {instrument}",
+    "hi": "✅ {instrument} की सदस्यता लें"
+},
+"unsubscribe_from": {
+    "en": "❌ Unsubscribe from {instrument}",
+    "ms": "❌ Berhenti langganan {instrument}",
+    "id": "❌ Berhenti berlangganan {instrument}",
+    "th": "❌ ยกเลิกสัญญาณ {instrument}",
+    "zh": "❌ 取消订阅 {instrument}",
+    "hi": "❌ {instrument} की सदस्यता रद्द करें"
+},
+"sub_success": {
+    "en": "✅ You are now subscribed to {instrument} alerts!",
+    "ms": "✅ Anda telah melanggan amaran {instrument}!",
+    "id": "✅ Anda telah berlangganan sinyal {instrument}!",
+    "th": "✅ คุณได้สมัครรับการแจ้งเตือน {instrument} แล้ว!",
+    "zh": "✅ 您已订阅 {instrument} 警报！",
+    "hi": "✅ आपने {instrument} अलर्ट की सदस्यता ले ली है!"
+},
+"sub_failed": {
+    "en": "❌ Subscription failed for {instrument}. Try again.",
+    "ms": "❌ Gagal melanggan {instrument}. Cuba lagi.",
+    "id": "❌ Gagal berlangganan {instrument}. Coba lagi.",
+    "th": "❌ ไม่สามารถสมัครสมาชิก {instrument} ได้ กรุณาลองใหม่",
+    "zh": "❌ 订阅 {instrument} 失败。请再试一次。",
+    "hi": "❌ {instrument} की सदस्यता असफल रही। कृपया पुनः प्रयास करें।"
+},
+"unsub_success": {
+    "en": "🚫 You have unsubscribed from {instrument} alerts.",
+    "ms": "🚫 Anda telah berhenti melanggan amaran {instrument}.",
+    "id": "🚫 Anda telah berhenti berlangganan sinyal {instrument}.",
+    "th": "🚫 คุณได้ยกเลิกการแจ้งเตือน {instrument} แล้ว",
+    "zh": "🚫 您已取消订阅 {instrument} 警报。",
+    "hi": "🚫 आपने {instrument} की सदस्यता रद्द कर दी है।"
+},
+"unsub_failed": {
+    "en": "❌ Unsubscription failed for {instrument}. Try again.",
+    "ms": "❌ Gagal berhenti melanggan {instrument}. Cuba lagi.",
+    "id": "❌ Gagal berhenti berlangganan {instrument}. Coba lagi.",
+    "th": "❌ ยกเลิกการสมัคร {instrument} ล้มเหลว กรุณาลองใหม่",
+    "zh": "❌ 取消订阅 {instrument} 失败。请再试一次。",
+    "hi": "❌ {instrument} की सदस्यता रद्द करने में विफल। फिर से प्रयास करें।"
 }
+
 
 # Get translated text for current user
 def get_text(user_id, key):
