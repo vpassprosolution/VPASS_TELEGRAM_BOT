@@ -4,6 +4,7 @@ from telegram.helpers import escape_markdown
 from utils import safe_replace_message
 import httpx
 import asyncio
+from language_handler import get_text
 
 # VPASS AI SENTIMENT API URL
 VPASS_AI_SENTIMENT_URL = "https://vpassaisentiment-production.up.railway.app/storyline/?instrument="
@@ -20,7 +21,6 @@ INSTRUMENTS = {
 }
 
 # Step 1: Show Instruments
-# Step 1: Show Instruments
 async def show_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -30,46 +30,49 @@ async def show_instruments(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["cooldown"] = True
     asyncio.create_task(reset_cooldown(context))
 
+    user_id = query.from_user.id
+
     keyboard = [
-        [InlineKeyboardButton("🏆 GOLD (XAUUSD)", callback_data="sentiment_gold")],
+        [InlineKeyboardButton(get_text(user_id, "instrument_gold", context), callback_data="sentiment_gold")],
         [
-            InlineKeyboardButton("₿ BITCOIN (BTC)", callback_data="sentiment_bitcoin"),
-            InlineKeyboardButton("🔣 ETHEREUM (ETH)", callback_data="sentiment_ethereum")
+            InlineKeyboardButton(get_text(user_id, "instrument_bitcoin", context), callback_data="sentiment_bitcoin"),
+            InlineKeyboardButton(get_text(user_id, "instrument_ethereum", context), callback_data="sentiment_ethereum")
         ],
         [
-            InlineKeyboardButton("📈 DOW JONES (DJI)", callback_data="sentiment_dowjones"),
-            InlineKeyboardButton("📊 NASDAQ (IXIC)", callback_data="sentiment_nasdaq")
+            InlineKeyboardButton(get_text(user_id, "instrument_dowjones", context), callback_data="sentiment_dowjones"),
+            InlineKeyboardButton(get_text(user_id, "instrument_nasdaq", context), callback_data="sentiment_nasdaq")
         ],
         [
-            InlineKeyboardButton("💶 EUR/USD (EURUSD)", callback_data="sentiment_eur/usd"),
-            InlineKeyboardButton("💷 GBP/USD (GBPUSD)", callback_data="sentiment_gbp/usd")
+            InlineKeyboardButton(get_text(user_id, "instrument_eurusd", context), callback_data="sentiment_eur/usd"),
+            InlineKeyboardButton(get_text(user_id, "instrument_gbpusd", context), callback_data="sentiment_gbp/usd")
         ],
-        [InlineKeyboardButton("⬅️ Back to Menu", callback_data="main_menu")]
+        [InlineKeyboardButton(get_text(user_id, "sentiment_back", context), callback_data="main_menu")]
     ]
 
-    # ✅ Always edit the message (never send new)
     await query.message.edit_text(
-        "*Select Your Exclusive Instrument :*",
+        get_text(user_id, "sentiment_title", context),
         reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode="Markdown"
     )
+
 
 # Step 2: Handle Instrument Selection
 async def handle_instrument_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
+    user_id = query.from_user.id
     selected_instrument = query.data.replace("sentiment_", "")
 
     try:
         await query.edit_message_text(
-            "🧠 *Fetching AI Sentiment... Please wait...*",
+            get_text(user_id, "sentiment_loading", context),
             parse_mode="Markdown"
         )
     except:
         await context.bot.send_message(
             chat_id=query.message.chat.id,
-            text="🧠 *Fetching AI Sentiment... Please wait...*",
+            text=get_text(user_id, "sentiment_loading", context),
             parse_mode="Markdown"
         )
 
@@ -92,8 +95,8 @@ async def handle_instrument_selection(update: Update, context: ContextTypes.DEFA
 
         buttons = [
             [
-                InlineKeyboardButton("🔁 Back to Instruments", callback_data="ai_sentiment"),
-                InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")
+                InlineKeyboardButton(get_text(user_id, "sentiment_back_instruments", context), callback_data="ai_sentiment"),
+                InlineKeyboardButton(get_text(user_id, "sentiment_back_menu", context), callback_data="main_menu")
             ]
         ]
 
@@ -104,6 +107,7 @@ async def handle_instrument_selection(update: Update, context: ContextTypes.DEFA
             reply_markup=InlineKeyboardMarkup(buttons),
             parse_mode="MarkdownV2"
         )
+
 
 # Cooldown reset function
 async def reset_cooldown(context):

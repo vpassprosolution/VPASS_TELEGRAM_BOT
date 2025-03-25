@@ -264,7 +264,105 @@ translations = {
     "th": "🔍 *เมนูการสมัครสมาชิก {instrument}:*",
     "zh": "🔍 *{instrument} 订阅菜单：*",
     "hi": "🔍 *{instrument} सदस्यता मेनू:*"
+},
+"sentiment_title": {
+    "en": "*Select Your Exclusive Instrument :*",
+    "ms": "*Pilih Instrumen Eksklusif Anda :*",
+    "id": "*Pilih Instrumen Eksklusif Anda :*",
+    "th": "*เลือกสินทรัพย์ที่คุณต้องการ :*",
+    "zh": "*选择您的专属交易品种：*",
+    "hi": "*अपना एक्सक्लूसिव इंस्ट्रूमेंट चुनें :*"
+},
+"sentiment_back": {
+    "en": "⬅️ Back to Menu",
+    "ms": "⬅️ Kembali ke Menu",
+    "id": "⬅️ Kembali ke Menu",
+    "th": "⬅️ กลับไปยังเมนู",
+    "zh": "⬅️ 返回菜单",
+    "hi": "⬅️ मेनू पर वापस जाएं"
+},
+"instrument_gold": {
+    "en": "🏆 GOLD (XAUUSD)",
+    "ms": "🏆 EMAS (XAUUSD)",
+    "id": "🏆 EMAS (XAUUSD)",
+    "th": "🏆 ทองคำ (XAUUSD)",
+    "zh": "🏆 黄金 (XAUUSD)",
+    "hi": "🏆 सोना (XAUUSD)"
+},
+"instrument_bitcoin": {
+    "en": "₿ BITCOIN (BTC)",
+    "ms": "₿ BITCOIN (BTC)",
+    "id": "₿ BITCOIN (BTC)",
+    "th": "₿ บิทคอยน์ (BTC)",
+    "zh": "₿ 比特币 (BTC)",
+    "hi": "₿ बिटकॉइन (BTC)"
+},
+"instrument_ethereum": {
+    "en": "🔣 ETHEREUM (ETH)",
+    "ms": "🔣 ETHEREUM (ETH)",
+    "id": "🔣 ETHEREUM (ETH)",
+    "th": "🔣 อีเธอเรียม (ETH)",
+    "zh": "🔣 以太坊 (ETH)",
+    "hi": "🔣 एथेरियम (ETH)"
+},
+"instrument_dowjones": {
+    "en": "📈 DOW JONES (DJI)",
+    "ms": "📈 DOW JONES (DJI)",
+    "id": "📈 DOW JONES (DJI)",
+    "th": "📈 ดาวโจนส์ (DJI)",
+    "zh": "📈 道琼斯 (DJI)",
+    "hi": "📈 डॉव जोन्स (DJI)"
+},
+"instrument_nasdaq": {
+    "en": "📊 NASDAQ (IXIC)",
+    "ms": "📊 NASDAQ (IXIC)",
+    "id": "📊 NASDAQ (IXIC)",
+    "th": "📊 แนสแด็ก (IXIC)",
+    "zh": "📊 纳斯达克 (IXIC)",
+    "hi": "📊 नैस्डैक (IXIC)"
+},
+"instrument_eurusd": {
+    "en": "💶 EUR/USD (EURUSD)",
+    "ms": "💶 EUR/USD (EURUSD)",
+    "id": "💶 EUR/USD (EURUSD)",
+    "th": "💶 EUR/USD (EURUSD)",
+    "zh": "💶 欧元/美元 (EURUSD)",
+    "hi": "💶 यूरो/यूएसडी (EURUSD)"
+},
+"instrument_gbpusd": {
+    "en": "💷 GBP/USD (GBPUSD)",
+    "ms": "💷 GBP/USD (GBPUSD)",
+    "id": "💷 GBP/USD (GBPUSD)",
+    "th": "💷 GBP/USD (GBPUSD)",
+    "zh": "💷 英镑/美元 (GBPUSD)",
+    "hi": "💷 GBP/USD (GBPUSD)"
+},
+"sentiment_loading": {
+    "en": "🧠 *Fetching AI Sentiment... Please wait...*",
+    "ms": "🧠 *Sedang mengambil AI Sentiment... Sila tunggu...*",
+    "id": "🧠 *Mengambil Sentimen AI... Mohon tunggu...*",
+    "th": "🧠 *กำลังดึงข้อมูล AI Sentiment... กรุณารอสักครู่...*",
+    "zh": "🧠 *正在获取 AI 情绪分析... 请稍等...*",
+    "hi": "🧠 *AI भावना लोड हो रही है... कृपया प्रतीक्षा करें...*"
+},
+"sentiment_back_instruments": {
+    "en": "🔁 Back to Instruments",
+    "ms": "🔁 Kembali ke Instrumen",
+    "id": "🔁 Kembali ke Instrumen",
+    "th": "🔁 กลับไปยังสินทรัพย์",
+    "zh": "🔁 返回选择品种",
+    "hi": "🔁 इंस्ट्रूमेंट्स पर वापस जाएं"
+},
+"sentiment_back_menu": {
+    "en": "🏠 Main Menu",
+    "ms": "🏠 Menu Utama",
+    "id": "🏠 Menu Utama",
+    "th": "🏠 เมนูหลัก",
+    "zh": "🏠 主菜单",
+    "hi": "🏠 मुख्य मेनू"
 }
+
+
 
 }
 
