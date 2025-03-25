@@ -1,30 +1,30 @@
 import json
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
+from db import connect_db
 
-LANGUAGE_FILE = "user_languages.json"
 
-# Save language to file
 def save_user_language(user_id, language_code):
-    try:
-        with open(LANGUAGE_FILE, "r") as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        data = {}
+    conn = connect_db()
+    cur = conn.cursor()
+    cur.execute("UPDATE users SET language = %s WHERE user_id = %s", (language_code, user_id))
+    conn.commit()
+    cur.close()
+    conn.close()
 
-    data[str(user_id)] = language_code
-
-    with open(LANGUAGE_FILE, "w") as f:
-        json.dump(data, f)
-
-# Get user language
 def get_user_language(user_id):
-    try:
-        with open(LANGUAGE_FILE, "r") as f:
-            data = json.load(f)
-        return data.get(str(user_id), "en")
-    except FileNotFoundError:
+    conn = connect_db()
+    cur = conn.cursor()
+    cur.execute("SELECT language FROM users WHERE user_id = %s", (user_id,))
+    result = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    if result and result[0]:
+        return result[0]
+    else:
         return "en"
+
 
 # Show Language Selection Menu
 async def show_language_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
