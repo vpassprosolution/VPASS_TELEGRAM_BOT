@@ -1,6 +1,5 @@
 import httpx
 import base64
-from telebot.types import InputMediaPhoto
 
 NEWS_API_URL = "https://vpassnewstoday-production.up.railway.app/get_today_news"
 
