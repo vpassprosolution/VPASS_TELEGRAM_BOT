@@ -195,6 +195,7 @@ translations = {
     "hi": "❌ {instrument} की सदस्यता रद्द करने में विफल। फिर से प्रयास करें।"
 }
 
+}
 
 # Get translated text for current user
 def get_text(user_id, key):
