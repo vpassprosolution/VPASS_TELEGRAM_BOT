@@ -1,5 +1,6 @@
 import json
-from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ContextTypes, CallbackContext
 
 LANGUAGE_FILE = "user_languages.json"
 
@@ -26,7 +27,8 @@ def get_user_language(user_id):
         return "en"
 
 # Language Selection Menu
-async def show_language_menu(callback_query: CallbackQuery):
+async def show_language_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton("🇲🇾 Bahasa Melayu", callback_data="set_lang_ms")],
         [InlineKeyboardButton("🇮🇩 Bahasa Indonesia", callback_data="set_lang_id")],
@@ -35,17 +37,18 @@ async def show_language_menu(callback_query: CallbackQuery):
         [InlineKeyboardButton("🇮🇳 हिंदी", callback_data="set_lang_hi")],
         [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]
     ])
-    await callback_query.message.edit_text("🌍 Please select your language:", reply_markup=keyboard)
+    await query.message.edit_text("🌍 Please select your language:", reply_markup=keyboard)
 
 # Handle Language Selection
-async def set_language(callback_query: CallbackQuery):
-    user_id = callback_query.from_user.id
-    lang_code = callback_query.data.replace("set_lang_", "")  # e.g., 'ms'
+async def set_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    user_id = query.from_user.id
+    lang_code = query.data.replace("set_lang_", "")
 
     save_user_language(user_id, lang_code)
 
-    await callback_query.answer("✅ Language updated!")
-    await callback_query.message.edit_text("✅ Your language preference has been saved.")
+    await query.answer("✅ Language updated!")
+    await query.message.edit_text("✅ Your language preference has been saved.")
 
 # Dictionary with translations
 translations = {
@@ -64,8 +67,7 @@ translations = {
         "th": "✅ การตั้งค่าภาษาของคุณถูกบันทึกแล้ว",
         "zh": "✅ 您的语言偏好已保存。",
         "hi": "✅ आपकी भाषा वरीयता सहेज ली गई है।"
-    },
-    # You can add more keys here later...
+    }
 }
 
 # Get translated text
