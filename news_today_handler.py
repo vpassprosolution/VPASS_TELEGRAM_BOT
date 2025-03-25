@@ -5,7 +5,11 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 NEWS_API_URL = "https://vpassnewstoday-production.up.railway.app/get_today_news"
 
 async def handle_news_today(update, context):
-    await safe_replace_message(update, context, "📰 Fetching today’s news...")
+    # Step 1: Send temporary loading message
+    loading_msg = await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="📰 Fetching today’s news..."
+    )
 
     try:
         async with httpx.AsyncClient() as client:
@@ -13,17 +17,26 @@ async def handle_news_today(update, context):
             data = res.json()
 
         if data["status"] != "success":
-            await safe_replace_message(update, context, "⚠️ No news found today.")
+            await context.bot.edit_message_text(
+                chat_id=loading_msg.chat_id,
+                message_id=loading_msg.message_id,
+                text="⚠️ No news found today."
+            )
             return
 
         news_text = data["news_text"]
         image_bytes = bytes.fromhex(data["image_base64"])
 
-        # Add inline F.Factory button under the image
+        # Step 2: Delete the loading message
+        await context.bot.delete_message(chat_id=loading_msg.chat_id, message_id=loading_msg.message_id)
+
+        # Step 3: Build buttons
         markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton("F.Factory", url="https://www.forexfactory.com")]
+            [InlineKeyboardButton("🔙 Back", callback_data="main_menu"),
+             InlineKeyboardButton("🌐 F.Factory", url="https://www.forexfactory.com")]
         ])
 
+        # Step 4: Send the final news
         await context.bot.send_photo(
             chat_id=update.effective_chat.id,
             photo=image_bytes,
@@ -33,11 +46,14 @@ async def handle_news_today(update, context):
 
     except Exception as e:
         print("❌ Error in news handler:", e)
-        await safe_replace_message(update, context, "⚠️ Something went wrong. Please try again later.")
-
-# ✅ Safe message replace for async telegram.ext
-async def safe_replace_message(update, context, new_text):
-    try:
-        await update.callback_query.edit_message_text(text=new_text)
-    except Exception:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=new_text)
+        try:
+            await context.bot.edit_message_text(
+                chat_id=loading_msg.chat_id,
+                message_id=loading_msg.message_id,
+                text="⚠️ Something went wrong. Please try again later."
+            )
+        except:
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text="⚠️ Something went wrong. Please try again later."
+            )
