@@ -1,5 +1,5 @@
 import httpx
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
 # Track live chat state per user
@@ -20,13 +20,13 @@ async def handle_live_chat_entry(update: Update, context: ContextTypes.DEFAULT_T
 
 async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text:
-        return  # Skip if not a valid text message
+        return
 
     user_id = update.message.from_user.id
     user_msg = update.message.text
 
     if user_id not in active_live_chat_users:
-        return  # Ignore messages not in live chat mode
+        return  # User not in live chat mode
 
     print(f"🔥 USER IN LIVE CHAT: {user_id} - Message: {user_msg}")
 
@@ -37,17 +37,24 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
             print("✅ RAW API RESPONSE:", raw)
 
             data = response.json()
-            answer = data.get("answer") or "🤖 No answer found in database."
+            answer = data.get("answer")
+
+            if not answer or answer.strip() == "":
+                answer = "🤖 Sorry, I don't have an answer for that yet. We're always learning!"
     except Exception as e:
         print(f"❌ Live chat API error: {e}")
-        answer = "❌ Sorry, something went wrong. Please try again later."
+        answer = "❌ Sorry, something went wrong while getting a reply."
 
-    # ✅ Send the answer to the user
+    # ✅ Create inline buttons
+    keyboard = [
+        [
+            InlineKeyboardButton("❌ Exit", callback_data="live_chat_exit"),
+            InlineKeyboardButton("➡️ Ask Another", callback_data="live_chat_continue")
+        ]
+    ]
+
+    # ✅ Send the answer + buttons
     try:
-        await update.message.reply_text(answer)
+        await update.message.reply_text(answer, reply_markup=InlineKeyboardMarkup(keyboard))
     except Exception as e:
-        print(f"❌ Failed to reply in Telegram: {e}")
-
-    # ✅ Auto-remove user from live chat session
-    active_live_chat_users.remove(user_id)
-    print(f"🔕 USER REMOVED FROM LIVE CHAT: {user_id}")
+        print(f"❌ Failed to send message in Telegram: {e}")

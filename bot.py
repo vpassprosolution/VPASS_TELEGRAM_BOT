@@ -401,6 +401,30 @@ async def check_membership_callback(update: Update, context: ContextTypes.DEFAUL
     else:
         await query.message.reply_text("❌ Registration process not found. Please restart by typing /start.")
 
+async def exit_live_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    user_id = query.from_user.id
+    await query.answer()
+
+    if user_id in active_live_chat_users:
+        active_live_chat_users.remove(user_id)
+
+    # Go back to setup
+    await query.message.edit_text(
+        "🔙 Returned to SETUP MENU.",
+        reply_markup=InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("🌐 Language", callback_data="language_menu"),
+                InlineKeyboardButton("🎓 Tutorial", callback_data="coming_soon")
+            ],
+            [
+                InlineKeyboardButton("💬 Live Chat", callback_data="live_chat"),
+                InlineKeyboardButton("🛠️ Support", url="https://t.me/vpassprosupport")
+            ],
+            [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]
+        ])
+    )
+
 
 # Filter wrapper
 async def route_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -472,7 +496,7 @@ def main():
     app.add_handler(CallbackQueryHandler(coming_soon, pattern="^coming_soon$"))
     app.add_handler(CallbackQueryHandler(handle_live_chat_entry, pattern="^live_chat$"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, route_text_message))
-
+    app.add_handler(CallbackQueryHandler(exit_live_chat, pattern="^live_chat_exit$"))
 
 
 
