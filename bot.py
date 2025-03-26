@@ -20,6 +20,7 @@ from ai_technical_handler import (
 from utils import safe_replace_message
 from news_today_handler import handle_news_today
 from language_handler import get_text, show_language_menu, set_language
+from live_chat_handler import handle_live_chat_entry, handle_user_message
 
 
 
@@ -128,7 +129,7 @@ async def setup_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("🎓 Tutorial", callback_data="coming_soon")
         ],
         [
-            InlineKeyboardButton("💬 Live Chat", url="https://t.me/vpassprosupport"),
+            InlineKeyboardButton("💬 Live Chat", callback_data="live_chat"),
             InlineKeyboardButton("🛠️ Support", url="https://t.me/vpassprosupport")
         ],
         [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]
@@ -459,6 +460,8 @@ def main():
     app.add_handler(CallbackQueryHandler(show_language_menu, pattern="^language_menu$"))
     app.add_handler(CallbackQueryHandler(setup_menu, pattern="^setup_menu$"))
     app.add_handler(CallbackQueryHandler(coming_soon, pattern="^coming_soon$"))
+    app.add_handler(CallbackQueryHandler(handle_live_chat_entry, pattern="^live_chat$"))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_user_message))
 
 
 
