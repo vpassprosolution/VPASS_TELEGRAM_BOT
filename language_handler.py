@@ -105,7 +105,7 @@ translations = {
         "hi": "VESSA AI तकनीकी विश्लेषण"
     },
     "btn_instant": {
-        "en": "AI AGENT INSTANT SIGNAL",
+        "en": "NAOMI ASSIST (INSTANT SIGNAL)",
         "ms": "ISYARAT SEGERA AI",
         "id": "SINYAL INSTAN AI",
         "th": "สัญญาณด่วนจาก AI",
