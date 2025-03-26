@@ -21,6 +21,7 @@ from utils import safe_replace_message
 from news_today_handler import handle_news_today
 from language_handler import get_text, show_language_menu, set_language
 from live_chat_handler import handle_live_chat_entry, handle_user_message, active_live_chat_users
+from social_media import social_media
 
 
 
@@ -106,7 +107,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     [InlineKeyboardButton(get("btn_news_war_room"), callback_data="news_war_room")],
     [
         InlineKeyboardButton(get("btn_news"), callback_data="news_today"),
-        InlineKeyboardButton("📱 SOCIAL MEDIA", url="https://t.me/vpasspro_bot"),
+        InlineKeyboardButton("🌐 MEDIA", callback_data="social_media"),
         InlineKeyboardButton("⚙️ SETUP", callback_data="setup_menu")
     ]
 ]
@@ -497,7 +498,9 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_live_chat_entry, pattern="^live_chat$"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, route_text_message))
     app.add_handler(CallbackQueryHandler(exit_live_chat, pattern="^live_chat_exit$"))
-    
+    app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
+    app.add_handler(CallbackQueryHandler(social_media, pattern="social_media"))
+
 
 
 
