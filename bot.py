@@ -105,7 +105,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     [InlineKeyboardButton(get("btn_news_war_room"), callback_data="news_war_room")],
     [
         InlineKeyboardButton(get("btn_news"), callback_data="news_today"),
-        InlineKeyboardButton("📱 SocMed", url="https://t.me/vpasspro_bot"),
+        InlineKeyboardButton("📱 SOCIAL MEDIA", url="https://t.me/vpasspro_bot"),
         InlineKeyboardButton("⚙️ SETUP", callback_data="setup_menu")
     ]
 ]
@@ -123,10 +123,14 @@ async def setup_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     keyboard = [
-        [InlineKeyboardButton("🌐 Language", callback_data="language_menu")],
-        [InlineKeyboardButton("🎓 Tutorial", callback_data="coming_soon")],
-        [InlineKeyboardButton("💬 Live Chat", url="https://t.me/vpassprosupport")],
-        [InlineKeyboardButton("🛠️ Support", url="https://t.me/vpassprosupport")],
+        [
+            InlineKeyboardButton("🌐 Language", callback_data="language_menu"),
+            InlineKeyboardButton("🎓 Tutorial", callback_data="coming_soon")
+        ],
+        [
+            InlineKeyboardButton("💬 Live Chat", url="https://t.me/vpassprosupport"),
+            InlineKeyboardButton("🛠️ Support", url="https://t.me/vpassprosupport")
+        ],
         [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]
     ]
 
@@ -135,6 +139,7 @@ async def setup_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="HTML",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
+
 
 async def coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
