@@ -1,4 +1,5 @@
 import httpx
+import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
@@ -23,10 +24,11 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         return
 
     user_id = update.message.from_user.id
+    chat_id = update.message.chat_id
     user_msg = update.message.text
 
     if user_id not in active_live_chat_users:
-        return  # User not in live chat mode
+        return
 
     print(f"🔥 USER IN LIVE CHAT: {user_id} - Message: {user_msg}")
 
@@ -35,26 +37,33 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
             response = await client.post(API_URL, json={"question": user_msg})
             raw = response.text
             print("✅ RAW API RESPONSE:", raw)
-
             data = response.json()
-            answer = data.get("answer")
-
-            if not answer or answer.strip() == "":
-                answer = "🤖 Sorry, I don't have an answer for that yet. We're always learning!"
+            answer = data.get("answer") or "🤖 Sorry, I don't understand that."
     except Exception as e:
         print(f"❌ Live chat API error: {e}")
-        answer = "❌ Sorry, something went wrong while getting a reply."
+        answer = "❌ Something went wrong. Please try again later."
 
-    # ✅ Create inline buttons
+    # ✅ Send the bot's reply with Exit & Ask Another buttons
     keyboard = [
         [
             InlineKeyboardButton("❌ Exit", callback_data="live_chat_exit"),
             InlineKeyboardButton("➡️ Ask Another", callback_data="live_chat_continue")
         ]
     ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # ✅ Send the answer + buttons
+    # ✅ Save the user message and bot message
     try:
-        await update.message.reply_text(answer, reply_markup=InlineKeyboardMarkup(keyboard))
+        bot_reply = await update.message.reply_text(answer, reply_markup=reply_markup)
     except Exception as e:
-        print(f"❌ Failed to send message in Telegram: {e}")
+        print(f"❌ Failed to send bot reply: {e}")
+        return
+
+    # ✅ Auto-delete after 5 seconds
+    await asyncio.sleep(5)
+
+    try:
+        await context.bot.delete_message(chat_id=chat_id, message_id=update.message.message_id)
+        await context.bot.delete_message(chat_id=chat_id, message_id=bot_reply.message_id)
+    except Exception as e:
+        print(f"❌ Error deleting messages: {e}")
