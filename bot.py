@@ -21,7 +21,7 @@ from utils import safe_replace_message
 from news_today_handler import handle_news_today
 from language_handler import get_text, show_language_menu, set_language
 from live_chat_handler import handle_live_chat_entry, handle_user_message, active_live_chat_users
-from telegram.ext import MessageHandler, filters
+
 
 
 
@@ -425,6 +425,15 @@ async def exit_live_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ])
     )
 
+async def clear_live_chat_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    try:
+        await query.message.edit_reply_markup(reply_markup=None)
+    except Exception as e:
+        print(f"❌ Failed to clear buttons: {e}")
+
 
 # Filter wrapper
 async def route_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -497,6 +506,7 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_live_chat_entry, pattern="^live_chat$"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, route_text_message))
     app.add_handler(CallbackQueryHandler(exit_live_chat, pattern="^live_chat_exit$"))
+    app.add_handler(CallbackQueryHandler(clear_live_chat_buttons, pattern="^live_chat_continue$"))
 
 
 
