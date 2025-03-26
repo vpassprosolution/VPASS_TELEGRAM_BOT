@@ -107,7 +107,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     [InlineKeyboardButton(get("btn_news_war_room"), callback_data="news_war_room")],
     [
         InlineKeyboardButton(get("btn_news"), callback_data="news_today"),
-        InlineKeyboardButton("🌐 MEDIA", callback_data="social_media"),
+        InlineKeyboardButton("📱 MEDIA", callback_data="social_media"),
         InlineKeyboardButton("⚙️ SETUP", callback_data="setup_menu")
     ]
 ]

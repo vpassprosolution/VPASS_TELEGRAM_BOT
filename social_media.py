@@ -22,7 +22,7 @@ async def social_media(update: Update, context: CallbackContext):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.callback_query.message.edit_text(
-        "🌐 <b>Join our social media platforms!</b>",
+        "🌐 <b>Stay connected with us! Join our social media platforms to stay updated on the latest news, exciting updates, and exclusive content. Follow us, engage with our posts, and be part of our growing community. We can’t wait to connect with you</b>",
         reply_markup=reply_markup,
         parse_mode='HTML'
     )
