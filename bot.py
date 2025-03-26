@@ -58,11 +58,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if user:
             username = user[0]
             try:
-                welcome_gif = "VP2.gif"  # ✅ Use your GIF here
-                with open(welcome_gif, "rb") as gif:
-                    await update.message.reply_animation(animation=gif)
+                welcome_video = "VP2.mp4"  # ✅ Use your video
+                with open(welcome_video, "rb") as video:
+                    await update.message.reply_video(video=video)
             except Exception as e:
-                print(f"❌ Failed to send welcome GIF: {e}")
+                print(f"❌ Failed to send welcome video: {e}")
 
             keyboard = [[InlineKeyboardButton("Go to Main Menu", callback_data="main_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -72,12 +72,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
 
+    # ✅ If new user (not found in DB)
     try:
-        welcome_gif = "VP2.gif"  # ✅ Same GIF for new users
-        with open(welcome_gif, "rb") as gif:
-            await update.message.reply_animation(animation=gif)
+        welcome_video = "VP2.mp4"  # ✅ Same video for new users
+        with open(welcome_video, "rb") as video:
+            await update.message.reply_video(video=video)
     except Exception as e:
-        print(f"❌ Failed to send welcome GIF: {e}")
+        print(f"❌ Failed to send welcome video: {e}")
 
     keyboard = [[InlineKeyboardButton("COMPLETE YOUR REGISTRATION", callback_data="register")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
