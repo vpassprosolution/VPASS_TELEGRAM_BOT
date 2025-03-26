@@ -29,8 +29,11 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(API_URL, json={"question": user_msg})
+            raw = response.text
+            print("✅ RAW API RESPONSE:", raw)
+
             data = response.json()
-            answer = data.get("answer", "🤖 Sorry, something went wrong.")
+            answer = data.get("answer") or "🤖 No answer found."
     except Exception as e:
         print(f"❌ Live chat API error: {e}")
         answer = "❌ Failed to get a reply from VESSA Live Chat."
