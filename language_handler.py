@@ -65,9 +65,9 @@ async def set_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Translations Dictionary
 translations = {
     "main_menu_title": {
-        "en": "          *CHOOSE YOUR STRATEGY*",
-        "ms": "          *PILIH STRATEGI ANDA*",
-        "id": "          *PILIH STRATEGI ANDA*",
+        "en": " ▌      *CHOOSE YOUR STRATEGY*      ▌",
+        "ms": " ▌      *PILIH STRATEGI ANDA*      ▌", 
+        "id": " ▌      *PILIH STRATEGI ANDA*      ▌",
         "th": "ยินดีต้อนรับสู่ VESSA PRO V2\n   อนาคตแห่งความฉลาดเริ่มต้นที่นี่\n          เลือกกลยุทธ์ของคุณ",
         "zh": "欢迎使用 VESSA PRO V2\n   智能的未来从这里开始\n          选择你的策略",
         "hi": "VESSA PRO संस्करण V2 में आपका स्वागत है\n   बुद्धिमत्ता का भविष्य यहाँ से शुरू होता है\n          अपनी रणनीति चुनें"
