@@ -135,10 +135,11 @@ async def setup_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     await query.message.edit_text(
-        "⚙️ <b>SETUP MENU</b>\n\nChoose an option below:",
-        parse_mode="HTML",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    "⚙️CHOOSE YOUR SETUP MENU⚙️",
+    parse_mode="HTML",
+    reply_markup=InlineKeyboardMarkup(keyboard)
+)
+
 
 
 async def coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
