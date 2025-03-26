@@ -1,26 +1,20 @@
 import httpx
 import asyncio
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Update
 from telegram.ext import ContextTypes
 
-# Store live chat users
 active_live_chat_users = set()
-
-# Your deployed API endpoint
 API_URL = "https://vessalivechat-production.up.railway.app/ask"
 
 async def handle_live_chat_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
     await query.answer()
-
     active_live_chat_users.add(user_id)
 
     await query.message.edit_text(
-        "🤖 You are now connected to VESSA Live Chat.\n\nAsk me anything below 👇",
-        reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("❌ Exit", callback_data="live_chat_exit")]
-        ])
+        "🤖 You are now connected to VESSA Live Chat.\n\nAsk me anything below 👇\n\n"
+        "❌ All chats auto-delete after 10 seconds."
     )
 
 async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -35,27 +29,25 @@ async def handle_user_message(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     print(f"🔥 USER IN LIVE CHAT: {user_id} - Message: {user_msg}")
 
-    # Fetch answer from API
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(API_URL, json={"question": user_msg})
-            try:
-                data = response.json()
-            except Exception:
-                data = {}
-            answer = data.get("answer") or "🤖 Sorry, I don't understand that yet."
+            data = response.json()
+            answer = data.get("answer", "🤖 Sorry, I don't understand.")
     except Exception as e:
         print(f"❌ Live chat API error: {e}")
         answer = "❌ Something went wrong. Please try again later."
 
-    # Send answer
-    try:
-        user_message = update.message
-        reply = await update.message.reply_text(answer)
+    # ✅ Send bot reply
+    reply = await update.message.reply_text(answer)
 
-        # Auto-delete user question and bot reply after 10 seconds
-        await asyncio.sleep(10)
-        await context.bot.delete_message(chat_id=user_message.chat_id, message_id=user_message.message_id)
-        await context.bot.delete_message(chat_id=reply.chat_id, message_id=reply.message_id)
-    except Exception as e:
-        print(f"❌ Failed to send or delete message: {e}")
+    # ✅ Schedule auto-delete both Q & A after 10s (non-blocking)
+    asyncio.create_task(delete_after_10s(context, update.message.chat_id, update.message.message_id))
+    asyncio.create_task(delete_after_10s(context, reply.chat_id, reply.message_id))
+
+async def delete_after_10s(context, chat_id, message_id):
+    await asyncio.sleep(10)
+    try:
+        await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+    except:
+        pass  # already deleted or expired
