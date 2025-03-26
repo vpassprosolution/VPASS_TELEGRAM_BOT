@@ -21,7 +21,7 @@ from utils import safe_replace_message
 from news_today_handler import handle_news_today
 from language_handler import get_text, show_language_menu, set_language
 from live_chat_handler import handle_live_chat_entry, handle_user_message
-
+from telegram.ext import MessageHandler, filters
 
 
 
@@ -402,6 +402,17 @@ async def check_membership_callback(update: Update, context: ContextTypes.DEFAUL
         await query.message.reply_text("❌ Registration process not found. Please restart by typing /start.")
 
 
+# Filter wrapper
+async def route_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.message.from_user.id
+
+    # Route to registration if in user_steps
+    if user_id in user_steps:
+        await collect_user_data(update, context)
+    else:
+        await handle_user_message(update, context)
+
+
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the 'START VPASS PRO NOW' button click"""
     query = update.callback_query
@@ -430,7 +441,6 @@ def main():
     app.add_handler(CallbackQueryHandler(add_user_prompt, pattern="admin_add_user"))
     app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
     app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_user_data))  
     app.add_handler(CallbackQueryHandler(ai_agent_signal, pattern="ai_agent_signal"))  # ✅ New AI button handler
     app.add_handler(CallbackQueryHandler(ai_signal_handler.fetch_ai_signal, pattern="^ai_signal_"))
     app.add_handler(CallbackQueryHandler(show_vip_room_message, pattern="news_war_room"))
@@ -461,7 +471,8 @@ def main():
     app.add_handler(CallbackQueryHandler(setup_menu, pattern="^setup_menu$"))
     app.add_handler(CallbackQueryHandler(coming_soon, pattern="^coming_soon$"))
     app.add_handler(CallbackQueryHandler(handle_live_chat_entry, pattern="^live_chat$"))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_user_message))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, route_text_message))
+
 
 
 
