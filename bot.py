@@ -58,11 +58,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if user:
             username = user[0]
             try:
-                welcome_image = "welcomeback.jpg"
-                with open(welcome_image, "rb") as photo:
-                    await update.message.reply_photo(photo=photo)
+                welcome_gif = "VP2.gif"  # ✅ Use your GIF here
+                with open(welcome_gif, "rb") as gif:
+                    await update.message.reply_animation(animation=gif)
             except Exception as e:
-                print(f"❌ Failed to send image: {e}")
+                print(f"❌ Failed to send welcome GIF: {e}")
 
             keyboard = [[InlineKeyboardButton("Go to Main Menu", callback_data="main_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -73,11 +73,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
     try:
-        welcome_image = "welcome.png"
-        with open(welcome_image, "rb") as photo:
-            await update.message.reply_photo(photo=photo)
+        welcome_gif = "VP2.gif"  # ✅ Same GIF for new users
+        with open(welcome_gif, "rb") as gif:
+            await update.message.reply_animation(animation=gif)
     except Exception as e:
-        print(f"❌ Failed to send image: {e}")
+        print(f"❌ Failed to send welcome GIF: {e}")
 
     keyboard = [[InlineKeyboardButton("COMPLETE YOUR REGISTRATION", callback_data="register")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
