@@ -98,18 +98,18 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     get = lambda key: get_text(user_id, key, context)
 
     keyboard = [
-        [InlineKeyboardButton(get("btn_signal"), callback_data="vpass_smart_signal")],
-        [InlineKeyboardButton(get("btn_sentiment"), callback_data="ai_sentiment")],
-        [InlineKeyboardButton(get("btn_technical"), callback_data="ai_technical")],
-        [InlineKeyboardButton(get("btn_instant"), callback_data="ai_agent_signal")],
-        [InlineKeyboardButton(get("btn_news_war_room"), callback_data="news_war_room")],
-        [
-            InlineKeyboardButton(get("btn_news"), callback_data="news_today"),
-            InlineKeyboardButton(get("btn_language"), callback_data="language_menu"),
-            InlineKeyboardButton("ChatGPT", url="https://chat.openai.com"),
-            InlineKeyboardButton("DeepSeek", url="https://www.deepseek.com")
-        ]
+    [InlineKeyboardButton(get("btn_signal"), callback_data="vpass_smart_signal")],
+    [InlineKeyboardButton(get("btn_sentiment"), callback_data="ai_sentiment")],
+    [InlineKeyboardButton(get("btn_technical"), callback_data="ai_technical")],
+    [InlineKeyboardButton(get("btn_instant"), callback_data="ai_agent_signal")],
+    [InlineKeyboardButton(get("btn_news_war_room"), callback_data="news_war_room")],
+    [
+        InlineKeyboardButton(get("btn_news"), callback_data="news_today"),
+        InlineKeyboardButton("📱 SocMed", url="https://t.me/vpasspro_bot"),
+        InlineKeyboardButton("⚙️ SETUP", callback_data="setup_menu")
     ]
+]
+
 
     await safe_replace_message(
         query,
@@ -118,7 +118,28 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
+async def setup_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
 
+    keyboard = [
+        [InlineKeyboardButton("🌐 Language", callback_data="language_menu")],
+        [InlineKeyboardButton("🎓 Tutorial", callback_data="coming_soon")],
+        [InlineKeyboardButton("💬 Live Chat", url="https://t.me/vpassprosupport")],
+        [InlineKeyboardButton("🛠️ Support", url="https://t.me/vpassprosupport")],
+        [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]
+    ]
+
+    await query.message.edit_text(
+        "⚙️ <b>SETUP MENU</b>\n\nChoose an option below:",
+        parse_mode="HTML",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+async def coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    await query.message.edit_text("🚧 This feature is coming soon!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back", callback_data="setup_menu")]]))
 
 
 
@@ -430,6 +451,8 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_news_today, pattern="^news_today$"))
     app.add_handler(CallbackQueryHandler(set_language, pattern="^set_lang_"))
     app.add_handler(CallbackQueryHandler(show_language_menu, pattern="^language_menu$"))
+    app.add_handler(CallbackQueryHandler(setup_menu, pattern="^setup_menu$"))
+    app.add_handler(CallbackQueryHandler(coming_soon, pattern="^coming_soon$"))
 
 
 
