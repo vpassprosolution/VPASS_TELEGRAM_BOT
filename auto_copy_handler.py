@@ -307,6 +307,8 @@ async def collect_risk_input(update: Update, context: ContextTypes.DEFAULT_TYPE)
         user_risk_steps[user_id]["message_id"] = msg.message_id
 
 
+import httpx
+
 async def confirm_mt5_login(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
@@ -321,10 +323,20 @@ async def confirm_mt5_login(update: Update, context: ContextTypes.DEFAULT_TYPE):
     login = data["login"]
     password = data["password"]
 
-    # 🧠 Here later you will send data to backend via API
+    # ✅ Send to backend
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post("http://127.0.0.1:8000/save_mt5", json={
+                "user_id": user_id,
+                "broker": broker,
+                "login": login,
+                "password": password
+            })
+        if response.status_code == 200:
+            await query.message.edit_text("✅ Your MT5 login details have been saved!")
+        else:
+            await query.message.edit_text("❌ Failed to save your data. Try again later.")
+    except Exception as e:
+        await query.message.edit_text(f"❌ API Error: {e}")
 
-    del user_mt5_steps[user_id]  # ✅ Clear temp storage
-
-    await query.message.edit_text(
-        "✅ Your MT5 login details have been recorded!\n\n(We will connect to MetaAPI after surface is done.)"
-    )
+    del user_mt5_steps[user_id]
