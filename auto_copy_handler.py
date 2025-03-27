@@ -148,7 +148,7 @@ async def confirm_risk_setting(update: Update, context: ContextTypes.DEFAULT_TYP
     # ✅ Send to backend
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post("https://vessa-mt5-backend.up.railway.app/save_risk", json={
+            response = await client.post("https://vessa-mt5-backend-production.up.railway.app/save_risk", json={
                 "user_id": user_id,
                 "method": method,
                 "value": value
@@ -336,10 +336,10 @@ async def confirm_mt5_login(update: Update, context: ContextTypes.DEFAULT_TYPE):
     login = data["login"]
     password = data["password"]
 
-    # ✅ Send to backend
+    # ✅ Send to backend properly
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post("https://vessa-mt5-backend.up.railway.app/save_mt5", json={
+            response = await client.post("https://vessa-mt5-backend-production.up.railway.app/save_mt5", json={
                 "user_id": user_id,
                 "broker": broker,
                 "login": login,
