@@ -33,8 +33,9 @@ from auto_copy_handler import (
     set_risk_percent,
     collect_risk_input,
     confirm_risk_setting,
+    handle_risk_value_selection  
 )
-from auto_copy_handler import user_mt5_steps, user_risk_steps
+
 
 
 
