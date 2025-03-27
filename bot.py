@@ -34,7 +34,7 @@ from auto_copy_handler import (
     collect_risk_input,
     confirm_risk_setting,
 )
-
+from auto_copy_handler import user_mt5_steps, user_risk_steps
 
 
 
@@ -537,7 +537,11 @@ def main():
     app.add_handler(CallbackQueryHandler(set_risk_percent, pattern="^risk_percent$"))
     app.add_handler(CallbackQueryHandler(confirm_risk_setting, pattern="^confirm_risk_setting$"))
    
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, route_text_message))  # ✅ This now routes all
+    app.add_handler(CallbackQueryHandler(handle_risk_value_selection, pattern="^fixed_val_"))
+    app.add_handler(CallbackQueryHandler(handle_risk_value_selection, pattern="^percent_val_"))
+    app.add_handler(CallbackQueryHandler(collect_risk_input, pattern="^fixed_val_custom$"))
+    app.add_handler(CallbackQueryHandler(collect_risk_input, pattern="^percent_val_custom$"))
+
 
 
 

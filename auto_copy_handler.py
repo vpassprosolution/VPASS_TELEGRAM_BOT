@@ -70,10 +70,29 @@ async def set_fixed_lot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     await query.message.delete()
 
-    user_risk_steps[user_id]["method"] = "fixed"
-    user_risk_steps[user_id]["step"] = "fixed_lot"
+    user_risk_steps[user_id] = {
+        "method": "fixed",
+        "step": "fixed_lot"
+    }
 
-    msg = await query.message.reply_text("✏️ Enter fixed lot size (e.g., 0.01):")
+    keyboard = [
+        [
+            InlineKeyboardButton("0.01", callback_data="fixed_val_0.01"),
+            InlineKeyboardButton("0.05", callback_data="fixed_val_0.05")
+        ],
+        [
+            InlineKeyboardButton("0.10", callback_data="fixed_val_0.10"),
+            InlineKeyboardButton("0.20", callback_data="fixed_val_0.20")
+        ],
+        [InlineKeyboardButton("✍️ Other (Type Manually)", callback_data="fixed_val_custom")],
+        [InlineKeyboardButton("⬅️ Back", callback_data="risk_setting")]
+    ]
+
+    msg = await query.message.reply_text(
+        "📏 Choose your *Fixed Lot Size*:",
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
     user_risk_steps[user_id]["message_id"] = msg.message_id
 
 
@@ -84,11 +103,31 @@ async def set_risk_percent(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     await query.message.delete()
 
-    user_risk_steps[user_id]["method"] = "percent"
-    user_risk_steps[user_id]["step"] = "risk_percent"
+    user_risk_steps[user_id] = {
+        "method": "percent",
+        "step": "risk_percent"
+    }
 
-    msg = await query.message.reply_text("✏️ Enter risk % of account (e.g., 2):")
+    keyboard = [
+        [
+            InlineKeyboardButton("1%", callback_data="percent_val_1"),
+            InlineKeyboardButton("2%", callback_data="percent_val_2")
+        ],
+        [
+            InlineKeyboardButton("3%", callback_data="percent_val_3"),
+            InlineKeyboardButton("5%", callback_data="percent_val_5")
+        ],
+        [InlineKeyboardButton("✍️ Other (Type Manually)", callback_data="percent_val_custom")],
+        [InlineKeyboardButton("⬅️ Back", callback_data="risk_setting")]
+    ]
+
+    msg = await query.message.reply_text(
+        "📊 Choose your *Risk % of Balance*:",
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
     user_risk_steps[user_id]["message_id"] = msg.message_id
+
 
 async def confirm_risk_setting(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -111,6 +150,36 @@ async def confirm_risk_setting(update: Update, context: ContextTypes.DEFAULT_TYP
         f"Method: {method}\nValue: {value}"
     )
 
+async def handle_risk_value_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    user_id = query.from_user.id
+    await query.answer()
+
+    if user_id not in user_risk_steps:
+        await query.message.edit_text("❌ Something went wrong. Please try again.")
+        return
+
+    if "fixed_val_" in query.data:
+        value = query.data.replace("fixed_val_", "")
+        user_risk_steps[user_id]["value"] = value
+        user_risk_steps[user_id]["method"] = "fixed"
+    elif "percent_val_" in query.data:
+        value = query.data.replace("percent_val_", "")
+        user_risk_steps[user_id]["value"] = value
+        user_risk_steps[user_id]["method"] = "percent"
+
+    keyboard = [
+        [InlineKeyboardButton("✅ Confirm", callback_data="confirm_risk_setting")],
+        [InlineKeyboardButton("🔁 Start Over", callback_data="risk_setting")]
+    ]
+
+    await query.message.edit_text(
+        f"⚙️ Risk Method: `{user_risk_steps[user_id]['method']}`\n"
+        f"📊 Value: `{value}`\n\n"
+        f"Confirm your setting?",
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
 
 
 
