@@ -24,10 +24,10 @@ from live_chat_handler import handle_live_chat_entry, handle_user_message, activ
 from social_media import social_media
 from auto_copy_handler import (
     auto_copy_menu,
-    upgrade_premium,
     subscribe_copy,
     unsubscribe_copy
 )
+
 
 
 
