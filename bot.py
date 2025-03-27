@@ -22,6 +22,19 @@ from news_today_handler import handle_news_today
 from language_handler import get_text, show_language_menu, set_language
 from live_chat_handler import handle_live_chat_entry, handle_user_message, active_live_chat_users
 from social_media import social_media
+from auto_copy_handler import (
+    auto_copy_menu,
+    link_mt5_account,
+    risk_setting,
+    upgrade_premium,
+    collect_mt5_info,
+    confirm_mt5_login,
+    set_fixed_lot,
+    set_risk_percent,
+    collect_risk_input,
+    confirm_risk_setting,
+)
+
 
 
 
@@ -105,7 +118,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     [InlineKeyboardButton(get("btn_sentiment"), callback_data="ai_sentiment")],
     [InlineKeyboardButton(get("btn_technical"), callback_data="ai_technical")],
     [InlineKeyboardButton(get("btn_instant"), callback_data="ai_agent_signal")],
-    [InlineKeyboardButton(get("btn_news_war_room"), callback_data="news_war_room")],
+    [InlineKeyboardButton("🚀 AUTO COPY TO MT5", callback_data="auto_copy")],
     [
         InlineKeyboardButton(get("btn_news"), callback_data="news_today"),
         InlineKeyboardButton("📱 MEDIA", callback_data="social_media"),
@@ -501,6 +514,17 @@ def main():
     app.add_handler(CallbackQueryHandler(exit_live_chat, pattern="^live_chat_exit$"))
     app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
     app.add_handler(CallbackQueryHandler(social_media, pattern="social_media"))
+    
+    app.add_handler(CallbackQueryHandler(auto_copy_menu, pattern="^auto_copy$"))
+    app.add_handler(CallbackQueryHandler(link_mt5_account, pattern="^link_mt5$"))
+    app.add_handler(CallbackQueryHandler(risk_setting, pattern="^risk_setting$"))
+    app.add_handler(CallbackQueryHandler(upgrade_premium, pattern="^upgrade_premium$"))
+    app.add_handler(CallbackQueryHandler(confirm_mt5_login, pattern="^confirm_mt5_login$"))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_mt5_info))
+    app.add_handler(CallbackQueryHandler(set_fixed_lot, pattern="^risk_fixed$"))
+    app.add_handler(CallbackQueryHandler(set_risk_percent, pattern="^risk_percent$"))
+    app.add_handler(CallbackQueryHandler(confirm_risk_setting, pattern="^confirm_risk_setting$"))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_risk_input))
 
 
 
