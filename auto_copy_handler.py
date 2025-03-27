@@ -2,7 +2,10 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 from utils import safe_replace_message  # make sure this exists in your project
 
+# ===== In-memory storage =====
 user_mt5_steps = {}
+user_risk_steps = {}  # ✅ Add this line to fix the error
+
 
 
 

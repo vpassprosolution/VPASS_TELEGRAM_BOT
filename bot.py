@@ -442,14 +442,26 @@ async def exit_live_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # Filter wrapper
+# Smart router for all user input
 async def route_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
 
-    # Route to registration if in user_steps
+    # 💡 If user is doing registration
     if user_id in user_steps:
         await collect_user_data(update, context)
+
+    # 💡 If user is setting up MT5
+    elif user_id in user_mt5_steps:
+        await collect_mt5_info(update, context)
+
+    # 💡 If user is setting up risk
+    elif user_id in user_risk_steps:
+        await collect_risk_input(update, context)
+
+    # 💬 All other normal chat
     else:
         await handle_user_message(update, context)
+
 
 
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -520,11 +532,12 @@ def main():
     app.add_handler(CallbackQueryHandler(risk_setting, pattern="^risk_setting$"))
     app.add_handler(CallbackQueryHandler(upgrade_premium, pattern="^upgrade_premium$"))
     app.add_handler(CallbackQueryHandler(confirm_mt5_login, pattern="^confirm_mt5_login$"))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_mt5_info))
+    
     app.add_handler(CallbackQueryHandler(set_fixed_lot, pattern="^risk_fixed$"))
     app.add_handler(CallbackQueryHandler(set_risk_percent, pattern="^risk_percent$"))
     app.add_handler(CallbackQueryHandler(confirm_risk_setting, pattern="^confirm_risk_setting$"))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, collect_risk_input))
+   
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, route_text_message))  # ✅ This now routes all
 
 
 
