@@ -145,7 +145,6 @@ async def confirm_risk_setting(update: Update, context: ContextTypes.DEFAULT_TYP
     method = user_risk_steps[user_id]["method"]
     value = user_risk_steps[user_id]["value"]
 
-    # ✅ Send to backend
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post("https://vessa-mt5-backend-production.up.railway.app/save_risk", json={
@@ -154,7 +153,11 @@ async def confirm_risk_setting(update: Update, context: ContextTypes.DEFAULT_TYP
                 "value": value
             })
         if response.status_code == 200:
-            await query.message.edit_text(f"✅ Your risk preference has been saved:\n\nMethod: {method}\nValue: {value}")
+            keyboard = [[InlineKeyboardButton("⬅️ Back to Auto Copy Menu", callback_data="auto_copy")]]
+            await query.message.edit_text(
+                f"✅ Your risk preference has been saved:\n\nMethod: {method}\nValue: {value}",
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
         else:
             await query.message.edit_text("❌ Failed to save risk preference.")
     except Exception as e:
@@ -336,7 +339,6 @@ async def confirm_mt5_login(update: Update, context: ContextTypes.DEFAULT_TYPE):
     login = data["login"]
     password = data["password"]
 
-    # ✅ Send to backend properly
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post("https://vessa-mt5-backend-production.up.railway.app/save_mt5", json={
@@ -346,7 +348,11 @@ async def confirm_mt5_login(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "password": password
             })
         if response.status_code == 200:
-            await query.message.edit_text("✅ Your MT5 login details have been saved!")
+            keyboard = [[InlineKeyboardButton("⬅️ Back to Auto Copy Menu", callback_data="auto_copy")]]
+            await query.message.edit_text(
+                "✅ Your MT5 login details have been saved!",
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
         else:
             await query.message.edit_text("❌ Failed to save your data. Try again later.")
     except Exception as e:
