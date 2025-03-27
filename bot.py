@@ -24,20 +24,10 @@ from live_chat_handler import handle_live_chat_entry, handle_user_message, activ
 from social_media import social_media
 from auto_copy_handler import (
     auto_copy_menu,
-    link_mt5_account,
-    risk_setting,
     upgrade_premium,
-    collect_mt5_info,
-    confirm_mt5_login,
-    set_fixed_lot,
-    set_risk_percent,
-    collect_risk_input,
-    confirm_risk_setting,
-    handle_risk_value_selection,   # ✅ this too
-    user_mt5_steps,                # ✅ import this
-    user_risk_steps                # ✅ and this
+    subscribe_copy,
+    unsubscribe_copy
 )
-
 
 
 
@@ -530,21 +520,10 @@ def main():
     app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
     app.add_handler(CallbackQueryHandler(social_media, pattern="social_media"))
     
-    app.add_handler(CallbackQueryHandler(auto_copy_menu, pattern="^auto_copy$"))
-    app.add_handler(CallbackQueryHandler(link_mt5_account, pattern="^link_mt5$"))
-    app.add_handler(CallbackQueryHandler(risk_setting, pattern="^risk_setting$"))
-    app.add_handler(CallbackQueryHandler(upgrade_premium, pattern="^upgrade_premium$"))
-    app.add_handler(CallbackQueryHandler(confirm_mt5_login, pattern="^confirm_mt5_login$"))
-    
-    app.add_handler(CallbackQueryHandler(set_fixed_lot, pattern="^risk_fixed$"))
-    app.add_handler(CallbackQueryHandler(set_risk_percent, pattern="^risk_percent$"))
-    app.add_handler(CallbackQueryHandler(confirm_risk_setting, pattern="^confirm_risk_setting$"))
-   
-    app.add_handler(CallbackQueryHandler(handle_risk_value_selection, pattern="^fixed_val_"))
-    app.add_handler(CallbackQueryHandler(handle_risk_value_selection, pattern="^percent_val_"))
-    app.add_handler(CallbackQueryHandler(collect_risk_input, pattern="^fixed_val_custom$"))
-    app.add_handler(CallbackQueryHandler(collect_risk_input, pattern="^percent_val_custom$"))
 
+    app.add_handler(CallbackQueryHandler(auto_copy_menu, pattern="^auto_copy$"))
+    app.add_handler(CallbackQueryHandler(subscribe_copy, pattern="^subscribe_copy$"))
+    app.add_handler(CallbackQueryHandler(unsubscribe_copy, pattern="^unsubscribe_copy$"))
 
 
 
