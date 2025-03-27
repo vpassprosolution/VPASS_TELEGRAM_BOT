@@ -1,6 +1,8 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 from utils import safe_replace_message  # make sure this exists in your project
+import httpx
+
 
 # ===== In-memory storage =====
 user_mt5_steps = {}
@@ -129,6 +131,8 @@ async def set_risk_percent(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_risk_steps[user_id]["message_id"] = msg.message_id
 
 
+
+
 async def confirm_risk_setting(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
@@ -141,14 +145,23 @@ async def confirm_risk_setting(update: Update, context: ContextTypes.DEFAULT_TYP
     method = user_risk_steps[user_id]["method"]
     value = user_risk_steps[user_id]["value"]
 
-    # 🔒 Later, send this to backend API
+    # ✅ Send to backend
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post("https://vessa-mt5-backend.up.railway.app/save_risk", json={
+                "user_id": user_id,
+                "method": method,
+                "value": value
+            })
+        if response.status_code == 200:
+            await query.message.edit_text(f"✅ Your risk preference has been saved:\n\nMethod: {method}\nValue: {value}")
+        else:
+            await query.message.edit_text("❌ Failed to save risk preference.")
+    except Exception as e:
+        await query.message.edit_text(f"❌ API Error: {e}")
 
     del user_risk_steps[user_id]
 
-    await query.message.edit_text(
-        f"✅ Your risk preference has been saved:\n\n"
-        f"Method: {method}\nValue: {value}"
-    )
 
 async def handle_risk_value_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -307,7 +320,7 @@ async def collect_risk_input(update: Update, context: ContextTypes.DEFAULT_TYPE)
         user_risk_steps[user_id]["message_id"] = msg.message_id
 
 
-import httpx
+
 
 async def confirm_mt5_login(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -326,7 +339,7 @@ async def confirm_mt5_login(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ✅ Send to backend
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post("http://127.0.0.1:8000/save_mt5", json={
+            response = await client.post("https://vessa-mt5-backend.up.railway.app/save_mt5", json={
                 "user_id": user_id,
                 "broker": broker,
                 "login": login,
