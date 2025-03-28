@@ -39,6 +39,12 @@ BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
 # Step tracking for user registration
 user_steps = {}
 
+# ✅ Step tracking for MT5 Auto Copy
+user_mt5_steps = {}
+user_risk_steps = {}
+
+
+
 async def reset_cooldown(context):
     await asyncio.sleep(1.5)
     context.user_data["cooldown"] = False
@@ -402,26 +408,19 @@ async def exit_live_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-# Filter wrapper
-# Smart router for all user input
 async def route_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
 
-    # 💡 If user is doing registration
     if user_id in user_steps:
         await collect_user_data(update, context)
 
-    # 💡 If user is setting up MT5
-    elif user_id in user_mt5_steps:
-        await collect_mt5_info(update, context)
-
-    # 💡 If user is setting up risk
-    elif user_id in user_risk_steps:
-        await collect_risk_input(update, context)
-
-    # 💬 All other normal chat
-    else:
+    elif user_id in active_live_chat_users:
         await handle_user_message(update, context)
+
+    else:
+        # Optional fallback (ignore unknown text)
+        pass
+
 
 
 
