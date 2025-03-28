@@ -21,6 +21,8 @@ def is_premium_user(user_id: int):
         return False
 
 # ✅ MT5 Auto Copy Menu
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+
 async def auto_copy_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -36,13 +38,10 @@ async def auto_copy_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # ❌ Don't inject user_id in URL — Telegram auto handles it
-    mini_app_url = "https://vpassprosolution.github.io/vessa-mt5-miniapp/"
-
     keyboard = [
         [InlineKeyboardButton(
             text="📝 Fill My MT5 Details",
-            web_app=WebAppInfo(url=mini_app_url)
+            web_app=WebAppInfo(url="https://t.me/VPASSBOT/mt5copy")  # ✅ USE SHORT NAME!
         )],
         [InlineKeyboardButton("✅ Subscribe Copy", callback_data="subscribe_copy")],
         [InlineKeyboardButton("❌ Unsubscribe Copy", callback_data="unsubscribe_copy")],
@@ -56,6 +55,7 @@ async def auto_copy_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode="Markdown"
     )
+
 
 # ✅ Subscribe user to MT5 Auto Copy
 async def subscribe_copy(update: Update, context: ContextTypes.DEFAULT_TYPE):
