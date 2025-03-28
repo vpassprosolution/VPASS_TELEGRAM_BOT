@@ -27,7 +27,7 @@ from auto_copy_handler import (
     subscribe_copy,
     unsubscribe_copy
 )
-
+from subscription_handler import show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
 
 
 
@@ -455,21 +455,21 @@ def main():
     app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
     app.add_handler(CallbackQueryHandler(ai_agent_signal, pattern="ai_agent_signal"))  # ✅ New AI button handler
     app.add_handler(CallbackQueryHandler(ai_signal_handler.fetch_ai_signal, pattern="^ai_signal_"))
-    app.add_handler(CallbackQueryHandler(show_vip_room_message, pattern="news_war_room"))
-    app.add_handler(CallbackQueryHandler(delete_vip_message, pattern="delete_vip_message"))
+    
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="confirm_phone"))
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="reenter_phone"))
     app.add_handler(CallbackQueryHandler(confirm_email, pattern="confirm_email"))
     app.add_handler(CallbackQueryHandler(confirm_email, pattern="reenter_email"))
     app.add_handler(CallbackQueryHandler(check_membership_callback, pattern="check_membership"))  # ✅ Membership Verification
 
-    # Connect "VPASS SMART SIGNAL" button to subscription system
-    from subscription_handler import show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
+  
+    
 
     app.add_handler(CallbackQueryHandler(show_instruments, pattern="vpass_smart_signal"))
     app.add_handler(CallbackQueryHandler(show_subscription_menu, pattern="^select_"))
     app.add_handler(CallbackQueryHandler(subscribe, pattern="^subscribe_"))
     app.add_handler(CallbackQueryHandler(unsubscribe, pattern="^unsubscribe_"))
+    
     app.add_handler(CallbackQueryHandler(back_to_main, pattern="back_to_main"))
     app.add_handler(CallbackQueryHandler(back_to_instruments, pattern="back_to_instruments"))
     app.add_handler(CallbackQueryHandler(show_categories, pattern="^ai_technical$"))  # Entry button
@@ -478,13 +478,16 @@ def main():
     app.add_handler(CallbackQueryHandler(fetch_chart, pattern="^tech2_chart_"))
     app.add_handler(CallbackQueryHandler(show_categories, pattern="^tech2_back_categories$"))
     app.add_handler(CallbackQueryHandler(handle_news_today, pattern="^news_today$"))
+    
     app.add_handler(CallbackQueryHandler(set_language, pattern="^set_lang_"))
     app.add_handler(CallbackQueryHandler(show_language_menu, pattern="^language_menu$"))
     app.add_handler(CallbackQueryHandler(setup_menu, pattern="^setup_menu$"))
     app.add_handler(CallbackQueryHandler(coming_soon, pattern="^coming_soon$"))
+    
     app.add_handler(CallbackQueryHandler(handle_live_chat_entry, pattern="^live_chat$"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, route_text_message))
     app.add_handler(CallbackQueryHandler(exit_live_chat, pattern="^live_chat_exit$"))
+    
     app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
     app.add_handler(CallbackQueryHandler(social_media, pattern="social_media"))
     
