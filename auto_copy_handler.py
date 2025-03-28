@@ -4,6 +4,7 @@ from utils import safe_replace_message
 import psycopg2
 import httpx
 
+# ✅ Database & Backend
 DATABASE_URL = "postgresql://postgres:vVMyqWjrqgVhEnwyFifTQxkDtPjQutGb@interchange.proxy.rlwy.net:30451/railway"
 BACKEND_URL = "https://vessa-mt5-backend-production.up.railway.app"
 
@@ -37,10 +38,13 @@ async def auto_copy_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
+    # ✅ Inject user_id into WebApp URL
+    mini_app_url = f"https://vpassprosolution.github.io/vessa-mt5-miniapp/?user_id={user_id}"
+
     keyboard = [
         [InlineKeyboardButton(
             text="📝 Fill My MT5 Details",
-            web_app=WebAppInfo(url="https://vpassprosolution.github.io/vessa-mt5-miniapp/")
+            web_app=WebAppInfo(url=mini_app_url)
         )],
         [InlineKeyboardButton("✅ Subscribe Copy", callback_data="subscribe_copy")],
         [InlineKeyboardButton("❌ Unsubscribe Copy", callback_data="unsubscribe_copy")],
