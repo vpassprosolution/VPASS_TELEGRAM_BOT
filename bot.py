@@ -149,8 +149,6 @@ async def setup_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup=InlineKeyboardMarkup(keyboard)
 )
 
-
-
 async def coming_soon(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -165,36 +163,6 @@ async def ai_agent_signal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await ai_signal_handler.show_instruments(update, context)
 
 
-
-async def show_vip_room_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Shows VIP message with 'I UNDERSTAND' button"""
-    query = update.callback_query
-
-    # Create "I UNDERSTAND" button
-    keyboard = [[InlineKeyboardButton("I UNDERSTAND", callback_data="delete_vip_message")]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    # Send VIP message (so it can be deleted)
-    await query.message.reply_text(
-        "✨ *EXCLUSIVE VPASS PRO ACCESS* ✨\n"
-        "✨ *VIP MEMBERS ONLY* ✨\n\n"
-        "This space is reserved for our esteemed VIP subscribers.\n\n"
-        "For inquiries or to elevate your experience, kindly contact the administration.\n\n"
-        "We appreciate your understanding and look forward to welcoming you.",
-        parse_mode="Markdown",
-        reply_markup=reply_markup
-    )
-
-async def delete_vip_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Deletes the VIP message when 'I UNDERSTAND' button is clicked"""
-    query = update.callback_query
-    await query.answer()  # Acknowledge button press
-
-    # Delete the button and message itself
-    try:
-        await context.bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
-    except Exception:
-        pass  # Ignore errors if already deleted
 
 async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles user registration when they click the button"""
