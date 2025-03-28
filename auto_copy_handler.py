@@ -39,14 +39,15 @@ async def auto_copy_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     keyboard = [
-        [InlineKeyboardButton(
-            text="📝 Fill My MT5 Details",
-            web_app=WebAppInfo(url="https://t.me/VPASSBOT/mt5copy")  # ✅ USE SHORT NAME!
-        )],
-        [InlineKeyboardButton("✅ Subscribe Copy", callback_data="subscribe_copy")],
-        [InlineKeyboardButton("❌ Unsubscribe Copy", callback_data="unsubscribe_copy")],
-        [InlineKeyboardButton("⬅️ Back to Main Menu", callback_data="main_menu")]
-    ]
+     [InlineKeyboardButton(
+         text="📝 Fill My MT5 Details",
+         web_app=WebAppInfo(url="https://t.me/VPASSBOT/mt5copy")
+     )],
+     [InlineKeyboardButton("✅ Subscribe Copy", callback_data="subscribe_copy")],
+     [InlineKeyboardButton("❌ Unsubscribe Copy", callback_data="unsubscribe_copy")],
+     [InlineKeyboardButton("⬅️ Back to Main Menu", callback_data="main_menu")]
+ ]
+
 
     await safe_replace_message(
         query,
