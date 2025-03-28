@@ -21,8 +21,6 @@ def is_premium_user(user_id: int):
         return False
 
 # ✅ MT5 Auto Copy Menu
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
-
 async def auto_copy_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -38,16 +36,16 @@ async def auto_copy_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
+    # ✅ Updated WebApp URL
     keyboard = [
-     [InlineKeyboardButton(
-         text="📝 Fill My MT5 Details",
-         web_app=WebAppInfo(url="https://t.me/VPASSBOT/mt5copy")
-     )],
-     [InlineKeyboardButton("✅ Subscribe Copy", callback_data="subscribe_copy")],
-     [InlineKeyboardButton("❌ Unsubscribe Copy", callback_data="unsubscribe_copy")],
-     [InlineKeyboardButton("⬅️ Back to Main Menu", callback_data="main_menu")]
- ]
-
+        [InlineKeyboardButton(
+    text="📝 Fill My MT5 Details",
+    web_app=WebAppInfo(url="https://vpassprosolution.github.io/vessa-mt5-miniapp/")
+        )],
+        [InlineKeyboardButton("✅ Subscribe Copy", callback_data="subscribe_copy")],
+        [InlineKeyboardButton("❌ Unsubscribe Copy", callback_data="unsubscribe_copy")],
+        [InlineKeyboardButton("⬅️ Back to Main Menu", callback_data="main_menu")]
+    ]
 
     await safe_replace_message(
         query,
@@ -56,7 +54,6 @@ async def auto_copy_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode="Markdown"
     )
-
 
 # ✅ Subscribe user to MT5 Auto Copy
 async def subscribe_copy(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -76,8 +73,8 @@ async def subscribe_copy(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await query.edit_message_text("❌ Failed to subscribe. Please try again.")
     except Exception as e:
-        await query.edit_message_text(f"❌ Error: {e}")
-
+        print(f"Error: {e}")  # Log error for debugging
+        await query.edit_message_text("❌ An unexpected error occurred. Please try again later.")
 
 # ✅ Unsubscribe user from MT5 Auto Copy
 async def unsubscribe_copy(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -97,4 +94,5 @@ async def unsubscribe_copy(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await query.edit_message_text("⚠️ Failed to unsubscribe. Please try again.")
     except Exception as e:
-        await query.edit_message_text(f"❌ Error: {e}")
+        print(f"Error: {e}")  # Log error for debugging
+        await query.edit_message_text("❌ An unexpected error occurred. Please try again later.")
