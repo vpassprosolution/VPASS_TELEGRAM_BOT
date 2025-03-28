@@ -1,4 +1,4 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, WebAppInfo
 from telegram.ext import ContextTypes
 from utils import safe_replace_message
 import psycopg2
@@ -30,12 +30,18 @@ async def auto_copy_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_premium_user(user_id):
         await query.edit_message_text(
             "💎 This feature is only for *Premium Members*.\n\nPlease upgrade your account to access MT5 Auto Copy.",
-            parse_mode="Markdown"
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("⬅️ Back to Main Menu", callback_data="main_menu")]
+            ])
         )
         return
 
     keyboard = [
-        [InlineKeyboardButton("📝 Fill My MT5 Details", url="https://vpassprosolution.github.io/vessa-mt5-miniapp/")],
+        [InlineKeyboardButton(
+            text="📝 Fill My MT5 Details",
+            web_app=WebAppInfo(url="https://vpassprosolution.github.io/vessa-mt5-miniapp/")
+        )],
         [InlineKeyboardButton("✅ Subscribe Copy", callback_data="subscribe_copy")],
         [InlineKeyboardButton("❌ Unsubscribe Copy", callback_data="unsubscribe_copy")],
         [InlineKeyboardButton("⬅️ Back to Main Menu", callback_data="main_menu")]
