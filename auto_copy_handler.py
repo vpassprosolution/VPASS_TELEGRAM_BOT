@@ -4,11 +4,9 @@ from utils import safe_replace_message
 import psycopg2
 import httpx
 
-# ✅ Database & Backend
 DATABASE_URL = "postgresql://postgres:vVMyqWjrqgVhEnwyFifTQxkDtPjQutGb@interchange.proxy.rlwy.net:30451/railway"
 BACKEND_URL = "https://vessa-mt5-backend-production.up.railway.app"
 
-# ✅ Check if user is premium
 def is_premium_user(user_id: int):
     try:
         conn = psycopg2.connect(DATABASE_URL)
@@ -22,7 +20,7 @@ def is_premium_user(user_id: int):
         print("❌ Error checking premium:", e)
         return False
 
-# ✅ Auto Copy Menu
+# ✅ MT5 Auto Copy Menu
 async def auto_copy_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -38,8 +36,8 @@ async def auto_copy_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # ✅ Inject user_id into WebApp URL
-    mini_app_url = f"https://vpassprosolution.github.io/vessa-mt5-miniapp/?user_id={user_id}"
+    # ❌ Don't inject user_id in URL — Telegram auto handles it
+    mini_app_url = "https://vpassprosolution.github.io/vessa-mt5-miniapp/"
 
     keyboard = [
         [InlineKeyboardButton(
@@ -78,6 +76,7 @@ async def subscribe_copy(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text("❌ Failed to subscribe. Please try again.")
     except Exception as e:
         await query.edit_message_text(f"❌ Error: {e}")
+
 
 # ✅ Unsubscribe user from MT5 Auto Copy
 async def unsubscribe_copy(update: Update, context: ContextTypes.DEFAULT_TYPE):
