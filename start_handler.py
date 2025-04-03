@@ -39,7 +39,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             keyboard = [[InlineKeyboardButton("Go to Main Menu", callback_data="main_menu")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await update.message.reply_text(
-                f"🌑 Welcome back to world of AI {username} 🌑",
+                f"Welcome back to world of AI {username}",
                 reply_markup=reply_markup
             )
             return
