@@ -2,6 +2,7 @@ import httpx
 import asyncio
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
+from user_state import user_steps
 
 # ✅ Set to track live chat users
 active_live_chat_users = set()
