@@ -3,7 +3,7 @@ import asyncio
 import ai_signal_handler
 from channel_verification import check_membership
 from telegram.ext import JobQueue
-from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_prompt, handle_admin_input
+
 from db import connect_db
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
@@ -91,14 +91,6 @@ def main():
     app.add_handler(CallbackQueryHandler(unsubscribe, pattern="^unsubscribe_"))
     app.add_handler(CallbackQueryHandler(back_to_main, pattern="^back_to_main$"))
     app.add_handler(CallbackQueryHandler(back_to_instruments, pattern="^back_to_instruments$"))
-
-
-    
-
-    app.add_handler(CommandHandler("admin", admin_panel))
-    app.add_handler(CallbackQueryHandler(add_user_prompt, pattern="admin_add_user"))
-    app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
-    app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
    
     
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="confirm_phone"))
