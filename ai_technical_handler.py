@@ -105,7 +105,6 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     _, category, symbol = query.data.split("_", 2)
 
-    # ✅ Load translated labels from your dict
     lang = context.user_data.get("user_lang", "en")
     labels = get_text(user_id, "timeframe_labels", context)
 
@@ -132,7 +131,6 @@ async def show_timeframes(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode="Markdown"
         )
-
 
 async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -162,42 +160,57 @@ async def fetch_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
             full_symbol = f"OANDA:{symbol}"
 
         payload = {"symbol": full_symbol, "interval": tf}
-        async with httpx.AsyncClient(timeout=60) as client:
-            response = await client.post(API_URL, json=payload)
-            if response.status_code == 200:
-                data = response.json()
-                if "image_base64" in data and "caption" in data:
+
+        # ✅ SAFE NETWORK CALL
+        try:
+            async with httpx.AsyncClient(timeout=60) as client:
+                response = await client.post(API_URL, json=payload)
+        except httpx.RemoteProtocolError as e:
+            print(f"❌ RemoteProtocolError: {e}")
+            await query.message.reply_text("⚠️ Server disconnected. Please try again in a moment.")
+            return
+        except httpx.HTTPError as e:
+            print(f"❌ HTTPError: {e}")
+            await query.message.reply_text("⚠️ Network error occurred. Please try again later.")
+            return
+
+        if response.status_code == 200:
+            data = response.json()
+            if "image_base64" in data and "caption" in data:
+                # ✅ SAFE DELETE FIX
+                try:
                     await context.bot.delete_message(
                         chat_id=query.message.chat.id,
                         message_id=loading_message.message_id
                     )
+                except Exception as e:
+                    print(f"❌ Exception: Message can't be deleted for everyone – {e}")
 
-                    image_data = base64.b64decode(data["image_base64"])
-                    image_stream = BytesIO(image_data)
-                    image_stream.name = "chart.png"
-                    image_stream.seek(0)
+                image_data = base64.b64decode(data["image_base64"])
+                image_stream = BytesIO(image_data)
+                image_stream.name = "chart.png"
+                image_stream.seek(0)
 
-                    # ✅ TRANSLATION
-                    user_id = query.from_user.id
-                    get = lambda key: get_text(user_id, key, context)
+                user_id = query.from_user.id
+                get = lambda key: get_text(user_id, key, context)
 
-                    footer_buttons = InlineKeyboardMarkup([
-                        [
-                            InlineKeyboardButton(get("chart_back_timeframe"), callback_data=f"tech2_symbol_{category}_{symbol}"),
-                            InlineKeyboardButton(get("chart_back_menu"), callback_data="main_menu")
-                        ]
-                    ])
+                footer_buttons = InlineKeyboardMarkup([
+                    [
+                        InlineKeyboardButton(get("chart_back_timeframe"), callback_data=f"tech2_symbol_{category}_{symbol}"),
+                        InlineKeyboardButton(get("chart_back_menu"), callback_data="main_menu")
+                    ]
+                ])
 
-                    await context.bot.send_photo(
-                        chat_id=query.message.chat.id,
-                        photo=image_stream,
-                        caption=data["caption"],
-                        reply_markup=footer_buttons
-                    )
-                else:
-                    await query.message.reply_text("⚠️ Incomplete chart data. Please try again.")
+                await context.bot.send_photo(
+                    chat_id=query.message.chat.id,
+                    photo=image_stream,
+                    caption=data["caption"],
+                    reply_markup=footer_buttons
+                )
             else:
-                await query.message.reply_text("⚠️ Chart fetch failed. Try again.")
+                await query.message.reply_text("⚠️ Incomplete chart data. Please try again.")
+        else:
+            await query.message.reply_text("⚠️ Chart fetch failed. Try again.")
     except Exception as e:
         print(f"❌ Exception: {e}")
         await query.message.reply_text("❌ Server error. Please try again.")
