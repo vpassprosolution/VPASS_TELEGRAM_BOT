@@ -16,7 +16,14 @@ from ai_technical_handler import (
 from utils import safe_replace_message
 from news_today_handler import handle_news_today
 from language_handler import get_text, show_language_menu, set_language
-from live_chat_handler import handle_live_chat_entry, handle_user_message, active_live_chat_users, route_text_message
+from live_chat_handler import (
+    handle_live_chat_entry,
+    handle_user_message,
+    active_live_chat_users,
+    route_text_message,
+    exit_live_chat  # ✅ Add this
+)
+
 from social_media import social_media
 from auto_copy_handler import (
     auto_copy_menu,
