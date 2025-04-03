@@ -15,7 +15,7 @@ from ai_technical_handler import (
 )
 
 from utils import safe_replace_message
-from news_today_handler import handle_news_today
+
 from language_handler import get_text, show_language_menu, set_language
 from live_chat_handler import (
     handle_live_chat_entry,
@@ -105,7 +105,7 @@ def main():
     app.add_handler(CallbackQueryHandler(show_timeframes, pattern="^tech2_symbol_"))
     app.add_handler(CallbackQueryHandler(fetch_chart, pattern="^tech2_chart_"))
     app.add_handler(CallbackQueryHandler(show_categories, pattern="^tech2_back_categories$"))
-    app.add_handler(CallbackQueryHandler(handle_news_today, pattern="^news_today$"))
+   
     
     app.add_handler(CallbackQueryHandler(set_language, pattern="^set_lang_"))
     app.add_handler(CallbackQueryHandler(show_language_menu, pattern="^language_menu$"))

@@ -24,7 +24,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton(get("btn_instant"), callback_data="ai_agent_signal")],
         [InlineKeyboardButton("\ud83d\ude80 AUTO COPY TO MT5", callback_data="auto_copy")],
         [
-            InlineKeyboardButton(get("btn_news"), callback_data="news_today"),
+            InlineKeyboardButton(get("btn_news"), url="https://vpassprosolution.github.io/vessa_news_miniapp/"),
             InlineKeyboardButton("\ud83d\udcf1 MEDIA", callback_data="social_media"),
             InlineKeyboardButton("\u2699\ufe0f SETUP", callback_data="setup_menu")
         ]
