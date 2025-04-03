@@ -3,9 +3,15 @@ import asyncio
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
 from user_state import user_steps
+from registration_handler import collect_user_data  # ✅ Add this clearly
+
+
+
 
 # ✅ Set to track live chat users
 active_live_chat_users = set()
+
+
 
 # ✅ Your FastAPI endpoint
 API_URL = "https://vessalivechat-production.up.railway.app/ask"
