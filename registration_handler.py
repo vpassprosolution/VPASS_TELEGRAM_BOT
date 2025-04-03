@@ -4,8 +4,8 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from db import connect_db
 from channel_verification import check_membership
+from user_state import user_steps
 
-user_steps = {}
 
 async def register_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles user registration when they click the button"""
@@ -141,7 +141,7 @@ async def confirm_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def check_membership_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the '✅ I Have Joined' button by checking if the user joined the Telegram channel."""
     from channel_verification import check_membership  # ✅ Import function inside to prevent circular import
-    global user_steps
+    
 
     query = update.callback_query
     await query.answer()  # ✅ Acknowledge button press (prevents UI bugs)
