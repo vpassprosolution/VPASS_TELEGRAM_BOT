@@ -6,6 +6,7 @@ from telegram.ext import JobQueue
 from admin import admin_panel, add_user_prompt, delete_user_prompt, check_user_prompt, handle_admin_input
 from db import connect_db
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
+
 from ai_technical_handler import (
     show_categories,
     show_technical_instruments,
@@ -30,7 +31,11 @@ from auto_copy_handler import (
     subscribe_copy,
     unsubscribe_copy
 )
-from subscription_handler import show_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
+
+from ai_sentiment import show_instruments as show_sentiment_instruments, handle_instrument_selection
+
+from subscription_handler import show_instruments as show_smart_signal_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
+
 from menu import main_menu
 from setup_handler import setup_menu, coming_soon
 from registration_handler import (
@@ -70,15 +75,31 @@ def main():
     app.add_handler(CallbackQueryHandler(register_user, pattern="register"))
     app.add_handler(CallbackQueryHandler(start_vpass_pro, pattern="start_vpass_pro"))  # ✅ FIXED
     app.add_handler(CallbackQueryHandler(main_menu, pattern="main_menu"))
-    app.add_handler(CallbackQueryHandler(show_instruments, pattern="ai_sentiment"))  
-    app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="sentiment_"))  
+    
+    app.add_handler(CallbackQueryHandler(ai_signal_handler.show_instruments, pattern="^ai_agent_signal$"))
+    app.add_handler(CallbackQueryHandler(ai_signal_handler.fetch_ai_signal, pattern="^ai_signal_"))
+
+
+ 
+    app.add_handler(CallbackQueryHandler(show_sentiment_instruments, pattern="^ai_sentiment$"))
+    app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="^sentiment_"))
+
+
+    app.add_handler(CallbackQueryHandler(show_smart_signal_instruments, pattern="^vpass_smart_signal$"))
+    app.add_handler(CallbackQueryHandler(show_subscription_menu, pattern="^select_"))
+    app.add_handler(CallbackQueryHandler(subscribe, pattern="^subscribe_"))
+    app.add_handler(CallbackQueryHandler(unsubscribe, pattern="^unsubscribe_"))
+    app.add_handler(CallbackQueryHandler(back_to_main, pattern="^back_to_main$"))
+    app.add_handler(CallbackQueryHandler(back_to_instruments, pattern="^back_to_instruments$"))
+
+
+    
+
     app.add_handler(CommandHandler("admin", admin_panel))
     app.add_handler(CallbackQueryHandler(add_user_prompt, pattern="admin_add_user"))
     app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
     app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
    
-    app.add_handler(CallbackQueryHandler(ai_signal_handler.show_instruments, pattern="^ai_agent_signal$"))
-    app.add_handler(CallbackQueryHandler(ai_signal_handler.fetch_ai_signal, pattern="^ai_signal_"))
     
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="confirm_phone"))
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="reenter_phone"))
@@ -87,15 +108,6 @@ def main():
     app.add_handler(CallbackQueryHandler(check_membership_callback, pattern="check_membership"))  # ✅ Membership Verification
 
   
-    
-
-    app.add_handler(CallbackQueryHandler(show_instruments, pattern="vpass_smart_signal"))
-    app.add_handler(CallbackQueryHandler(show_subscription_menu, pattern="^select_"))
-    app.add_handler(CallbackQueryHandler(subscribe, pattern="^subscribe_"))
-    app.add_handler(CallbackQueryHandler(unsubscribe, pattern="^unsubscribe_"))
-    
-    app.add_handler(CallbackQueryHandler(back_to_main, pattern="back_to_main"))
-    app.add_handler(CallbackQueryHandler(back_to_instruments, pattern="back_to_instruments"))
     app.add_handler(CallbackQueryHandler(show_categories, pattern="^ai_technical$"))  # Entry button
     app.add_handler(CallbackQueryHandler(show_technical_instruments, pattern="^tech2_cat_"))
     app.add_handler(CallbackQueryHandler(show_timeframes, pattern="^tech2_symbol_"))
