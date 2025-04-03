@@ -69,3 +69,41 @@ async def delete_after_10s(context, chat_id, message_id):
         await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
     except:
         pass  # Ignore if already deleted
+
+async def exit_live_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    user_id = query.from_user.id
+    await query.answer()
+
+    if user_id in active_live_chat_users:
+        active_live_chat_users.remove(user_id)
+
+    # Go back to setup
+    await query.message.edit_text(
+        "🔙 Returned to SETUP MENU.",
+        reply_markup=InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("🌐 Language", callback_data="language_menu"),
+                InlineKeyboardButton("🎓 Tutorial", callback_data="coming_soon")
+            ],
+            [
+                InlineKeyboardButton("💬 Live Chat", callback_data="live_chat"),
+                InlineKeyboardButton("🛠️ Support", url="https://t.me/vpassprosupport")
+            ],
+            [InlineKeyboardButton("🔙 Back", callback_data="main_menu")]
+        ])
+    )
+
+
+async def route_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.message.from_user.id
+
+    if user_id in user_steps:
+        await collect_user_data(update, context)
+
+    elif user_id in active_live_chat_users:
+        await handle_user_message(update, context)
+
+    else:
+        # Optional fallback (ignore unknown text)
+        pass
