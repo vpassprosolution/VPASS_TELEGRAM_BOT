@@ -4,9 +4,12 @@ from utils import safe_replace_message
 import psycopg2
 import httpx
 
+# ✅ Config
 DATABASE_URL = "postgresql://postgres:vVMyqWjrqgVhEnwyFifTQxkDtPjQutGb@interchange.proxy.rlwy.net:30451/railway"
 BACKEND_URL = "https://vessa-mt5-backend-production.up.railway.app"
+WEBAPP_URL = "https://vpassprosolution.github.io/vessa-mt5-miniapp/"
 
+# 🔐 Check Premium
 def is_premium_user(user_id: int):
     try:
         conn = psycopg2.connect(DATABASE_URL)
@@ -17,15 +20,17 @@ def is_premium_user(user_id: int):
         conn.close()
         return result and result[0] == True
     except Exception as e:
-        print("❌ Error checking premium:", e)
+        print("❌ Premium Check Error:", e)
         return False
 
-# ✅ MT5 Auto Copy Menu
+# 🚀 MT5 Auto Copy Menu
 async def auto_copy_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
     user_id = query.from_user.id
+
+    # 🔐 Restrict to Premium
     if not is_premium_user(user_id):
         await query.edit_message_text(
             "💎 This feature is only for *Premium Members*.\n\nPlease upgrade your account to access MT5 Auto Copy.",
@@ -36,12 +41,9 @@ async def auto_copy_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # ✅ Updated WebApp URL
+    # ✅ Premium menu
     keyboard = [
-        [InlineKeyboardButton(
-    text="📝 Fill My MT5 Details",
-    web_app=WebAppInfo(url="https://vpassprosolution.github.io/vessa-mt5-miniapp/")
-        )],
+        [InlineKeyboardButton("📝 Fill My MT5 Details", web_app=WebAppInfo(url=WEBAPP_URL))],
         [InlineKeyboardButton("✅ Subscribe Copy", callback_data="subscribe_copy")],
         [InlineKeyboardButton("❌ Unsubscribe Copy", callback_data="unsubscribe_copy")],
         [InlineKeyboardButton("⬅️ Back to Main Menu", callback_data="main_menu")]
@@ -55,44 +57,44 @@ async def auto_copy_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown"
     )
 
-# ✅ Subscribe user to MT5 Auto Copy
+# ✅ Subscribe to Copy
 async def subscribe_copy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
     await query.answer()
 
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(f"{BACKEND_URL}/set_copy_subscription", json={
+        async with httpx.AsyncClient(timeout=10) as client:
+            res = await client.post(f"{BACKEND_URL}/set_copy_subscription", json={
                 "user_id": user_id,
                 "status": True
             })
 
-        if response.status_code == 200:
+        if res.status_code == 200:
             await query.edit_message_text("✅ You have successfully *subscribed* to MT5 Auto Copy!", parse_mode="Markdown")
         else:
             await query.edit_message_text("❌ Failed to subscribe. Please try again.")
     except Exception as e:
-        print(f"Error: {e}")  # Log error for debugging
+        print(f"❌ Subscribe Copy Error: {e}")
         await query.edit_message_text("❌ An unexpected error occurred. Please try again later.")
 
-# ✅ Unsubscribe user from MT5 Auto Copy
+# ✅ Unsubscribe from Copy
 async def unsubscribe_copy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
     await query.answer()
 
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(f"{BACKEND_URL}/set_copy_subscription", json={
+        async with httpx.AsyncClient(timeout=10) as client:
+            res = await client.post(f"{BACKEND_URL}/set_copy_subscription", json={
                 "user_id": user_id,
                 "status": False
             })
 
-        if response.status_code == 200:
+        if res.status_code == 200:
             await query.edit_message_text("❌ You have *unsubscribed* from MT5 Auto Copy.", parse_mode="Markdown")
         else:
             await query.edit_message_text("⚠️ Failed to unsubscribe. Please try again.")
     except Exception as e:
-        print(f"Error: {e}")  # Log error for debugging
+        print(f"❌ Unsubscribe Copy Error: {e}")
         await query.edit_message_text("❌ An unexpected error occurred. Please try again later.")
