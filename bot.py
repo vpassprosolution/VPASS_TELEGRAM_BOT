@@ -77,6 +77,7 @@ def main():
     app.add_handler(CallbackQueryHandler(delete_user_prompt, pattern="admin_delete_user"))
     app.add_handler(CallbackQueryHandler(check_user_prompt, pattern="admin_check_user"))
    
+    app.add_handler(CallbackQueryHandler(ai_signal_handler.show_instruments, pattern="^ai_agent_signal$"))
     app.add_handler(CallbackQueryHandler(ai_signal_handler.fetch_ai_signal, pattern="^ai_signal_"))
     
     app.add_handler(CallbackQueryHandler(confirm_phone_number, pattern="confirm_phone"))
