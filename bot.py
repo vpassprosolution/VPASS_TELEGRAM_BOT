@@ -32,7 +32,6 @@ from auto_copy_handler import (
     unsubscribe_copy
 )
 
-from ai_sentiment import show_instruments as show_sentiment_instruments, handle_instrument_selection
 
 from subscription_handler import show_instruments as show_smart_signal_instruments, show_subscription_menu, subscribe, unsubscribe, back_to_main, back_to_instruments
 
@@ -62,8 +61,7 @@ user_risk_steps = {}
 
 def main():
     """Main function to run the bot"""
-    from ai_sentiment import show_instruments, handle_instrument_selection  
-    from channel_verification import verify_active_membership  # ✅ Import the periodic check
+    from channel_verification import verify_active_membership  
 
     app = Application.builder().token(BOT_TOKEN).build()
     job_queue = app.job_queue
@@ -78,11 +76,6 @@ def main():
     
     app.add_handler(CallbackQueryHandler(ai_signal_handler.show_instruments, pattern="^ai_agent_signal$"))
     app.add_handler(CallbackQueryHandler(ai_signal_handler.fetch_ai_signal, pattern="^ai_signal_"))
-
-
- 
-    app.add_handler(CallbackQueryHandler(show_sentiment_instruments, pattern="^ai_sentiment$"))
-    app.add_handler(CallbackQueryHandler(handle_instrument_selection, pattern="^sentiment_"))
 
 
     app.add_handler(CallbackQueryHandler(show_smart_signal_instruments, pattern="^vpass_smart_signal$"))
