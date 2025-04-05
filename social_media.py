@@ -10,7 +10,7 @@ async def social_media(update: Update, context: CallbackContext):
         ],
         [
             InlineKeyboardButton("🐦 Twitter", url="https://x.com/vessaproai"),
-            InlineKeyboardButton("🎵 TikTok", url="https://www.tiktok.com/@vessaproai")
+            InlineKeyboardButton("🎵 TIKTok", url="https://www.tiktok.com/@vessaproai")
         ],
         [
             InlineKeyboardButton("▶️ YouTube", url="https://www.youtube.com/@Vessaproai"),
