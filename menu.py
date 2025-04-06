@@ -19,7 +19,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = [
         [InlineKeyboardButton(get("btn_technical"), callback_data="ai_technical")],
-        [InlineKeyboardButton(get("btn_sentiment"), callback_data="ai_sentiment")],
+        [InlineKeyboardButton(get("btn_sentiment"), callback_data="vessa_ai_sentiment")],
         [InlineKeyboardButton(get("btn_signal"), callback_data="vpass_smart_signal")],
         [InlineKeyboardButton(get("btn_instant"), callback_data="ai_agent_signal")],
         [InlineKeyboardButton("\ud83d\ude80 AUTO COPY TO MT5", callback_data="auto_copy")],

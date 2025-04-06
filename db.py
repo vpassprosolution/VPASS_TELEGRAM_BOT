@@ -1,7 +1,10 @@
 import psycopg2
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-# Database connection details (Using your Railway PostgreSQL)
-DB_URL = "postgresql://postgres:vVMyqWjrqgVhEnwyFifTQxkDtPjQutGb@interchange.proxy.rlwy.net:30451/railway"
+DB_URL = os.getenv("DB_URL")
+
 
 def connect_db():
     """Connects to the PostgreSQL database and returns the connection."""

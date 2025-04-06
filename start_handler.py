@@ -4,14 +4,11 @@ from telegram.ext import ContextTypes
 from db import connect_db
 from menu import main_menu
 
-
 async def reset_cooldown(context):
     await asyncio.sleep(1.5)
     context.user_data["cooldown"] = False
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    from ai_sentiment import show_instruments
-
     if context.user_data.get("cooldown"):
         return
     context.user_data["cooldown"] = True
@@ -46,7 +43,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ✅ If new user (not found in DB)
     try:
-        welcome_video = "VP2.mp4"  # ✅ Same video for new users
+        welcome_video = "VP2.mp4"
         with open(welcome_video, "rb") as video:
             await update.message.reply_video(video=video)
     except Exception as e:
@@ -57,11 +54,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sent_message = await update.message.reply_text("WELCOME TO VESSA PRO VERSION 2.0", reply_markup=reply_markup)
     context.user_data["button_message"] = sent_message.message_id
 
-
-
 async def start_vpass_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the 'START VPASS PRO NOW' button click"""
     query = update.callback_query
-
-    # Redirect to main menu
     await main_menu(update, context)

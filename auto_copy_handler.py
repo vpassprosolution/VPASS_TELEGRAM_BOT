@@ -3,9 +3,11 @@ from telegram.ext import ContextTypes
 from utils import safe_replace_message
 import psycopg2
 import httpx
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-# ✅ Config
-DATABASE_URL = "postgresql://postgres:vVMyqWjrqgVhEnwyFifTQxkDtPjQutGb@interchange.proxy.rlwy.net:30451/railway"
+DATABASE_URL = os.getenv("DB_URL")
 BACKEND_URL = "https://vessa-mt5-backend-production.up.railway.app"
 WEBAPP_URL = "https://vpassprosolution.github.io/vessa-mt5-miniapp/"
 

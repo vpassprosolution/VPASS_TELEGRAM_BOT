@@ -4,10 +4,14 @@ from db import connect_db
 from telegram import Bot, Update
 from telegram.ext import ContextTypes
 import time
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-BOT_TOKEN = "7900613582:AAGCwv6HCow334iKB4xWcyzvWj_hQBtmN4A"
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_USERNAME = "vessacommunity"
 bot = Bot(token=BOT_TOKEN)
+
 
 
 async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE, user_steps):
